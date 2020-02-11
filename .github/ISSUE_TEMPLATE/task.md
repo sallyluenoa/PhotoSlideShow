@@ -1,6 +1,6 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
+name: タスク
+about: 設計 or 実装
 title: ''
 labels: ''
 assignees: ''
