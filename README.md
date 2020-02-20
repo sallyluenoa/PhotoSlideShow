@@ -8,7 +8,7 @@
 ## Project Framework
 
 ```
-org.fog_rock
+org.fog_rock.photo_slideshow
   ├ app: アプリケーションUIに関するモジュール
   │  ├ main: スライドメイン画面
   │  ├ menu: メニュー画面

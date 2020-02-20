@@ -1,4 +1,4 @@
-package org.fog_rock
+package org.fog_rock.photo_slideshow
 
 import org.junit.Test
 
