@@ -1,5 +1,6 @@
 package org.fog_rock.photo_slideshow.app.splash.interactor
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -27,11 +28,16 @@ class SplashInteractor(
     override fun destroy() {
     }
 
-    override fun getGoogleApiClient(activity: FragmentActivity, scopes: Array<String>): GoogleApiClient =
+    override fun getGoogleApiClient(activity: Activity, scopes: Array<String>): GoogleApiClient =
         client ?: run {
             Log.i(TAG, "Generate new GoogleApiClient.")
-            client = generateGoogleApiClient(activity, generateScope(scopes))
-            client!!
+            if (activity is FragmentActivity) {
+                client = generateGoogleApiClient(activity, generateScope(scopes))
+                client!!
+            } else {
+                throw IllegalArgumentException(
+                    "Cannot generate GoogleApiClient. Activity is not extend FragmentActivity.")
+            }
         }
 
     override fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean {

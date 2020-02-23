@@ -1,16 +1,15 @@
 package org.fog_rock.photo_slideshow.app.splash.presenter
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.util.Log
-import androidx.fragment.app.FragmentActivity
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
 import org.fog_rock.photo_slideshow.app.splash.router.SplashRouter
 import org.fog_rock.photo_slideshow.core.entity.SignInRequest
 
 class SplashPresenter(
-    private val activity: FragmentActivity,
     private val callback: SplashContract.PresenterCallback
 ): SplashContract.Presenter {
 
@@ -18,7 +17,7 @@ class SplashPresenter(
 
     private val SCOPE_PHOTO_READONLY = "https://www.googleapis.com/auth/photoslibrary.readonly"
 
-    private val interactor: SplashContract.Interactor = SplashInteractor(activity)
+    private val interactor: SplashContract.Interactor = SplashInteractor(activity().applicationContext)
     private val router: SplashContract.Router = SplashRouter()
 
     override fun destroy() {
@@ -63,6 +62,8 @@ class SplashPresenter(
         }
     }
 
+    private fun activity(): Activity = callback.getActivity()
+
     private fun presentSequence(request: SignInRequest) {
         if (request <= SignInRequest.RUNTIME_PERMISSIONS) {
             Log.i(TAG, "Check runtime permissions.")
@@ -92,7 +93,7 @@ class SplashPresenter(
             return false
         }
         Log.i(TAG, "Request runtime permissions.")
-        router.startRuntimePermissions(activity, permissions, SignInRequest.RUNTIME_PERMISSIONS.code)
+        router.startRuntimePermissions(activity(), permissions, SignInRequest.RUNTIME_PERMISSIONS.code)
         return true
     }
 
@@ -102,13 +103,13 @@ class SplashPresenter(
             return false
         }
         Log.i(TAG, "Request google sign in.")
-        val client = interactor.getGoogleApiClient(activity, arrayOf(SCOPE_PHOTO_READONLY))
-        router.startGoogleSignInActivity(activity, client, SignInRequest.GOOGLE_SIGN_IN.code)
+        val client = interactor.getGoogleApiClient(activity(), arrayOf(SCOPE_PHOTO_READONLY))
+        router.startGoogleSignInActivity(activity(), client, SignInRequest.GOOGLE_SIGN_IN.code)
         return true
     }
 
     private fun presentMainActivity() {
-        router.startMainActivity(activity)
+        router.startMainActivity(activity())
         callback.succeededSignIn()
     }
 }
