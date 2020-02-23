@@ -17,6 +17,8 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
 
     private val TAG = SplashActivity::class.java.simpleName
 
+    private val SHOW_LOGO_TIME_MILLIS = 2000L
+
     private val fragmentManager = supportFragmentManager
 
     private lateinit var presenter: SplashContract.Presenter
@@ -30,11 +32,11 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         presenter = SplashPresenter(this)
 
         Handler().postDelayed({
-            Log.d(TAG, "postDelayed 2 sec.")
+            Log.i(TAG, "Request sign in.")
 
             replaceFragment(SignInFragment.newInstance())
             presenter.requestSignIn()
-        }, 2000)
+        }, SHOW_LOGO_TIME_MILLIS)
     }
 
     override fun onDestroy() {
@@ -62,10 +64,12 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
     override fun getActivity(): Activity = this
 
     override fun succeededSignIn() {
-        finish()
+        Log.i(TAG, "Succeeded sign in.")
+//        finish()
     }
 
     override fun failedSignIn(request: SignInRequest) {
+        Log.i(TAG, "Failed sign in.")
         AppDialogFragment.Builder(this).apply {
             setTitle(request.failedTitle)
             setMessage(request.failedMessage)
