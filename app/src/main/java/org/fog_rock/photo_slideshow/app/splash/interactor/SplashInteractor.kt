@@ -46,9 +46,10 @@ class SplashInteractor(
             return true
         }
         for (permission in permissions) {
-            if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED)
+            if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
                 Log.i(TAG, "All runtime permissions are not granted.")
                 return false
+            }
         }
         Log.i(TAG, "All runtime permissions are granted.")
         return true
@@ -74,7 +75,7 @@ class SplashInteractor(
     }
 
     override fun onConnectionFailed(connectionResult: ConnectionResult) {
-        Log.i(TAG, "onConnectionFailed. " +
+        Log.i(TAG, "onConnectionFailed() " +
                 "errorCode: ${connectionResult.errorCode}, errorMessage: ${connectionResult.errorMessage}")
     }
 
@@ -95,7 +96,7 @@ class SplashInteractor(
     private fun generateScope(scopes: Array<String>): Scope {
         var tmp = ""
         scopes.forEach {
-            if (tmp.isEmpty()) tmp += " "
+            if (tmp.isNotEmpty()) tmp += " "
             tmp += it
         }
         return Scope(tmp)
