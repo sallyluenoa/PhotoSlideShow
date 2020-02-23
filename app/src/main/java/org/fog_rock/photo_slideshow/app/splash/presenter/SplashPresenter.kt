@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentActivity
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
 import org.fog_rock.photo_slideshow.app.splash.router.SplashRouter
+import org.fog_rock.photo_slideshow.core.entity.SignInRequest
 
 class SplashPresenter(
     private val activity: FragmentActivity,
@@ -15,34 +16,28 @@ class SplashPresenter(
 
     private val TAG = SplashPresenter::class.java.simpleName
 
-    private enum class Request(val code: Int) {
-        RUNTIME_PERMISSIONS(1000),
-        GOOGLE_SIGN_IN(1001),
-        MAIN_ACTIVITY(9999)
-    }
-
     private val SCOPE_PHOTO_READONLY = "https://www.googleapis.com/auth/photoslibrary.readonly"
 
-    private var interactor: SplashContract.Interactor = SplashInteractor(activity)
-    private var router: SplashContract.Router = SplashRouter()
+    private val interactor: SplashContract.Interactor = SplashInteractor(activity)
+    private val router: SplashContract.Router = SplashRouter()
 
     override fun destroy() {
         interactor.destroy()
     }
 
     override fun requestSignIn() {
-        presentSequence(Request.RUNTIME_PERMISSIONS)
+        presentSequence(SignInRequest.RUNTIME_PERMISSIONS)
     }
 
     override fun evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            Request.GOOGLE_SIGN_IN.code -> {
+            SignInRequest.GOOGLE_SIGN_IN.code -> {
                 if (interactor.isSignedInGoogle(data)) {
                     Log.i(TAG, "Succeeded google sign in.")
-                    presentSequence(Request.MAIN_ACTIVITY)
+                    presentSequence(SignInRequest.COMPLETED)
                 } else {
                     Log.i(TAG, "Failed google sign in.")
-                    callback.failedSignIn()
+                    callback.failedSignIn(SignInRequest.GOOGLE_SIGN_IN)
                 }
             }
             else -> {
@@ -53,13 +48,13 @@ class SplashPresenter(
 
     override fun evaluateRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            Request.RUNTIME_PERMISSIONS.code -> {
+            SignInRequest.RUNTIME_PERMISSIONS.code -> {
                 if (interactor.isGrantedRuntimePermissions(permissions)) {
                     Log.i(TAG, "Runtime permissions is granted.")
-                    presentSequence(Request.GOOGLE_SIGN_IN)
+                    presentSequence(SignInRequest.GOOGLE_SIGN_IN)
                 } else {
                     Log.i(TAG, "Runtime permissions is denied.")
-                    callback.failedSignIn()
+                    callback.failedSignIn(SignInRequest.RUNTIME_PERMISSIONS)
                 }
             }
             else -> {
@@ -68,15 +63,15 @@ class SplashPresenter(
         }
     }
 
-    private fun presentSequence(request: Request) {
-        if (request <= Request.RUNTIME_PERMISSIONS) {
+    private fun presentSequence(request: SignInRequest) {
+        if (request <= SignInRequest.RUNTIME_PERMISSIONS) {
             Log.i(TAG, "Check runtime permissions.")
             if (presentRuntimePermissions()) {
                 Log.i(TAG, "Presented runtime permissions.")
                 return
             }
         }
-        if (request <= Request.GOOGLE_SIGN_IN) {
+        if (request <= SignInRequest.GOOGLE_SIGN_IN) {
             Log.i(TAG, "Check google sign in.")
             if (presentGoogleSignIn()) {
                 Log.i(TAG, "Presented google sign in.")
@@ -97,7 +92,7 @@ class SplashPresenter(
             return false
         }
         Log.i(TAG, "Request runtime permissions.")
-        router.startRuntimePermissions(activity, permissions, Request.RUNTIME_PERMISSIONS.code)
+        router.startRuntimePermissions(activity, permissions, SignInRequest.RUNTIME_PERMISSIONS.code)
         return true
     }
 
@@ -108,7 +103,7 @@ class SplashPresenter(
         }
         Log.i(TAG, "Request google sign in.")
         val client = interactor.getGoogleApiClient(activity, arrayOf(SCOPE_PHOTO_READONLY))
-        router.startGoogleSignInActivity(activity, client, Request.GOOGLE_SIGN_IN.code)
+        router.startGoogleSignInActivity(activity, client, SignInRequest.GOOGLE_SIGN_IN.code)
         return true
     }
 

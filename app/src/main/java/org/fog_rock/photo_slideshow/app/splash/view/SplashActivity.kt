@@ -7,10 +7,12 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import org.fog_rock.photo_slideshow.R
+import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.presenter.SplashPresenter
+import org.fog_rock.photo_slideshow.core.entity.SignInRequest
 
-class SplashActivity : AppCompatActivity(), SplashContract.View, SplashContract.PresenterCallback {
+class SplashActivity : AppCompatActivity(), SplashContract.View, SplashContract.PresenterCallback, AppDialogFragment.Callback {
 
     private val TAG = SplashActivity::class.java.simpleName
 
@@ -52,12 +54,21 @@ class SplashActivity : AppCompatActivity(), SplashContract.View, SplashContract.
         presenter.evaluateRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
+    override fun onDialogResult(requestCode: Int, resultCode: Int, data: Intent) {
+        finish()
+    }
+
     override fun succeededSignIn() {
         finish()
     }
 
-    override fun failedSignIn() {
-        finish()
+    override fun failedSignIn(request: SignInRequest) {
+        AppDialogFragment.Builder(this).apply {
+            setTitle(request.failedTitle)
+            setMessage(request.failedMessage)
+            setPositiveLabel(R.string.ok)
+            setCancelable(false)
+        }.show(fragmentManager, request.code)
     }
 
     /**

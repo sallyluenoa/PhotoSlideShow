@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.common.api.GoogleApiClient
+import org.fog_rock.photo_slideshow.core.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.viper.BaseInteractor
 import org.fog_rock.photo_slideshow.core.viper.BasePresenter
 import org.fog_rock.photo_slideshow.core.viper.BaseRouter
@@ -21,7 +22,7 @@ class SplashContract {
 
     interface PresenterCallback {
         fun succeededSignIn()
-        fun failedSignIn()
+        fun failedSignIn(request: SignInRequest)
     }
 
     interface Interactor : BaseInteractor {
