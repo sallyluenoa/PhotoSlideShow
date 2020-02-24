@@ -2,9 +2,10 @@ package org.fog_rock.photo_slideshow.app.splash.contract
 
 import android.app.Activity
 import android.content.Intent
-import com.google.android.gms.common.api.GoogleApiClient
+import org.fog_rock.photo_slideshow.core.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
+import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInClientHolder
 
 class SplashContract {
 
@@ -40,9 +41,9 @@ class SplashContract {
 
     interface Interactor : ViperContract.Interactor {
         /**
-         * GoogleApiClientを取得.
+         * ClientHolderを取得.
          */
-        fun getGoogleApiClient(activity: Activity, scopes: Array<String>): GoogleApiClient
+        fun getClientHolder(scopes: Array<PhotoScope>): GoogleSignInClientHolder
 
         /**
          * ランタイムパーミッションが許可されているか.
@@ -69,7 +70,7 @@ class SplashContract {
         /**
          * Googleサインインの表示.
          */
-        fun startGoogleSignInActivity(activity: Activity, client: GoogleApiClient, requestCode: Int)
+        fun startGoogleSignInActivity(activity: Activity, clientHolder: GoogleSignInClientHolder, requestCode: Int)
 
         /**
          * MainActivityの表示.

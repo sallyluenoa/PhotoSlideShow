@@ -7,14 +7,12 @@ import android.util.Log
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
 import org.fog_rock.photo_slideshow.app.splash.router.SplashRouter
+import org.fog_rock.photo_slideshow.core.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.entity.SignInRequest
-import java.lang.IllegalArgumentException
 
 class SplashPresenter(private val callback: SplashContract.PresenterCallback): SplashContract.Presenter {
 
     private val TAG = SplashPresenter::class.java.simpleName
-
-    private val SCOPE_PHOTO_READONLY = "https://www.googleapis.com/auth/photoslibrary.readonly"
 
     private val interactor: SplashContract.Interactor = SplashInteractor(activity().applicationContext)
     private val router: SplashContract.Router = SplashRouter()
@@ -119,14 +117,8 @@ class SplashPresenter(private val callback: SplashContract.PresenterCallback): S
             return false
         }
         Log.i(TAG, "Request google sign in.")
-        val client = try {
-            interactor.getGoogleApiClient(activity(), arrayOf(SCOPE_PHOTO_READONLY))
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
-            callback.failedSignIn(SignInRequest.GOOGLE_SIGN_IN)
-            return false
-        }
-        router.startGoogleSignInActivity(activity(), client, SignInRequest.GOOGLE_SIGN_IN.code)
+        val scopes = arrayOf(PhotoScope.READ_ONLY)
+        router.startGoogleSignInActivity(activity(), interactor.getClientHolder(scopes), SignInRequest.GOOGLE_SIGN_IN.code)
         return true
     }
 
