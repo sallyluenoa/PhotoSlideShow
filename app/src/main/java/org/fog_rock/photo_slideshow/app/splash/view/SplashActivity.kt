@@ -65,7 +65,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
 
     override fun succeededSignIn() {
         Log.i(TAG, "Succeeded sign in.")
-//        finish()
+        finish()
     }
 
     override fun failedSignIn(request: SignInRequest) {
@@ -82,8 +82,8 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
      * 新しいフラグメントに置換する.
      */
     private fun replaceFragment(fragment: Fragment) {
-        val transaction = fragmentManager.beginTransaction()
-        transaction.replace(R.id.fragment_container, fragment)
-        transaction.commit()
+        fragmentManager.beginTransaction().apply {
+            replace(R.id.fragment_container, fragment)
+        }.commit()
     }
 }
