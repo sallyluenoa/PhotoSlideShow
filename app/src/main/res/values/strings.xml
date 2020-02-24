@@ -1,3 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PhotoSlideShow</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
+
+    <string name="failed_runtime_permissions_title">Permissions are denied.</string>
+    <string name="failed_runtime_permissions_message">App will be finished.</string>
+    <string name="failed_google_sign_in_title">Failed to sign in with Google account.</string>
+    <string name="failed_google_sign_in_message">App will be finished.</string>
+
 </resources>
