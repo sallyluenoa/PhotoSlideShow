@@ -1,9 +1,9 @@
 package org.fog_rock.photo_slideshow.app.select.view
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.activity_select.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.core.entity.AlbumData
 
@@ -28,10 +28,18 @@ class SelectActivity : AppCompatActivity() {
                 AlbumData("8", "sample8", "https://", 80)
             )
         ))
+    }
 
-        button_ok.setOnClickListener {
-            finish()
+    /**
+     * アルバムを確定し、Activityを終了する
+     * Fragmentから呼び出す想定なのでpublic定義にしている.
+     */
+    fun decidedAndFinishAlbum(album: AlbumData) {
+        val intent = Intent().apply {
+            putExtra("decided_album", album)
         }
+        setResult(RESULT_OK, intent)
+        finish()
     }
 
     /**

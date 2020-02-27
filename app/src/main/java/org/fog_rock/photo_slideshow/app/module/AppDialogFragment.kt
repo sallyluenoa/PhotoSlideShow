@@ -21,6 +21,10 @@ class AppDialogFragment : DialogFragment() {
 
     companion object {
 
+        val BUTTON_POSITIVE = DialogInterface.BUTTON_POSITIVE
+        val BUTTON_NEGATIVE = DialogInterface.BUTTON_NEGATIVE
+        val BUTTON_CANCEL = 0
+
         private const val ARGS_REQUEST_CODE = "request_code"
         private const val ARGS_TITLE = "title"
         private const val ARGS_MESSAGE = "message"
@@ -72,6 +76,11 @@ class AppDialogFragment : DialogFragment() {
             return this
         }
 
+        /**
+         * AppDialogFragmentを生成.
+         * @param fragmentManager Activity#getSupportFragmentManager() or Fragment#getChildFragmentManager()
+         * @param requestCode リクエストコード
+         */
         fun show(fragmentManager: FragmentManager, requestCode: Int) {
             val args = Bundle().apply {
                 putInt(ARGS_REQUEST_CODE, requestCode)
@@ -122,7 +131,7 @@ class AppDialogFragment : DialogFragment() {
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
-        callDialogResult(0)
+        callDialogResult(BUTTON_CANCEL)
     }
 
     private fun callDialogResult(which: Int) {

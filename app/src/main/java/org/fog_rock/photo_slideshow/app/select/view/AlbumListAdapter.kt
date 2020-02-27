@@ -25,12 +25,13 @@ class AlbumListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumListViewHolder =
         AlbumListViewHolder(LayoutInflater.from(parent.context)
-            .inflate(R.layout.listview_album, parent, false))
+            .inflate(R.layout.recyclerview_album, parent, false))
 
     override fun onBindViewHolder(holder: AlbumListViewHolder, position: Int) {
         holder.titleView?.text = albumList[position].title
         holder.itemCountView?.text = albumList[position].mediaItemCount.toString()
         holder.itemView.setOnClickListener {
+            it.setSelected(true)
             listener.onItemClick(it, position, albumList[position])
         }
     }
