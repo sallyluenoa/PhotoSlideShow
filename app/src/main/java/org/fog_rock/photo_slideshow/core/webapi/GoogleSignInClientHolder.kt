@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.core.entity.PhotoScope
 
 /**
@@ -18,6 +19,7 @@ class GoogleSignInClientHolder(context: Context, scopes: Array<PhotoScope>) {
         val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).apply {
             requestScopes(scope)
             requestEmail()
+            requestIdToken(context.getString(R.string.default_web_client_id))
         }.build()
         client = GoogleSignIn.getClient(context, options)
     }
