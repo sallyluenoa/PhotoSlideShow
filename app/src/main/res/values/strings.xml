@@ -6,10 +6,15 @@
     <string name="cancel">Cancel</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
+    <string name="start">Start</string>
+    <string name="end">End</string>
 
     <string name="failed_runtime_permissions_title">Permissions are denied.</string>
     <string name="failed_runtime_permissions_message">App will be finished.</string>
     <string name="failed_google_sign_in_title">Failed to sign in with Google account.</string>
     <string name="failed_google_sign_in_message">App will be finished.</string>
+
+    <string name="confirm_select_album_title">The album is selected.</string>
+    <string name="confirm_select_album_message">Are you sure to start slide show?\nAlbum Name: %1$s</string>
 
 </resources>
