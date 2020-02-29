@@ -8,3 +8,4 @@
 .externalNativeBuild
 .cxx
 google-services.json
+client_secret.json

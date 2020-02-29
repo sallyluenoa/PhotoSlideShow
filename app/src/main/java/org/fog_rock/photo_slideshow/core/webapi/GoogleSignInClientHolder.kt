@@ -19,7 +19,7 @@ class GoogleSignInClientHolder(context: Context, scopes: Array<PhotoScope>) {
         val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).apply {
             requestScopes(scope)
             requestEmail()
-            requestIdToken(context.getString(R.string.default_web_client_id))
+            requestServerAuthCode(context.getString(R.string.default_web_client_id))
         }.build()
         client = GoogleSignIn.getClient(context, options)
     }
