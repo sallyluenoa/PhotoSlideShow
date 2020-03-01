@@ -5,17 +5,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.core.entity.AlbumData
 
 class AlbumListAdapter(
-    private val albumList: Array<AlbumData>,
+    private val albumList: Array<Album>,
     private val listener: OnItemClickListener
 ): RecyclerView.Adapter<AlbumListAdapter.AlbumListViewHolder>() {
 
     interface OnItemClickListener {
 
-        fun onItemClick(view: View, position: Int, album: AlbumData)
+        fun onItemClick(view: View, position: Int, album: Album)
     }
 
     class AlbumListViewHolder(view: View): RecyclerView.ViewHolder(view) {
@@ -28,11 +28,12 @@ class AlbumListAdapter(
             .inflate(R.layout.recyclerview_album, parent, false))
 
     override fun onBindViewHolder(holder: AlbumListViewHolder, position: Int) {
-        holder.titleView?.text = albumList[position].title
-        holder.itemCountView?.text = albumList[position].mediaItemCount.toString()
+        val album = albumList[position]
+        holder.titleView?.text = album.title
+        holder.itemCountView?.text = album.mediaItemsCount.toString()
         holder.itemView.setOnClickListener {
             it.setSelected(true)
-            listener.onItemClick(it, position, albumList[position])
+            listener.onItemClick(it, position, album)
         }
     }
 

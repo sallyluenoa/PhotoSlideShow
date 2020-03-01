@@ -11,23 +11,23 @@ import org.fog_rock.photo_slideshow.core.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInClientHolder
 
-class SplashInteractor(private val context: Context): SplashContract.Interactor {
+class SplashInteractor(
+    private val context: Context,
+    scopes: Array<PhotoScope>,
+    requestIdToken: Boolean,
+    requestServerAuthCode: Boolean,
+    private val callback: SplashContract.InteractorCallback
+): SplashContract.Interactor, GoogleSignInApi.Callback {
 
     private val TAG = SplashInteractor::class.java.simpleName
 
-    private val signInApi = GoogleSignInApi(context)
-
-    private var clientHolder: GoogleSignInClientHolder? = null
+    private val signInApi =
+        GoogleSignInApi(context, scopes, requestIdToken, requestServerAuthCode, this)
 
     override fun destroy() {
     }
 
-    override fun getClientHolder(scopes: Array<PhotoScope>): GoogleSignInClientHolder =
-        clientHolder ?: run {
-            Log.i(TAG, "Generate new client holder.")
-            clientHolder = GoogleSignInClientHolder(context, scopes)
-            clientHolder!!
-        }
+    override fun getClientHolder(): GoogleSignInClientHolder = signInApi.clientHolder
 
     override fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -44,7 +44,11 @@ class SplashInteractor(private val context: Context): SplashContract.Interactor 
         return true
     }
 
-    override fun isSignedInGoogle(): Boolean = signInApi.isSignedIn()
+    override fun requestGoogleSilentSignIn() = signInApi.requestSilentSignIn()
 
-    override fun isSignedInGoogle(data: Intent?): Boolean = signInApi.isSignedIn(data)
+    override fun isSucceededGoogleUserSignIn(data: Intent?): Boolean =
+        signInApi.isSucceededUserSignIn(data)
+
+    override fun requestSilentSignInResult(isSucceeded: Boolean) =
+        callback.requestGoogleSilentSignInResult(isSucceeded)
 }

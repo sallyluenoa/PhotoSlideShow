@@ -10,13 +10,13 @@ import java.io.IOException
 /**
  * PhotosLibraryClientをシングルトンで保持するHolderクラス.
  */
-class PhotosLibraryClientHolder(token: String) {
+class PhotosLibraryClientHolder(accessToken: String) {
 
     val client: PhotosLibraryClient
 
     init {
         try {
-            val credentials = OAuth2Credentials.create(AccessToken(token, null))
+            val credentials = OAuth2Credentials.create(AccessToken(accessToken, null))
             val settings = PhotosLibrarySettings.newBuilder().apply {
                 credentialsProvider = FixedCredentialsProvider.create(credentials)
             }.build()

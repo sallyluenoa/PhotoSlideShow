@@ -2,7 +2,6 @@ package org.fog_rock.photo_slideshow.app.splash.contract
 
 import android.app.Activity
 import android.content.Intent
-import org.fog_rock.photo_slideshow.core.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInClientHolder
@@ -12,16 +11,20 @@ class SplashContract {
     interface Presenter : ViperContract.Presenter {
         /**
          * サインインに必要な一連処理をリクエストする.
+         * @see PresenterCallback.succeededSignIn
+         * @see PresenterCallback.failedSignIn
          */
         fun requestSignIn()
 
         /**
          * Activity#onActivityResult()の結果を評価する.
+         * @see Activity.onActivityResult
          */
         fun evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
 
         /**
          * Activity#onRequestPermissionsResult()の結果を評価する.
+         * @see Activity.onRequestPermissionsResult
          */
         fun evaluateRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
     }
@@ -29,12 +32,14 @@ class SplashContract {
     interface PresenterCallback : ViperContract.PresenterCallback {
         /**
          * サインインの一連処理に成功.
+         * @see Presenter.requestSignIn
          */
         fun succeededSignIn()
 
         /**
          * サインインの一連処理に失敗.
          * @param request 失敗したリクエスト
+         * @see Presenter.requestSignIn
          */
         fun failedSignIn(request: SignInRequest)
     }
@@ -43,7 +48,7 @@ class SplashContract {
         /**
          * ClientHolderを取得.
          */
-        fun getClientHolder(scopes: Array<PhotoScope>): GoogleSignInClientHolder
+        fun getClientHolder(): GoogleSignInClientHolder
 
         /**
          * ランタイムパーミッションが許可されているか.
@@ -51,14 +56,23 @@ class SplashContract {
         fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean
 
         /**
-         * Googleアカウントでサインインしているか.
+         * Googleアカウントでのサイレントサインイン要求.
+         * @see InteractorCallback.requestGoogleSilentSignInResult
          */
-        fun isSignedInGoogle(): Boolean
+        fun requestGoogleSilentSignIn()
 
         /**
-         * Googleアカウントでのサインインに成功したか.
+         * Googleアカウントでのユーザーサインインに成功したか.
          */
-        fun isSignedInGoogle(data: Intent?): Boolean
+        fun isSucceededGoogleUserSignIn(data: Intent?): Boolean
+    }
+
+    interface InteractorCallback: ViperContract.InteractorCallback {
+        /**
+         * Googleアカウントでのサイレントサインインを要求に成功したか.
+         * @see Interactor.requestGoogleSilentSignIn
+         */
+        fun requestGoogleSilentSignInResult(isSucceeded: Boolean)
     }
 
     interface Router : ViperContract.Router {
