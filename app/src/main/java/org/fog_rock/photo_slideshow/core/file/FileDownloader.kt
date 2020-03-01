@@ -39,13 +39,21 @@ class FileDownloader(
      * @see Callback.downloadResult
      */
     fun doDownload(downloadUrl: URL, outputFile: File) {
+        Log.i(TAG, "Do download. DownloadURL: $downloadUrl, OutputFile: $outputFile")
+
+        if (outputFile.exists()) {
+            Log.i(TAG, "OutputFile is already existed.")
+            callback.downloadResult(outputFile)
+            return
+        }
+
         val request = Request.Builder().apply {
             url(downloadUrl)
         }.build()
 
         client.newCall(request).enqueue(object : okhttp3.Callback {
             override fun onResponse(call: Call, response: Response) {
-                Log.e(TAG, "Succeeded to get http response.")
+                Log.i(TAG, "Succeeded to get http response.")
                 val body = response.body ?: run {
                     Log.e(TAG, "Cannot get response body.")
                     callback.downloadResult(null)

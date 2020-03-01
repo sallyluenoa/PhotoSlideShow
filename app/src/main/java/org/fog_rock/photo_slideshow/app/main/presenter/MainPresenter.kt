@@ -59,9 +59,14 @@ class MainPresenter(
     override fun requestMediaItemsResult(mediaItemList: List<MediaItem>?) {
         if (!mediaItemList.isNullOrEmpty()) {
             Log.i(TAG, "Succeeded to get mediaItem list. ${mediaItemList.count()}")
+            interactor.requestDownloadFiles(mediaItemList)
         } else {
             Log.i(TAG, "Failed to get mediaItem list.")
         }
+    }
+
+    override fun completedDownloadFiles(mediaItemList: List<MediaItem>) {
+        Log.i(TAG, "Completed to download files.")
     }
 
     private fun activity() = callback.getActivity()

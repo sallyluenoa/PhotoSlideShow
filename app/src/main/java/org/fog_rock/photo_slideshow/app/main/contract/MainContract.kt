@@ -25,11 +25,13 @@ class MainContract {
     interface Interactor : ViperContract.Interactor {
         fun requestSharedAlbums()
         fun requestMediaItems(album: Album)
+        fun requestDownloadFiles(mediaItemList: List<MediaItem>)
     }
 
     interface InteractorCallback : ViperContract.InteractorCallback {
         fun requestSharedAlbumsResult(albumList: List<Album>?)
         fun requestMediaItemsResult(mediaItemList: List<MediaItem>?)
+        fun completedDownloadFiles(mediaItemList: List<MediaItem>)
     }
 
     interface Router : ViperContract.Router {

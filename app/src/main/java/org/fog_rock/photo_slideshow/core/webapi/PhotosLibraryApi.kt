@@ -34,6 +34,7 @@ class PhotosLibraryApi(
         try {
             val request = SearchMediaItemsRequest.newBuilder().apply {
                 albumId = album.id
+                pageSize = 100
             }.build()
             val pagedResponse = clientHolder.client.searchMediaItems(request)
             val mediaItemsResponse = pagedResponse.page.response
