@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -33,7 +34,14 @@ class GoogleSignInApi(
         fun requestSilentSignInResult(isSucceeded: Boolean)
     }
 
-    val clientHolder = GoogleSignInClientHolder(context, scopes, requestIdToken, requestServerAuthCode)
+    val clientHolder =
+        GoogleSignInClientHolder(context, scopes, requestIdToken, requestServerAuthCode)
+
+    /**
+     * サインインアカウントの取得.
+     */
+    fun getSignInAccount(): GoogleSignInAccount? =
+        GoogleSignIn.getLastSignedInAccount(context)
 
     /**
      * サイレントサインイン要求.
@@ -41,7 +49,7 @@ class GoogleSignInApi(
      */
     fun requestSilentSignIn() {
         GlobalScope.launch(Dispatchers.Main) {
-            if (GoogleSignIn.getLastSignedInAccount(context) != null) {
+            if (getSignInAccount() != null) {
                 withContext(Dispatchers.Default) {
                     val task = clientHolder.client.silentSignIn()
                     if (task.isSuccessful) {

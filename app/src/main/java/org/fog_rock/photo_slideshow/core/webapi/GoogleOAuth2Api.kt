@@ -13,6 +13,9 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 
+/**
+ * Google OAuth2 認証に関連するAPI
+ */
 class GoogleOAuth2Api(private val context: Context) {
 
     private val TAG = GoogleOAuth2Api::class.java.simpleName

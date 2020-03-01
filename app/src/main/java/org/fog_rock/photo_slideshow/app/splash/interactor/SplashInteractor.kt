@@ -21,7 +21,8 @@ class SplashInteractor(
 
     private val TAG = SplashInteractor::class.java.simpleName
 
-    private val signInApi = GoogleSignInApi(context, scopes, requestIdToken, requestServerAuthCode, this)
+    private val signInApi =
+        GoogleSignInApi(context, scopes, requestIdToken, requestServerAuthCode, this)
 
     override fun destroy() {
     }

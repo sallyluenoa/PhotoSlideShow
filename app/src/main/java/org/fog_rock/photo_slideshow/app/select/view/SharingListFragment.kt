@@ -8,10 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.photos.types.proto.Album
 import kotlinx.android.synthetic.main.fragment_sharing_list.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
-import org.fog_rock.photo_slideshow.core.entity.AlbumData
 
 class SharingListFragment : Fragment(), AppDialogFragment.Callback, AlbumListAdapter.OnItemClickListener {
 
@@ -23,7 +23,7 @@ class SharingListFragment : Fragment(), AppDialogFragment.Callback, AlbumListAda
 
         private const val ARGS_ALBUM_LIST = "album_list"
 
-        fun newInstance(albumList: Array<AlbumData>): Fragment {
+        fun newInstance(albumList: Array<Album>): Fragment {
             val args = Bundle().apply {
                 putSerializable(ARGS_ALBUM_LIST, albumList)
             }
@@ -39,12 +39,12 @@ class SharingListFragment : Fragment(), AppDialogFragment.Callback, AlbumListAda
             Bundle()
         }
     }
-    private val albumList: Array<AlbumData> by lazy {
-        args.getSerializable(ARGS_ALBUM_LIST) as Array<AlbumData>
+    private val albumList: Array<Album> by lazy {
+        args.getSerializable(ARGS_ALBUM_LIST) as Array<Album>
     }
 
     private var selectedView: View? = null
-    private var selectedAlbum: AlbumData? = null
+    private var selectedAlbum: Album? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -91,7 +91,7 @@ class SharingListFragment : Fragment(), AppDialogFragment.Callback, AlbumListAda
         }
     }
 
-    override fun onItemClick(view: View, position: Int, album: AlbumData) {
+    override fun onItemClick(view: View, position: Int, album: Album) {
         Log.i(TAG, "Item clicked. position: $position")
         selectedView = view
         selectedAlbum = album
