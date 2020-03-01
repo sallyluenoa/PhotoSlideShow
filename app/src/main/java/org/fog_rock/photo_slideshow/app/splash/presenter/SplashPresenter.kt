@@ -10,11 +10,17 @@ import org.fog_rock.photo_slideshow.app.splash.router.SplashRouter
 import org.fog_rock.photo_slideshow.core.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.entity.SignInRequest
 
-class SplashPresenter(private val callback: SplashContract.PresenterCallback): SplashContract.Presenter {
+class SplashPresenter(
+    private val callback: SplashContract.PresenterCallback
+): SplashContract.Presenter, SplashContract.InteractorCallback {
 
     private val TAG = SplashPresenter::class.java.simpleName
 
-    private val interactor: SplashContract.Interactor = SplashInteractor(activity().applicationContext)
+    private val interactor: SplashContract.Interactor = SplashInteractor(
+        activity().applicationContext, arrayOf(PhotoScope.READ_ONLY),
+        false, true, this
+    )
+
     private val router: SplashContract.Router = SplashRouter()
 
     override fun destroy() {
@@ -31,7 +37,7 @@ class SplashPresenter(private val callback: SplashContract.PresenterCallback): S
 
         when (requestCode) {
             SignInRequest.GOOGLE_SIGN_IN.code -> {
-                if (interactor.isSignedInGoogle(data)) {
+                if (interactor.isSucceededGoogleUserSignIn(data)) {
                     Log.i(TAG, "Succeeded google sign in.")
                     presentSequence(SignInRequest.COMPLETED)
                 } else {
@@ -64,6 +70,16 @@ class SplashPresenter(private val callback: SplashContract.PresenterCallback): S
         }
     }
 
+    override fun requestGoogleSilentSignInResult(isSucceeded: Boolean) {
+        if (isSucceeded) {
+            Log.i(TAG, "Succeeded silent sign in.")
+            presentSequence(SignInRequest.COMPLETED)
+        } else {
+            Log.i(TAG, "Failed silent sign in. Might be signed out. Present user sign in.")
+            router.startGoogleSignInActivity(activity(), interactor.getClientHolder(), SignInRequest.GOOGLE_SIGN_IN.code)
+        }
+    }
+
     private fun activity(): Activity = callback.getActivity()
 
     /**
@@ -79,11 +95,9 @@ class SplashPresenter(private val callback: SplashContract.PresenterCallback): S
             }
         }
         if (request <= SignInRequest.GOOGLE_SIGN_IN) {
-            Log.i(TAG, "Check google sign in.")
-            if (presentGoogleSignIn()) {
-                Log.i(TAG, "Presented google sign in.")
-                return
-            }
+            Log.i(TAG, "Request google silent sign in.")
+            interactor.requestGoogleSilentSignIn()
+            return
         }
         presentMainActivity()
         Log.i(TAG, "Presented main activity.")
@@ -104,21 +118,6 @@ class SplashPresenter(private val callback: SplashContract.PresenterCallback): S
         }
         Log.i(TAG, "Request runtime permissions.")
         router.startRuntimePermissions(activity(), permissions, SignInRequest.RUNTIME_PERMISSIONS.code)
-        return true
-    }
-
-    /**
-     * Googleサインインの表示.
-     * @return サインインを表示した場合はtrue, そうでない場合はfalse
-     */
-    private fun presentGoogleSignIn(): Boolean {
-        if (interactor.isSignedInGoogle()) {
-            Log.i(TAG, "Signed in with google account.")
-            return false
-        }
-        Log.i(TAG, "Request google sign in.")
-        val scopes = arrayOf(PhotoScope.READ_ONLY)
-        router.startGoogleSignInActivity(activity(), interactor.getClientHolder(scopes), SignInRequest.GOOGLE_SIGN_IN.code)
         return true
     }
 
