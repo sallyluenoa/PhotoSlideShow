@@ -22,6 +22,8 @@ class MainPresenter(
 
     private val router: MainContract.Router = MainRouter()
 
+    private var showFileList = listOf<String>()
+
     override fun destroy() {
         interactor.destroy()
     }
@@ -65,8 +67,9 @@ class MainPresenter(
         }
     }
 
-    override fun completedDownloadFiles(mediaItemList: List<MediaItem>) {
-        Log.i(TAG, "Completed to download files.")
+    override fun completedDownloadFiles(fileList: List<String>) {
+        Log.i(TAG, "Completed to download files. Slide show will be started.")
+        callback.requestSlideShow(fileList)
     }
 
     private fun activity() = callback.getActivity()

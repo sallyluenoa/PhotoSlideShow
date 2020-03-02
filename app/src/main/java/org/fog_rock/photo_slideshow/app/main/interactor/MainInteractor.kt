@@ -38,6 +38,7 @@ class MainInteractor(
 
     private var index = 0
     private var downloadMediaItemList = listOf<MediaItem>()
+    private var downloadSuccessFileList = mutableListOf<String>()
 
     override fun destroy() {
     }
@@ -76,18 +77,24 @@ class MainInteractor(
     override fun requestDownloadFiles(mediaItemList: List<MediaItem>) {
         index = 0
         downloadMediaItemList = mediaItemList
+        downloadSuccessFileList = mutableListOf()
         doDownload()
     }
 
     override fun downloadResult(resultOutputFile: File?) {
-        Log.i(TAG, "Download file result. ResultOutputFile: ${resultOutputFile?.path}")
+        if (resultOutputFile != null) {
+            Log.i(TAG, "Succeeded to download file: ${resultOutputFile.path}")
+            downloadSuccessFileList.add(resultOutputFile.path)
+        } else {
+            Log.e(TAG, "Failed to download file.")
+        }
         doNextDownload()
     }
 
     private fun doDownload() {
         if (index >= downloadMediaItemList.size) {
-            Log.i(TAG, "Finished download files.")
-            callback.completedDownloadFiles(downloadMediaItemList)
+            Log.i(TAG, "Finished download files. FileSize: ${downloadSuccessFileList.size}")
+            callback.completedDownloadFiles(downloadSuccessFileList.toList())
             return
         }
         val mediaItem = downloadMediaItemList[index]

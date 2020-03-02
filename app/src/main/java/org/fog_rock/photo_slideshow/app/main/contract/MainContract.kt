@@ -19,7 +19,7 @@ class MainContract {
     }
 
     interface PresenterCallback : ViperContract.PresenterCallback {
-
+        fun requestSlideShow(fileList: List<String>)
     }
 
     interface Interactor : ViperContract.Interactor {
@@ -31,7 +31,7 @@ class MainContract {
     interface InteractorCallback : ViperContract.InteractorCallback {
         fun requestSharedAlbumsResult(albumList: List<Album>?)
         fun requestMediaItemsResult(mediaItemList: List<MediaItem>?)
-        fun completedDownloadFiles(mediaItemList: List<MediaItem>)
+        fun completedDownloadFiles(fileList: List<String>)
     }
 
     interface Router : ViperContract.Router {
