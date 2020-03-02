@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
+import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
 import org.fog_rock.photo_slideshow.app.main.router.MainRouter
@@ -29,6 +30,10 @@ class MainPresenter(
 
     override fun requestAlbums() {
         interactor.requestSharedAlbums()
+    }
+
+    override fun requestLicense() {
+        router.startOssLicensesMenuActivity(activity(), R.string.license)
     }
 
     override fun evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

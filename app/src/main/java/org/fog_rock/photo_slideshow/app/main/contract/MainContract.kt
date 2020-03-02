@@ -15,6 +15,11 @@ class MainContract {
         fun requestAlbums()
 
         /**
+         * ライセンス表示を要求.
+         */
+        fun requestLicense()
+
+        /**
          * Activity#onActivityResult()の結果を評価する.
          * @see Activity.onActivityResult
          */
@@ -77,5 +82,10 @@ class MainContract {
          * SelectActivityの表示.
          */
         fun startSelectActivity(activity: Activity, albums: List<Album>, requestCode: Int)
+
+        /**
+         * OssLicensesMenuActivityの表示.
+         */
+        fun startOssLicensesMenuActivity(activity: Activity, titleResId: Int)
     }
 }

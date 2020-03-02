@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     private lateinit var presenter: MainContract.Presenter
 
     private var slideShowFiles = listOf<String>()
+    private var index = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,9 +42,20 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     override fun onDestroy() {
         presenter.destroy()
-        handler.removeCallbacksAndMessages(null)
 
         super.onDestroy()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if (slideShowFiles.size > 1) presentSlideShow()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        handler.removeCallbacksAndMessages(null)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -59,6 +71,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
             }
             R.id.action_license -> {
                 Log.i(TAG, "License action is selected.")
+                presenter.requestLicense()
                 true
             }
             R.id.action_sign_out -> {
@@ -89,10 +102,11 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         }
         if (slideShowFiles.size == 1) {
             Log.i(TAG, "Present one image.")
-            presentSlideShow(slideShowFiles[0])
+            presentImage(slideShowFiles[0])
             return
         }
-        presentSlideShow(0)
+        index = 0
+        presentSlideShow()
     }
 
     /**
@@ -105,10 +119,10 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     }
 
     /**
-     * ファイルをスライドショーに表示する.
-     * @param filePath ファイルパス
+     * 画像を表示する.
+     * @param filePath 画像ファイルパス
      */
-    private fun presentSlideShow(filePath: String) {
+    private fun presentImage(filePath: String) {
         for (fragment in fragmentManager.fragments) {
             if (fragment is SlideShowFragment) {
                 Log.i(TAG, "Update image to fragment. FilePath: $filePath")
@@ -122,15 +136,14 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     /**
      * ファイルリストからインデックスに該当するファイルをスライドショーに表示する.
-     * @param index インデックス
      */
-    private fun presentSlideShow(index: Int) {
+    private fun presentSlideShow() {
         Log.i(TAG, "Present image. Index: $index")
-        presentSlideShow(slideShowFiles[index])
+        presentImage(slideShowFiles[index])
 
         handler.postDelayed({
-            val nextIndex = if (index + 1 < slideShowFiles.size) index + 1 else 0
-            presentSlideShow(nextIndex)
+            index = if (index + 1 < slideShowFiles.size) index + 1 else 0
+            presentSlideShow()
         }, PRESENT_TIME_MILLISECS)
     }
 }
