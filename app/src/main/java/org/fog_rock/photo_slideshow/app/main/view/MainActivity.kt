@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
+import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
 
 class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
@@ -34,7 +35,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        replaceFragment(ProgressFragment.newInstance())
+        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
 
         presenter = MainPresenter(this)
         presenter.requestAlbums()
