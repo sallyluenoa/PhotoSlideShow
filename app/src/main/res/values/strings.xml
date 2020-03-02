@@ -8,6 +8,10 @@
     <string name="no">NO</string>
     <string name="start">Start</string>
     <string name="end">End</string>
+    <string name="menu">Menu</string>
+    <string name="license">License</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_out">Sign Out</string>
 
     <string name="failed_runtime_permissions_title">Permissions are denied.</string>
     <string name="failed_runtime_permissions_message">App will be finished.</string>

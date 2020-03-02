@@ -5,8 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.activity_main.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
@@ -29,6 +32,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
         replaceFragment(ProgressFragment.newInstance())
 
         presenter = MainPresenter(this)
@@ -41,6 +45,31 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
         super.onDestroy()
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
+        when (item?.itemId) {
+            R.id.action_menu -> {
+                Log.i(TAG, "Menu action is selected.")
+                true
+            }
+            R.id.action_license -> {
+                Log.i(TAG, "License action is selected.")
+                true
+            }
+            R.id.action_sign_out -> {
+                Log.i(TAG, "Sign out action is selected.")
+                true
+            }
+            else -> {
+                Log.e(TAG, "No actions are found.")
+                super.onOptionsItemSelected(item)
+            }
+        }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
