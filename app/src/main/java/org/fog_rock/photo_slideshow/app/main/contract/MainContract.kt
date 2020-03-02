@@ -9,6 +9,9 @@ import org.fog_rock.photo_slideshow.core.viper.ViperContract
 class MainContract {
 
     interface Presenter : ViperContract.Presenter {
+        /**
+         * アルバム取得を要求.
+         */
         fun requestAlbums()
 
         /**
@@ -19,22 +22,60 @@ class MainContract {
     }
 
     interface PresenterCallback : ViperContract.PresenterCallback {
-        fun requestSlideShow(fileList: List<String>)
+        /**
+         * スライドショー開始を要求する.
+         * @param files 画像ファイルリスト
+         */
+        fun requestSlideShow(files: List<String>)
     }
 
     interface Interactor : ViperContract.Interactor {
+        /**
+         * 共有アルバム取得を要求.
+         * @see InteractorCallback.requestSharedAlbumsResult
+         */
         fun requestSharedAlbums()
+
+        /**
+         * メディアアイテム取得を要求.
+         * @param album メディアアイテムを取得するターゲットアルバム
+         */
         fun requestMediaItems(album: Album)
-        fun requestDownloadFiles(mediaItemList: List<MediaItem>)
+
+        /**
+         * ファイルダウンロードを要求.
+         * @param mediaItems ダウンロードターゲットのメディアアイテムリスト
+         */
+        fun requestDownloadFiles(mediaItems: List<MediaItem>)
     }
 
     interface InteractorCallback : ViperContract.InteractorCallback {
-        fun requestSharedAlbumsResult(albumList: List<Album>?)
-        fun requestMediaItemsResult(mediaItemList: List<MediaItem>?)
-        fun completedDownloadFiles(fileList: List<String>)
+        /**
+         * 共有アルバム取得結果.
+         * @param albums アルバムリスト
+         * @see Interactor.requestSharedAlbums
+         */
+        fun requestSharedAlbumsResult(albums: List<Album>?)
+
+        /**
+         * メディアアイテム取得結果.
+         * @param mediaItems メディアアイテムリスト
+         * @see Interactor.requestMediaItems
+         */
+        fun requestMediaItemsResult(mediaItems: List<MediaItem>?)
+
+        /**
+         * ファイルダウンロード完了.
+         * @param files ダウンロードに成功した画像ファイルリスト
+         * @see Interactor.requestDownloadFiles
+         */
+        fun completedDownloadFiles(files: List<String>)
     }
 
     interface Router : ViperContract.Router {
-        fun startSelectActivity(activity: Activity, albumList: List<Album>, requestCode: Int)
+        /**
+         * SelectActivityの表示.
+         */
+        fun startSelectActivity(activity: Activity, albums: List<Album>, requestCode: Int)
     }
 }

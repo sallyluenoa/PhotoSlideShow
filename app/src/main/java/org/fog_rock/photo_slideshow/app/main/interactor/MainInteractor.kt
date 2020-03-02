@@ -37,8 +37,8 @@ class MainInteractor(
         FileDownloader(TIMEOUT_MILLISECS, TIMEOUT_MILLISECS, TIMEOUT_MILLISECS, this)
 
     private var index = 0
-    private var downloadMediaItemList = listOf<MediaItem>()
-    private var downloadSuccessFileList = mutableListOf<String>()
+    private var downloadMediaItems = listOf<MediaItem>()
+    private var downloadedFiles = mutableListOf<String>()
 
     override fun destroy() {
     }
@@ -57,34 +57,34 @@ class MainInteractor(
 
             Log.d(TAG, "accessToken: $accessToken")
             photosApi = PhotosLibraryApi(context, accessToken)
-            val albumList = withContext(Dispatchers.Default) {
-                photosApi?.getSharedAlbumList()
+            val albums = withContext(Dispatchers.Default) {
+                photosApi?.getSharedAlbums()
             }
 
-            callback.requestSharedAlbumsResult(albumList)
+            callback.requestSharedAlbumsResult(albums)
         }
     }
 
     override fun requestMediaItems(album: Album) {
         GlobalScope.launch(Dispatchers.Main) {
-            val mediaItemList = withContext(Dispatchers.Default) {
-                photosApi?.getMediaItemList(album, 10)
+            val mediaItems = withContext(Dispatchers.Default) {
+                photosApi?.getMediaItems(album, 10)
             }
-            callback.requestMediaItemsResult(mediaItemList)
+            callback.requestMediaItemsResult(mediaItems)
         }
     }
 
-    override fun requestDownloadFiles(mediaItemList: List<MediaItem>) {
+    override fun requestDownloadFiles(mediaItems: List<MediaItem>) {
         index = 0
-        downloadMediaItemList = mediaItemList
-        downloadSuccessFileList = mutableListOf()
+        downloadMediaItems = mediaItems
+        downloadedFiles = mutableListOf()
         doDownload()
     }
 
     override fun downloadResult(resultOutputFile: File?) {
         if (resultOutputFile != null) {
             Log.i(TAG, "Succeeded to download file: ${resultOutputFile.path}")
-            downloadSuccessFileList.add(resultOutputFile.path)
+            downloadedFiles.add(resultOutputFile.path)
         } else {
             Log.e(TAG, "Failed to download file.")
         }
@@ -92,12 +92,12 @@ class MainInteractor(
     }
 
     private fun doDownload() {
-        if (index >= downloadMediaItemList.size) {
-            Log.i(TAG, "Finished download files. FileSize: ${downloadSuccessFileList.size}")
-            callback.completedDownloadFiles(downloadSuccessFileList.toList())
+        if (index >= downloadMediaItems.size) {
+            Log.i(TAG, "Finished download files. FileSize: ${downloadMediaItems.size}")
+            callback.completedDownloadFiles(downloadedFiles.toList())
             return
         }
-        val mediaItem = downloadMediaItemList[index]
+        val mediaItem = downloadMediaItems[index]
         if (!mediaItem.hasMediaMetadata()) {
             Log.i(TAG, "MediaItem does not have meta data.")
             doNextDownload()

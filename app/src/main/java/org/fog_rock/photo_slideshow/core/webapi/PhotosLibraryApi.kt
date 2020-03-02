@@ -19,7 +19,7 @@ class PhotosLibraryApi(
 
     private val clientHolder = PhotosLibraryClientHolder(accessToken)
 
-    fun getSharedAlbumList(): List<Album> =
+    fun getSharedAlbums(): List<Album> =
         try {
             val pagedResponse = clientHolder.client.listSharedAlbums()
             val sharedAlbumsResponse = pagedResponse.page.response
@@ -30,7 +30,7 @@ class PhotosLibraryApi(
             listOf<Album>()
         }
 
-    fun getMediaItemList(album: Album, maxListSize: Int): List<MediaItem> =
+    fun getMediaItems(album: Album, maxSize: Int): List<MediaItem> =
         try {
             val request = SearchMediaItemsRequest.newBuilder().apply {
                 albumId = album.id
@@ -41,24 +41,24 @@ class PhotosLibraryApi(
 
             val count = mediaItemsResponse.mediaItemsCount
             Log.d(TAG, "mediaItem count: $count")
-            val randomNumList = generateRandomNumberList(max(count - maxListSize, 0), count)
-            val mediaItemList = mutableListOf<MediaItem>()
-            randomNumList.forEach {
+            val randNumbers = generateRandomNumbers(max(count - maxSize, 0), count)
+            val mediaItems = mutableListOf<MediaItem>()
+            randNumbers.forEach {
                 val item = mediaItemsResponse.getMediaItems(it)
                 Log.d(TAG, "$it: ${item.id}")
-                mediaItemList.add(item)
+                mediaItems.add(item)
             }
-            mediaItemList.toList()
+            mediaItems.toList()
         } catch (e: ApiException) {
             Log.e(TAG, "Failed to get mediaItem response.")
             e.printStackTrace()
             listOf<MediaItem>()
         }
 
-    private fun generateRandomNumberList(start: Int, end: Int): List<Int> {
-        val list = mutableListOf<Int>()
-        for (i in start until end) list.add(i)
-        list.shuffle()
-        return list.toList()
+    private fun generateRandomNumbers(start: Int, end: Int): List<Int> {
+        val numbers = mutableListOf<Int>()
+        for (i in start until end) numbers.add(i)
+        numbers.shuffle()
+        return numbers.toList()
     }
 }

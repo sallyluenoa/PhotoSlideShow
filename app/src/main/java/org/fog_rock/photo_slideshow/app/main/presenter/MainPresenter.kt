@@ -8,6 +8,7 @@ import com.google.photos.types.proto.MediaItem
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
 import org.fog_rock.photo_slideshow.app.main.router.MainRouter
+import org.fog_rock.photo_slideshow.app.select.view.SelectActivity
 
 class MainPresenter(
     private val callback: MainContract.PresenterCallback
@@ -22,8 +23,6 @@ class MainPresenter(
 
     private val router: MainContract.Router = MainRouter()
 
-    private var showFileList = listOf<String>()
-
     override fun destroy() {
         interactor.destroy()
     }
@@ -37,7 +36,7 @@ class MainPresenter(
             CODE_SELECT_ACTIVITY -> {
                 if (resultCode == RESULT_OK && data != null) {
                     Log.i(TAG, "Succeeded to select album.")
-                    val album = data.getSerializableExtra("decided_album") as Album
+                    val album = data.getSerializableExtra(SelectActivity.RESULT_DECIDE_ALBUM) as Album
                     interactor.requestMediaItems(album)
                 } else {
                     Log.i(TAG, "Canceled to select album.")
@@ -49,27 +48,27 @@ class MainPresenter(
         }
     }
 
-    override fun requestSharedAlbumsResult(albumList: List<Album>?) {
-        if (!albumList.isNullOrEmpty()) {
-            Log.i(TAG, "Succeeded to get album list. ${albumList.count()}")
-            router.startSelectActivity(activity(), albumList, CODE_SELECT_ACTIVITY)
+    override fun requestSharedAlbumsResult(albums: List<Album>?) {
+        if (!albums.isNullOrEmpty()) {
+            Log.i(TAG, "Succeeded to get albums. ${albums.count()}")
+            router.startSelectActivity(activity(), albums, CODE_SELECT_ACTIVITY)
         } else {
-            Log.i(TAG, "Failed to get album list.")
+            Log.i(TAG, "Failed to get albums.")
         }
     }
 
-    override fun requestMediaItemsResult(mediaItemList: List<MediaItem>?) {
-        if (!mediaItemList.isNullOrEmpty()) {
-            Log.i(TAG, "Succeeded to get mediaItem list. ${mediaItemList.count()}")
-            interactor.requestDownloadFiles(mediaItemList)
+    override fun requestMediaItemsResult(mediaItems: List<MediaItem>?) {
+        if (!mediaItems.isNullOrEmpty()) {
+            Log.i(TAG, "Succeeded to get mediaItems. ${mediaItems.count()}")
+            interactor.requestDownloadFiles(mediaItems)
         } else {
-            Log.i(TAG, "Failed to get mediaItem list.")
+            Log.i(TAG, "Failed to get mediaItems.")
         }
     }
 
-    override fun completedDownloadFiles(fileList: List<String>) {
+    override fun completedDownloadFiles(files: List<String>) {
         Log.i(TAG, "Completed to download files. Slide show will be started.")
-        callback.requestSlideShow(fileList)
+        callback.requestSlideShow(files)
     }
 
     private fun activity() = callback.getActivity()

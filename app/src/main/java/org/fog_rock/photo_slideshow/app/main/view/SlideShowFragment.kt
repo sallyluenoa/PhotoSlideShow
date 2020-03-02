@@ -3,7 +3,6 @@ package org.fog_rock.photo_slideshow.app.main.view
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.transition.Slide
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_slide_show.*
 import org.fog_rock.photo_slideshow.R
-import java.io.File
 
 class SlideShowFragment : Fragment() {
 

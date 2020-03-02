@@ -2,14 +2,11 @@ package org.fog_rock.photo_slideshow.app.main.view
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
@@ -26,7 +23,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     private lateinit var presenter: MainContract.Presenter
 
-    private var slideShowFileList = listOf<String>()
+    private var slideShowFiles = listOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,17 +50,17 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     override fun getActivity(): Activity = this
 
-    override fun requestSlideShow(fileList: List<String>) {
-        slideShowFileList = fileList
+    override fun requestSlideShow(files: List<String>) {
+        slideShowFiles = files
         handler.removeCallbacksAndMessages(null)
 
-        if (slideShowFileList.isEmpty()) {
-            Log.e(TAG, "File list for slide show is empty.")
+        if (slideShowFiles.isEmpty()) {
+            Log.e(TAG, "Files for slide show is empty.")
             return
         }
-        if (slideShowFileList.size == 1) {
+        if (slideShowFiles.size == 1) {
             Log.i(TAG, "Present one image.")
-            presentSlideShow(slideShowFileList[0])
+            presentSlideShow(slideShowFiles[0])
             return
         }
         presentSlideShow(0)
@@ -100,10 +97,10 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
      */
     private fun presentSlideShow(index: Int) {
         Log.i(TAG, "Present image. Index: $index")
-        presentSlideShow(slideShowFileList[index])
+        presentSlideShow(slideShowFiles[index])
 
         handler.postDelayed({
-            val nextIndex = if (index + 1 < slideShowFileList.size) index + 1 else 0
+            val nextIndex = if (index + 1 < slideShowFiles.size) index + 1 else 0
             presentSlideShow(nextIndex)
         }, PRESENT_TIME_MILLISECS)
     }
