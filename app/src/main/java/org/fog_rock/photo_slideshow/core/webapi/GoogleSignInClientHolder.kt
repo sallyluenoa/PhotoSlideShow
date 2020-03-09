@@ -13,8 +13,8 @@ import org.fog_rock.photo_slideshow.core.entity.PhotoScope
 class GoogleSignInClientHolder(
     context: Context,
     scopes: Array<PhotoScope>,
-    requestIdToken: Boolean,
-    requestServerAuthCode: Boolean
+    requestIdToken: Boolean = false,
+    requestServerAuthCode: Boolean = false
 ) {
 
     val client: GoogleSignInClient
