@@ -21,13 +21,16 @@ class SplashInteractor(
 
     private val TAG = SplashInteractor::class.java.simpleName
 
+    private val clientHolder =
+        GoogleSignInClientHolder(context, scopes, requestIdToken, requestServerAuthCode)
+
     private val signInApi =
-        GoogleSignInApi(context, scopes, requestIdToken, requestServerAuthCode, this)
+        GoogleSignInApi(context, clientHolder, this)
 
     override fun destroy() {
     }
 
-    override fun getClientHolder(): GoogleSignInClientHolder = signInApi.clientHolder
+    override fun getClientHolder(): GoogleSignInClientHolder = clientHolder
 
     override fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {

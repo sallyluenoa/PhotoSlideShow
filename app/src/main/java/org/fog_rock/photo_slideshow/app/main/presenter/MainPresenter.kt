@@ -36,6 +36,10 @@ class MainPresenter(
         router.startOssLicensesMenuActivity(activity(), R.string.license)
     }
 
+    override fun requestSignOut() {
+        interactor.requestSignOut()
+    }
+
     override fun evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             CODE_SELECT_ACTIVITY -> {
@@ -74,6 +78,14 @@ class MainPresenter(
     override fun completedDownloadFiles(files: List<String>) {
         Log.i(TAG, "Completed to download files. Slide show will be started.")
         callback.requestSlideShow(files)
+    }
+
+    override fun requestSignOutResult(isSucceeded: Boolean) {
+        if (isSucceeded) {
+            router.startSplashActivity(activity())
+            callback.requestFinish()
+        } else {
+        }
     }
 
     private fun activity() = callback.getActivity()

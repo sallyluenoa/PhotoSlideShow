@@ -11,8 +11,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
+import org.fog_rock.photo_slideshow.core.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.file.FileDownloader
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
+import org.fog_rock.photo_slideshow.core.webapi.GoogleSignOutApi
 import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryApi
 import java.io.File
 import java.net.MalformedURLException
@@ -23,11 +25,13 @@ import kotlin.math.min
 class MainInteractor(
     private val context: Context,
     private val callback: MainContract.InteractorCallback
-): MainContract.Interactor, FileDownloader.Callback {
+): MainContract.Interactor, GoogleSignOutApi.Callback, FileDownloader.Callback {
 
     private val TAG = MainInteractor::class.java.simpleName
 
     private val TIMEOUT_MILLISECS = 10000L
+
+    private val signOutApi = GoogleSignOutApi(context, arrayOf(PhotoScope.READ_ONLY), this)
 
     private val oauth2Api = GoogleOAuth2Api(context)
 
@@ -79,6 +83,14 @@ class MainInteractor(
         downloadMediaItems = mediaItems
         downloadedFiles = mutableListOf()
         doDownload()
+    }
+
+    override fun requestSignOut() {
+        signOutApi.requestSignOut()
+    }
+
+    override fun requestSignOutResult(isSucceeded: Boolean) {
+        callback.requestSignOutResult(isSucceeded)
     }
 
     override fun downloadResult(resultOutputFile: File?) {

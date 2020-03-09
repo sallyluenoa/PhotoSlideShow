@@ -20,6 +20,11 @@ class MainContract {
         fun requestLicense()
 
         /**
+         * サインアウトを要求.
+         */
+        fun requestSignOut()
+
+        /**
          * Activity#onActivityResult()の結果を評価する.
          * @see Activity.onActivityResult
          */
@@ -32,6 +37,11 @@ class MainContract {
          * @param files 画像ファイルリスト
          */
         fun requestSlideShow(files: List<String>)
+
+        /**
+         * ビューの終了処理を要求する.
+         */
+        fun requestFinish()
     }
 
     interface Interactor : ViperContract.Interactor {
@@ -52,6 +62,11 @@ class MainContract {
          * @param mediaItems ダウンロードターゲットのメディアアイテムリスト
          */
         fun requestDownloadFiles(mediaItems: List<MediaItem>)
+
+        /**
+         * サインアウトを要求.
+         */
+        fun requestSignOut()
     }
 
     interface InteractorCallback : ViperContract.InteractorCallback {
@@ -75,9 +90,19 @@ class MainContract {
          * @see Interactor.requestDownloadFiles
          */
         fun completedDownloadFiles(files: List<String>)
+
+        /**
+         * サインアウト完了.
+         */
+        fun requestSignOutResult(isSucceeded: Boolean)
     }
 
     interface Router : ViperContract.Router {
+        /**
+         * SplashActivityの表示.
+         */
+        fun startSplashActivity(activity: Activity)
+
         /**
          * SelectActivityの表示.
          */

@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
             }
             R.id.action_sign_out -> {
                 Log.i(TAG, "Sign out action is selected.")
+                presenter.requestSignOut()
                 true
             }
             else -> {
@@ -109,6 +110,8 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         index = 0
         presentSlideShow()
     }
+
+    override fun requestFinish() = finish()
 
     /**
      * 新しいフラグメントに置換する.
