@@ -12,19 +12,9 @@ import java.util.concurrent.TimeUnit
 class FileDownloader(
     connectionTimeoutMilliSecs: Long,
     readTimeoutMilliSecs: Long,
-    writeTimeoutMilliSecs: Long,
-    private val callback: Callback
+    writeTimeoutMilliSecs: Long
 ) {
     private val TAG = FileDownloader::class.java.simpleName
-
-    interface Callback {
-        /**
-         * ダウンロード結果を返す.
-         * @param resultOutputFile ダウンロードに成功した場合は出力先ファイル、失敗した場合はNULL
-         * @see doDownload
-         */
-        fun downloadResult(resultOutputFile: File?)
-    }
 
     private val client = OkHttpClient.Builder().apply {
         connectTimeout(connectionTimeoutMilliSecs, TimeUnit.MILLISECONDS)
@@ -32,47 +22,39 @@ class FileDownloader(
         writeTimeout(writeTimeoutMilliSecs, TimeUnit.MILLISECONDS)
     }.build()
 
+    constructor(timeoutMilliSecs: Long): this(timeoutMilliSecs, timeoutMilliSecs, timeoutMilliSecs)
+
     /**
-     * ファイルダウンロードを行う.
+     * ファイルダウンロードを行う. UIスレッドから呼び出さないこと.
      * @param downloadUrl ダウンロードURL
      * @param outputFile 出力先ファイル
-     * @see Callback.downloadResult
+     * @return ダウンロード成功やすでに存在などによりファイルが存在する場合はtrue、それ以外はfalse
      */
-    fun doDownload(downloadUrl: URL, outputFile: File) {
+    fun doDownload(downloadUrl: URL, outputFile: File): Boolean {
         Log.i(TAG, "Do download. DownloadURL: $downloadUrl, OutputFile: $outputFile")
 
         if (outputFile.exists()) {
             Log.i(TAG, "OutputFile is already existed.")
-            callback.downloadResult(outputFile)
-            return
+            return true
         }
 
-        val request = Request.Builder().apply {
-            url(downloadUrl)
-        }.build()
-
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onResponse(call: Call, response: Response) {
-                Log.i(TAG, "Succeeded to get http response.")
-                val body = response.body ?: run {
-                    Log.e(TAG, "Cannot get response body.")
-                    callback.downloadResult(null)
-                    return
-                }
-                if (writeOutputFile(body, outputFile)) {
-                    Log.i(TAG, "Succeeded to write output file.")
-                    callback.downloadResult(outputFile)
-                } else {
-                    Log.e(TAG, "Failed to write output file.")
-                    callback.downloadResult(null)
-                }
+        try {
+            val request = Request.Builder().apply {
+                url(downloadUrl)
+            }.build()
+            val response = client.newCall(request).execute()
+            val body = response.body ?: run {
+                Log.e(TAG, "Cannot get response body.")
+                return false
             }
+            return writeOutputFile(body, outputFile)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } catch (e: IllegalStateException) {
+            e.printStackTrace()
+        }
 
-            override fun onFailure(call: Call, e: IOException) {
-                Log.e(TAG, "Failed to get http response.")
-                callback.downloadResult(null)
-            }
-        })
+        return false
     }
 
     /**
@@ -88,6 +70,7 @@ class FileDownloader(
             inputStream = body.byteStream()
             outputStream = FileOutputStream(outputFile)
             inputStream.use { it.copyTo(outputStream) }
+            Log.i(TAG, "Succeeded to write output file.")
             return true
         } catch (e: IOException) {
             Log.e(TAG, "Failed to write OutputStream.")

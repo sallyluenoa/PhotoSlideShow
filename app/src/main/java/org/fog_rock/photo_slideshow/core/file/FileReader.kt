@@ -2,6 +2,7 @@ package org.fog_rock.photo_slideshow.core.file
 
 import android.content.Context
 import android.util.Log
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 
@@ -20,13 +21,16 @@ class FileReader(private val context: Context) {
     fun readAssetsFile(fileName: String): String? {
         var inputStream: InputStream? = null
         val assetManager = context.resources.assets
-        return try {
+
+        try {
             inputStream = assetManager.open(fileName)
-            inputStream.bufferedReader().use { it.readText() }
+            return inputStream.bufferedReader().use { it.readText() }
         } catch (e : IOException) {
             Log.e(TAG, "Failed to open or read InputStream.")
             e.printStackTrace()
-            null
+        } catch (e : FileNotFoundException) {
+            Log.e(TAG, "Not found in assets path.")
+            e.printStackTrace()
         } finally {
             if (inputStream != null) {
                 try {
@@ -37,5 +41,6 @@ class FileReader(private val context: Context) {
                 }
             }
         }
+        return null
     }
 }
