@@ -58,49 +58,47 @@ class GoogleSignOutApi(
      * サインアウト.
      * Suspendメソッドなので、Coroutine内で呼び出すこと.
      */
-    private suspend fun signOut(): Boolean {
-        return suspendCoroutine { continuation ->
+    private suspend fun signOut(): Boolean =
+        suspendCoroutine { continuation ->
             clientHolder.client.signOut().apply {
                 addOnCompleteListener {
                     Log.i(TAG, "Completed to sign out.")
                     continuation.resume(true)
                 }
-                addOnFailureListener {
-                    Log.e(TAG, "Failed to sign out.")
-                    it.printStackTrace()
-                    continuation.resume(false)
-                }
-                addOnCanceledListener {
-                    Log.e(TAG, "Canceled to sign out.")
-                    continuation.resume(false)
-                }
+//                addOnFailureListener {
+//                    Log.e(TAG, "Failed to sign out.")
+//                    it.printStackTrace()
+//                    continuation.resume(false)
+//                }
+//                addOnCanceledListener {
+//                    Log.e(TAG, "Canceled to sign out.")
+//                    continuation.resume(false)
+//                }
             }
             return@suspendCoroutine
         }
-    }
 
     /**
      * アカウントのアクセス破棄.
      * Suspendメソッドなので、Coroutine内で呼び出すこと.
      */
-    private suspend fun revokeAccess(): Boolean {
-        return suspendCoroutine { continuation ->
+    private suspend fun revokeAccess(): Boolean =
+        suspendCoroutine { continuation ->
             clientHolder.client.revokeAccess().apply {
                 addOnCompleteListener {
                     Log.i(TAG, "Completed to revoke access.")
                     continuation.resume(true)
                 }
-                addOnFailureListener {
-                    Log.e(TAG, "Failed to revoke access.")
-                    it.printStackTrace()
-                    continuation.resume(false)
-                }
-                addOnCanceledListener {
-                    Log.e(TAG, "Canceled to revoke access.")
-                    continuation.resume(false)
-                }
+//                addOnFailureListener {
+//                    Log.e(TAG, "Failed to revoke access.")
+//                    it.printStackTrace()
+//                    continuation.resume(false)
+//                }
+//                addOnCanceledListener {
+//                    Log.e(TAG, "Canceled to revoke access.")
+//                    continuation.resume(false)
+//                }
             }
             return@suspendCoroutine
         }
-    }
 }

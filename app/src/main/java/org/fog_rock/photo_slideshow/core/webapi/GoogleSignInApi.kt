@@ -72,8 +72,8 @@ class GoogleSignInApi(
      * サイレントサインイン.
      * Suspendメソッドなので、Coroutine内で呼び出すこと.
      */
-    private suspend fun silentSignIn(): Boolean {
-        return suspendCoroutine { continuation ->
+    private suspend fun silentSignIn(): Boolean =
+        suspendCoroutine { continuation ->
             clientHolder.client.silentSignIn().apply {
                 addOnCompleteListener {
                     Log.i(TAG, "Completed to silent sign in.")
@@ -102,5 +102,4 @@ class GoogleSignInApi(
             }
             return@suspendCoroutine
         }
-    }
 }
