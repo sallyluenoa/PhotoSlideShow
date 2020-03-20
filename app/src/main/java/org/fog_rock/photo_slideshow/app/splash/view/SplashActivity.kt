@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
+import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.presenter.SplashPresenter
 import org.fog_rock.photo_slideshow.core.entity.SignInRequest
@@ -27,14 +28,14 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_splash)
-        replaceFragment(LogoFragment.newInstance())
+        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.LOGO))
 
         presenter = SplashPresenter(this)
 
         Handler().postDelayed({
             Log.i(TAG, "Request sign in.")
 
-            replaceFragment(SignInFragment.newInstance())
+            replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.EMPTY))
             presenter.requestSignIn()
         }, SHOW_LOGO_TIME_MILLIS)
     }

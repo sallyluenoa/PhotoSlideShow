@@ -8,27 +8,27 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.R
 
-class AlbumListAdapter(
-    private val albumList: Array<Album>,
+class AlbumsAdapter(
+    private val albums: Array<Album>,
     private val listener: OnItemClickListener
-): RecyclerView.Adapter<AlbumListAdapter.AlbumListViewHolder>() {
+): RecyclerView.Adapter<AlbumsAdapter.AlbumsViewHolder>() {
 
     interface OnItemClickListener {
 
         fun onItemClick(view: View, position: Int, album: Album)
     }
 
-    class AlbumListViewHolder(view: View): RecyclerView.ViewHolder(view) {
+    class AlbumsViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val titleView = view.findViewById<TextView?>(R.id.textView_title)
         val itemCountView = view.findViewById<TextView?>(R.id.textView_item_count)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumListViewHolder =
-        AlbumListViewHolder(LayoutInflater.from(parent.context)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumsViewHolder =
+        AlbumsViewHolder(LayoutInflater.from(parent.context)
             .inflate(R.layout.recyclerview_album, parent, false))
 
-    override fun onBindViewHolder(holder: AlbumListViewHolder, position: Int) {
-        val album = albumList[position]
+    override fun onBindViewHolder(holder: AlbumsViewHolder, position: Int) {
+        val album = albums[position]
         holder.titleView?.text = album.title
         holder.itemCountView?.text = album.mediaItemsCount.toString()
         holder.itemView.setOnClickListener {
@@ -37,5 +37,5 @@ class AlbumListAdapter(
         }
     }
 
-    override fun getItemCount(): Int = albumList.size
+    override fun getItemCount(): Int = albums.size
 }

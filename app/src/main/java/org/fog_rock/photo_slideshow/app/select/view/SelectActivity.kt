@@ -11,17 +11,23 @@ class SelectActivity : AppCompatActivity() {
 
     private val TAG = SelectActivity::class.java.simpleName
 
+    companion object {
+
+        const val REQUEST_ALBUMS = "albums"
+        const val RESULT_DECIDE_ALBUM = "decide_album"
+    }
+
     private val fragmentManager = supportFragmentManager
 
-    private val albumList: Array<Album> by lazy {
-        intent.getSerializableExtra("album_list") as Array<Album>
+    private val albums: Array<Album> by lazy {
+        intent.getSerializableExtra(REQUEST_ALBUMS) as Array<Album>
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_select)
-        replaceFragment(SharingListFragment.newInstance(albumList))
+        replaceFragment(SharingAlbumsFragment.newInstance(albums))
     }
 
     /**
@@ -30,7 +36,7 @@ class SelectActivity : AppCompatActivity() {
      */
     fun decidedAndFinishAlbum(album: Album) {
         val intent = Intent().apply {
-            putExtra("decided_album", album)
+            putExtra(RESULT_DECIDE_ALBUM, album)
         }
         setResult(RESULT_OK, intent)
         finish()

@@ -9,25 +9,25 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.photos.types.proto.Album
-import kotlinx.android.synthetic.main.fragment_sharing_list.*
+import kotlinx.android.synthetic.main.fragment_sharing_albums.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
 
-class SharingListFragment : Fragment(), AppDialogFragment.Callback, AlbumListAdapter.OnItemClickListener {
+class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdapter.OnItemClickListener {
 
-    private val TAG = SharingListFragment::class.java.simpleName
+    private val TAG = SharingAlbumsFragment::class.java.simpleName
 
     private val CODE_CONFIRM_SELECT = 1000
 
     companion object {
 
-        private const val ARGS_ALBUM_LIST = "album_list"
+        private const val ARGS_ALBUMS = "albums"
 
-        fun newInstance(albumList: Array<Album>): Fragment {
+        fun newInstance(albums: Array<Album>): Fragment {
             val args = Bundle().apply {
-                putSerializable(ARGS_ALBUM_LIST, albumList)
+                putSerializable(ARGS_ALBUMS, albums)
             }
-            return SharingListFragment().apply {
+            return SharingAlbumsFragment().apply {
                 arguments = args
             }
         }
@@ -39,8 +39,8 @@ class SharingListFragment : Fragment(), AppDialogFragment.Callback, AlbumListAda
             Bundle()
         }
     }
-    private val albumList: Array<Album> by lazy {
-        args.getSerializable(ARGS_ALBUM_LIST) as Array<Album>
+    private val albums: Array<Album> by lazy {
+        args.getSerializable(ARGS_ALBUMS) as Array<Album>
     }
 
     private var selectedView: View? = null
@@ -50,16 +50,16 @@ class SharingListFragment : Fragment(), AppDialogFragment.Callback, AlbumListAda
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_sharing_list, container, false)
+    ): View? = inflater.inflate(R.layout.fragment_sharing_albums, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val albumListAdapter = AlbumListAdapter(albumList, this)
+        val albumsAdapter = AlbumsAdapter(albums, this)
         recyclerView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = albumListAdapter
+            adapter = albumsAdapter
         }
     }
 
