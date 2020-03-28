@@ -3,6 +3,7 @@ package org.fog_rock.photo_slideshow.core.file
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.fog_rock.photo_slideshow.core.file.impl.FileReaderImpl
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -11,7 +12,7 @@ import org.junit.runner.RunWith
 class FileReaderTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val fileReader = FileReader(context)
+    private val fileReader: FileReader = FileReaderImpl(context)
 
     @Test
     fun readAssetsFile() {

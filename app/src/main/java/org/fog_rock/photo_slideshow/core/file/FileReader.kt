@@ -1,46 +1,11 @@
 package org.fog_rock.photo_slideshow.core.file
 
-import android.content.Context
-import android.util.Log
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.InputStream
-
-/**
- * ファイル読み込み専用クラス.
- */
-class FileReader(private val context: Context) {
-
-    private val TAG = FileReader::class.java.simpleName
+interface FileReader {
 
     /**
      * assets 以下に設置されているファイルの読み込みを行う.
      * @param fileName ファイル名
      * @return ファイルの読み込みに成功した場合はファイル内の文字列、失敗した場合はNULL
      */
-    fun readAssetsFile(fileName: String): String? {
-        var inputStream: InputStream? = null
-        val assetManager = context.resources.assets
-
-        try {
-            inputStream = assetManager.open(fileName)
-            return inputStream.bufferedReader().use { it.readText() }
-        } catch (e : IOException) {
-            Log.e(TAG, "Failed to open or read InputStream.")
-            e.printStackTrace()
-        } catch (e : FileNotFoundException) {
-            Log.e(TAG, "Not found in assets path.")
-            e.printStackTrace()
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close()
-                } catch (e : IOException) {
-                    Log.e(TAG, "Failed to close InputStream.")
-                    e.printStackTrace()
-                }
-            }
-        }
-        return null
-    }
+    fun readAssetsFile(fileName: String): String?
 }

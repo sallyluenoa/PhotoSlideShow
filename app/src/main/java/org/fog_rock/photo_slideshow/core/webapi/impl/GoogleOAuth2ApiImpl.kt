@@ -7,7 +7,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
-import org.fog_rock.photo_slideshow.core.file.FileReader
+import org.fog_rock.photo_slideshow.core.file.impl.FileReaderImpl
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
 import org.json.JSONException
 import org.json.JSONObject
@@ -17,7 +17,7 @@ import java.io.IOException
  * Google OAuth2 認証に関連するAPI
  */
 class GoogleOAuth2ApiImpl(
-    private val fileReader: FileReader
+    private val fileReader: FileReaderImpl
 ): GoogleOAuth2Api {
 
     private val TAG = GoogleOAuth2ApiImpl::class.java.simpleName
