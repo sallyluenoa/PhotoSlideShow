@@ -3,6 +3,7 @@ package org.fog_rock.photo_slideshow.core.file.impl
 import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.ResponseBody
 import org.fog_rock.photo_slideshow.core.file.FileDownloader
 import java.io.*
@@ -53,11 +54,7 @@ class FileDownloaderImpl(
                 url(downloadUrl)
             }.build()
             val response = client.newCall(request).execute()
-            val body = response.body ?: run {
-                Log.e(TAG, "Cannot get response body.")
-                return false
-            }
-            writeOutputFile(body, outputFile)
+            writeOutputFile(response, outputFile)
         } catch (e: IOException) {
             Log.e(TAG, "Failed network connection.")
             e.printStackTrace()
@@ -71,6 +68,23 @@ class FileDownloaderImpl(
             e.printStackTrace()
             false
         }
+
+    /**
+     * レスポンスファイルに書き込む.
+     * @param body レスポンスボディ
+     * @param outputFile 出力先ファイル
+     */
+    private fun writeOutputFile(response: Response, outputFile: File): Boolean {
+        if (!response.isSuccessful) {
+            Log.e(TAG, "Failed network connection. Code: ${response.code}")
+            return false
+        }
+        val body = response.body ?: run {
+            Log.e(TAG, "Response body is null.")
+            return false
+        }
+        return writeOutputFile(body, outputFile)
+    }
 
     /**
      * レスポンスボディからファイルに書き込む.

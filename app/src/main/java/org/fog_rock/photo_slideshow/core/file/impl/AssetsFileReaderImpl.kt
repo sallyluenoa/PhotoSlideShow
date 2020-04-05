@@ -2,7 +2,7 @@ package org.fog_rock.photo_slideshow.core.file.impl
 
 import android.content.Context
 import android.util.Log
-import org.fog_rock.photo_slideshow.core.file.FileReader
+import org.fog_rock.photo_slideshow.core.file.AssetsFileReader
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
@@ -10,13 +10,15 @@ import java.io.InputStream
 /**
  * ファイル読み込み専用クラス.
  */
-class FileReaderImpl(
+class AssetsFileReaderImpl(
     private val context: Context
-): FileReader {
+): AssetsFileReader {
 
-    private val TAG = FileReaderImpl::class.java.simpleName
+    private val TAG = AssetsFileReaderImpl::class.java.simpleName
 
-    override fun readAssetsFile(fileName: String): String? {
+    override fun read(fileName: String): String? {
+        Log.i(TAG, "Read assets file: $fileName")
+
         var inputStream: InputStream? = null
         val assetManager = context.resources.assets
 

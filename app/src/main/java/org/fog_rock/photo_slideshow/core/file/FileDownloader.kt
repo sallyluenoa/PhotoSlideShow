@@ -3,6 +3,9 @@ package org.fog_rock.photo_slideshow.core.file
 import java.io.File
 import java.net.URL
 
+/**
+ * ファイルダウンロードするためのインターフェース.
+ */
 interface FileDownloader {
 
     /**

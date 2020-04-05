@@ -3,6 +3,7 @@ package org.fog_rock.photo_slideshow.core.file.impl
 import android.util.Log
 import com.google.photos.types.proto.MediaItem
 import com.google.photos.types.proto.MediaMetadata
+import org.fog_rock.photo_slideshow.core.file.FileDownloader
 import org.fog_rock.photo_slideshow.core.file.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.math.SizeCalculator
 import java.io.File
@@ -10,7 +11,7 @@ import java.net.MalformedURLException
 import java.net.URL
 
 class PhotosDownloaderImpl(
-    private val fileDownloader: FileDownloaderImpl,
+    private val fileDownloader: FileDownloader,
     private val outputDir: File,
     private val aspectWidth: Long,
     private val aspectHeight: Long

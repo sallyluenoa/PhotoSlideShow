@@ -7,7 +7,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
-import org.fog_rock.photo_slideshow.core.file.impl.FileReaderImpl
+import org.fog_rock.photo_slideshow.core.file.AssetsFileReader
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
 import org.json.JSONException
 import org.json.JSONObject
@@ -17,7 +17,7 @@ import java.io.IOException
  * Google OAuth2 認証に関連するAPI
  */
 class GoogleOAuth2ApiImpl(
-    private val fileReader: FileReaderImpl
+    private val fileReader: AssetsFileReader
 ): GoogleOAuth2Api {
 
     private val TAG = GoogleOAuth2ApiImpl::class.java.simpleName
@@ -100,7 +100,7 @@ class GoogleOAuth2ApiImpl(
             Log.i(TAG, "Client secrets are already loaded.")
             return true
         }
-        val jsonString = fileReader.readAssetsFile(CLIENT_SECRET_FILE) ?: run {
+        val jsonString = fileReader.read(CLIENT_SECRET_FILE) ?: run {
             Log.e(TAG, "Failed to read assets file.")
             return false
         }
