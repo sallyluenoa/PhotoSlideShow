@@ -12,7 +12,6 @@ import java.net.URL
 
 class PhotosDownloaderImpl(
     private val fileDownloader: FileDownloader,
-    private val outputDir: File,
     private val aspectWidth: Long,
     private val aspectHeight: Long
 ): PhotosDownloader {
@@ -21,11 +20,14 @@ class PhotosDownloaderImpl(
 
     private val calculator = SizeCalculator()
 
-    override suspend fun doDownloads(mediaItems: List<MediaItem>): List<String> {
+    override suspend fun requestDownloads(mediaItems: List<MediaItem>, outputDir: File): List<String> {
         val outputFiles = mutableListOf<String>()
-
+        if (!isValidOutputDir(outputDir)) {
+            Log.e(TAG, "Invalid output dir.");
+            return outputFiles
+        }
         mediaItems.forEach {
-            val outputFile = doDownload(it)
+            val outputFile = doDownload(it, outputDir)
             if (outputFile != null) outputFiles.add(outputFile)
         }
         return outputFiles.toList()
@@ -34,10 +36,10 @@ class PhotosDownloaderImpl(
     /**
      * メディアアイテムリストの情報を元に、写真のダウンロードを行う.
      */
-    private suspend fun doDownload(mediaItem: MediaItem): String? {
+    private suspend fun doDownload(mediaItem: MediaItem, outputDir: File): String? {
         val metadata = getPhotoMetaData(mediaItem) ?: return null
         val downloadUrl = getDownloadUrl(mediaItem.baseUrl, metadata) ?: return null
-        val outputFile = getOutputFile(mediaItem.filename) ?: return null
+        val outputFile = File(outputDir, mediaItem.filename)
         return if (fileDownloader.requestDownload(downloadUrl, outputFile)) outputFile.path else null
     }
 
@@ -76,18 +78,18 @@ class PhotosDownloaderImpl(
     }
 
     /**
-     * 出力先ファイルを取得.
+     * 出力先ディレクトリが存在するか確認.
      */
-    private fun getOutputFile(fileName: String): File? {
+    private fun isValidOutputDir(outputDir: File): Boolean {
         if (!outputDir.exists()) {
             Log.e(TAG, "Output dir path does not exist.")
-            return null
+            return false
         }
         if (!outputDir.isDirectory) {
             Log.e(TAG, "Output dir path is not directory.")
-            return null
+            return false
         }
-        return File(outputDir, fileName)
+        return true
     }
 
 }
