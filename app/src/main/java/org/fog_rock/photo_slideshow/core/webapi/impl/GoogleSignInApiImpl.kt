@@ -1,8 +1,6 @@
 package org.fog_rock.photo_slideshow.core.webapi.impl
 
-import android.content.Intent
 import android.util.Log
-import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInClientHolder
@@ -15,13 +13,7 @@ class GoogleSignInApiImpl(
 
     private val TAG = GoogleSignInApiImpl::class.java.simpleName
 
-    override fun isSucceededUserSignIn(data: Intent?): Boolean =
-        GoogleSignIn.getSignedInAccountFromIntent(data).isSuccessful
-
-    override suspend fun requestSilentSignIn(): Boolean {
-        val account = silentSignIn()
-        return account != null
-    }
+    override suspend fun requestSilentSignIn(): GoogleSignInAccount? = silentSignIn()
 
     override suspend fun requestSignOut(): Boolean {
         val isSignedOut = signOut()
