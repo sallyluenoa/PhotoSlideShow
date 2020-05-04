@@ -1,7 +1,6 @@
 package org.fog_rock.photo_slideshow.core.webapi.impl
 
 import android.util.Log
-import com.google.api.client.auth.oauth2.TokenResponse
 import com.google.api.client.auth.oauth2.TokenResponseException
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest
 import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest
@@ -32,65 +31,51 @@ class GoogleOAuth2ApiImpl(
     private var clientId: String = ""
     private var clientSecret: String = ""
 
-    private var tokenResponse: TokenResponse? = null
-
-    override suspend fun requestAccessToken(serverAuthCode: String): String {
+    @Suppress("BlockingMethodInNonBlockingContext")
+    override suspend fun requestTokenInfoWithAuthCode(serverAuthCode: String): GoogleOAuth2Api.TokenInfo? {
         if (!loadClientSecrets()) {
             Log.i(TAG, "Failed to load client secrets.")
-            return ""
+            return null
         }
 
-        val refreshToken = tokenResponse?.refreshToken
-        return if (refreshToken != null) {
-            getAccessTokenWithRefreshToken(refreshToken)
-        } else {
-            getAccessTokenWithAuthCode(serverAuthCode)
-        }
-    }
-
-    /**
-     * アクセストークン取得.
-     * @param serverAuthCode サーバーの認証コード
-     */
-    private fun getAccessTokenWithAuthCode(serverAuthCode: String): String =
         try {
-            tokenResponse = GoogleAuthorizationCodeTokenRequest(
+            val response = GoogleAuthorizationCodeTokenRequest(
                 NetHttpTransport(), JacksonFactory(), clientId, clientSecret, serverAuthCode, ""
             ).execute()
-            Log.d(TAG, "accessToken: ${tokenResponse?.accessToken}")
-            Log.d(TAG, "refreshToken: ${tokenResponse?.refreshToken}")
-            tokenResponse!!.accessToken
+            return GoogleOAuth2Api.TokenInfo(response)
         } catch (e: TokenResponseException) {
             Log.e(TAG, "Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
             e.printStackTrace()
-            ""
         } catch (e: IOException) {
             Log.e(TAG, "Failed to execute request.")
             e.printStackTrace()
-            ""
+        }
+        return null
+    }
+
+    @Suppress("BlockingMethodInNonBlockingContext")
+    override suspend fun requestTokenInfoWithRefreshToken(refreshToken: String): GoogleOAuth2Api.TokenInfo? {
+        if (!loadClientSecrets()) {
+            Log.i(TAG, "Failed to load client secrets.")
+            return null
         }
 
-    /**
-     * アクセストークン取得.
-     * @param refreshToken リフレッシュトークン
-     */
-    private fun getAccessTokenWithRefreshToken(refreshToken: String): String =
         try {
-            tokenResponse = GoogleRefreshTokenRequest(
+            val response = GoogleRefreshTokenRequest(
                 NetHttpTransport(), JacksonFactory(), refreshToken, clientId, clientSecret
             ).execute()
-            tokenResponse!!.accessToken
+            return GoogleOAuth2Api.TokenInfo(response, refreshToken)
         } catch (e: TokenResponseException) {
             Log.e(TAG, "Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
             e.printStackTrace()
-            ""
         } catch (e: IOException) {
             Log.e(TAG, "Failed to execute request.")
             e.printStackTrace()
-            ""
         }
+        return null
+    }
 
     /**
      * クライアントの秘密情報をロードする.
