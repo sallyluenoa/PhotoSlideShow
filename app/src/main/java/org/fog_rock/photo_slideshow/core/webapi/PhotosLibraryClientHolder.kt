@@ -10,20 +10,29 @@ import java.io.IOException
 /**
  * PhotosLibraryClientをシングルトンで保持するHolderクラス.
  */
-class PhotosLibraryClientHolder(accessToken: String) {
+class PhotosLibraryClientHolder(tokenInfo: GoogleOAuth2Api.TokenInfo) {
 
-    val client: PhotosLibraryClient
+    companion object {
+        // 有効期限を確認してから実際にAPI実行するまでの時間を考慮.
+        private const val INTERVAL_TIME_MILLIS = 60 * 1000L;
+    }
 
-    init {
+    val client: PhotosLibraryClient =
         try {
-            val credentials = OAuth2Credentials.create(AccessToken(accessToken, null))
+            val credentials = OAuth2Credentials.create(AccessToken(tokenInfo.accessToken, null))
             val settings = PhotosLibrarySettings.newBuilder().apply {
                 credentialsProvider = FixedCredentialsProvider.create(credentials)
             }.build()
-            client = PhotosLibraryClient.initialize(settings)
+            PhotosLibraryClient.initialize(settings)
         } catch (e : IOException) {
             throw IOException("Failed to initialize PhotosLibraryClient.")
         }
-    }
 
+    private val expiredTimeMillis = tokenInfo.expiredAccessTokenTimeMillis
+
+    /**
+     * Clientの有効期限が切れていないか確認する.
+     */
+    fun isAvailable(): Boolean =
+        System.currentTimeMillis() < expiredTimeMillis - INTERVAL_TIME_MILLIS
 }

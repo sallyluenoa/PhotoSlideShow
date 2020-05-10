@@ -7,71 +7,85 @@ import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryApi
 import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryClientHolder
-import kotlin.math.max
 
-/**
- * Google Photos に関連するAPI
- */
 class PhotosLibraryApiImpl(
-    private val clientHolder: PhotosLibraryClientHolder
+    private var clientHolder: PhotosLibraryClientHolder
 ): PhotosLibraryApi {
 
     private val TAG = PhotosLibraryApiImpl::class.java.simpleName
 
-    override suspend fun requestSharedAlbums(): List<Album> = getSharedAlbums()
+    override fun updateClientHolder(clientHolder: PhotosLibraryClientHolder) {
+        this.clientHolder = clientHolder
+    }
 
-    override suspend fun requestMediaItems(album: Album, maxSize: Int): List<MediaItem> =
-        getMediaItems(album, maxSize)
+    override fun isAvailableClientHolder(): Boolean = clientHolder.isAvailable()
 
-    /**
-     * 共有アルバムリスト取得.
-     */
-    private fun getSharedAlbums(): List<Album> =
+    override fun requestAlbum(albumId: String): Album =
         try {
-            val pagedResponse = clientHolder.client.listSharedAlbums()
-            val sharedAlbumsResponse = pagedResponse.page.response
-            sharedAlbumsResponse.sharedAlbumsList
+            clientHolder.client.getAlbum(albumId)
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get album response.")
+            Log.e(TAG, "Failed to get album.")
             e.printStackTrace()
-            listOf()
+            Album.newBuilder().apply { id = albumId }.build()
         }
 
-    /**
-     * アルバム内のアイテムリスト取得.
-     */
-    private fun getMediaItems(album: Album, maxSize: Int): List<MediaItem> =
+    override fun requestMediaItem(mediaItemId: String): MediaItem =
+        try {
+            clientHolder.client.getMediaItem(mediaItemId)
+        } catch (e: ApiException) {
+            Log.e(TAG, "Failed to get mediaItem.")
+            e.printStackTrace()
+            MediaItem.newBuilder().apply { id = mediaItemId }.build()
+        }
+
+    override fun requestUpdateAlbums(albums: List<Album>): List<Album> {
+        val newAlbums = emptyList<Album>().toMutableList()
+        albums.forEach {
+            newAlbums.add(requestAlbum(it.id))
+        }
+        return newAlbums.toList()
+    }
+
+    override fun requestUpdateMediaItems(mediaItems: List<MediaItem>): List<MediaItem> {
+        val newMediaItems = emptyList<MediaItem>().toMutableList()
+        mediaItems.forEach {
+            newMediaItems.add(requestMediaItem(it.id))
+        }
+        return newMediaItems.toList()
+    }
+
+    override suspend fun requestSharedAlbums(): List<Album> =
+        try {
+            val response = clientHolder.client.listSharedAlbums()
+            val albums = emptyList<Album>()
+            for (page in response.iteratePages()) {
+                Log.i(TAG, "Load ListSharedAlbumsPage. PageCount: ${page.pageElementCount}");
+                albums.plus(page.response.sharedAlbumsList)
+            }
+            albums
+        } catch (e: ApiException) {
+            Log.e(TAG, "Failed to get listSharedAlbums.")
+            e.printStackTrace()
+            emptyList()
+        }
+
+    override suspend fun requestMediaItems(album: Album): List<MediaItem> =
         try {
             val request = SearchMediaItemsRequest.newBuilder().apply {
                 albumId = album.id
                 pageSize = 100
             }.build()
-            val pagedResponse = clientHolder.client.searchMediaItems(request)
-            val mediaItemsResponse = pagedResponse.page.response
-
-            val count = mediaItemsResponse.mediaItemsCount
-            Log.d(TAG, "mediaItem count: $count")
-            val randNumbers = generateRandomNumbers(max(count - maxSize, 0), count)
-            val mediaItems = mutableListOf<MediaItem>()
-            randNumbers.forEach {
-                val item = mediaItemsResponse.getMediaItems(it)
-                Log.d(TAG, "$it: ${item.id}")
-                mediaItems.add(item)
+            val response = clientHolder.client.searchMediaItems(request)
+            val mediaItems = emptyList<MediaItem>()
+            Log.i(TAG, "Total mediaItem count: ${album.mediaItemsCount}")
+            for (page in response.iteratePages()) {
+                Log.i(TAG, "Load SearchMediaItemsPage. PageCount: ${page.pageElementCount}")
+                mediaItems.plus(page.response.mediaItemsList)
             }
-            mediaItems.toList()
+            mediaItems
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get mediaItem response.")
+            Log.e(TAG, "Failed to get searchMediaItems.")
             e.printStackTrace()
-            listOf()
+            emptyList()
         }
-
-    /**
-     * 一定範囲内の数字をランダムに入れ替えたリストを取得する.
-     */
-    private fun generateRandomNumbers(start: Int, end: Int): List<Int> {
-        val numbers = mutableListOf<Int>()
-        for (i in start until end) numbers.add(i)
-        numbers.shuffle()
-        return numbers.toList()
-    }
 }
