@@ -8,9 +8,16 @@ import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * PhotosLibraryApiテスト
+ * Googleアカウントでアプリ内にサインインして、アクセストークンを取得した状態でテストすること.
+ */
 class PhotosLibraryApiTest {
 
     companion object {
+        /**
+         * それぞれ必要な情報を適宜更新すること.
+         */
         private const val ACCESS_TOKEN = ""
         private const val EXPIRED_ACCESS_TOKEN_TIME_MILLIS = 0L
 

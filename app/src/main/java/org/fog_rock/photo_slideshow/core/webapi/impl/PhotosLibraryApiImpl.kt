@@ -20,7 +20,7 @@ class PhotosLibraryApiImpl(
 
     override fun isAvailableClientHolder(): Boolean = clientHolder.isAvailable()
 
-    override fun requestAlbum(albumId: String): Album =
+    override suspend fun requestAlbum(albumId: String): Album =
         try {
             clientHolder.client.getAlbum(albumId)
         } catch (e: ApiException) {
@@ -29,7 +29,7 @@ class PhotosLibraryApiImpl(
             Album.newBuilder().apply { id = albumId }.build()
         }
 
-    override fun requestMediaItem(mediaItemId: String): MediaItem =
+    override suspend fun requestMediaItem(mediaItemId: String): MediaItem =
         try {
             clientHolder.client.getMediaItem(mediaItemId)
         } catch (e: ApiException) {
@@ -38,7 +38,7 @@ class PhotosLibraryApiImpl(
             MediaItem.newBuilder().apply { id = mediaItemId }.build()
         }
 
-    override fun requestUpdateAlbums(albums: List<Album>): List<Album> {
+    override suspend fun requestUpdateAlbums(albums: List<Album>): List<Album> {
         val newAlbums = emptyList<Album>().toMutableList()
         albums.forEach {
             newAlbums.add(requestAlbum(it.id))
@@ -46,7 +46,7 @@ class PhotosLibraryApiImpl(
         return newAlbums.toList()
     }
 
-    override fun requestUpdateMediaItems(mediaItems: List<MediaItem>): List<MediaItem> {
+    override suspend fun requestUpdateMediaItems(mediaItems: List<MediaItem>): List<MediaItem> {
         val newMediaItems = emptyList<MediaItem>().toMutableList()
         mediaItems.forEach {
             newMediaItems.add(requestMediaItem(it.id))

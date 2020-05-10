@@ -25,26 +25,26 @@ interface PhotosLibraryApi {
      * コルーチン内で呼び出すこと.
      * @param albumId アルバムID
      */
-    fun requestAlbum(albumId: String): Album
+    suspend fun requestAlbum(albumId: String): Album
 
     /**
      * メディアアイテム取得要求.
      * コルーチン内で呼び出すこと.
      * @param mediaItemId メディアアイテムID
      */
-    fun requestMediaItem(mediaItemId: String): MediaItem
+    suspend fun requestMediaItem(mediaItemId: String): MediaItem
 
     /**
      * アルバムリストの更新要求.
      * コルーチン内で呼び出すこと.
      */
-    fun requestUpdateAlbums(albums: List<Album>): List<Album>
+    suspend fun requestUpdateAlbums(albums: List<Album>): List<Album>
 
     /**
      * メディアアイテムリスト更新要求.
      * コルーチン内で呼び出すこと.
      */
-    fun requestUpdateMediaItems(mediaItems: List<MediaItem>): List<MediaItem>
+    suspend fun requestUpdateMediaItems(mediaItems: List<MediaItem>): List<MediaItem>
 
     /**
      * 共有アルバムリスト取得要求.
