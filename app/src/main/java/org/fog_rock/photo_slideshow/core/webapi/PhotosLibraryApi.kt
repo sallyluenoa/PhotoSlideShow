@@ -2,6 +2,7 @@ package org.fog_rock.photo_slideshow.core.webapi
 
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
+import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
 
 /**
  * Google Photos に関連するAPI

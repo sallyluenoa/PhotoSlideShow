@@ -3,7 +3,9 @@ package org.fog_rock.photo_slideshow.core.webapi
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
-import org.fog_rock.photo_slideshow.core.entity.PhotoScope
+import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
+import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -14,12 +16,14 @@ import org.junit.Test
  */
 class GoogleSignInApiTest {
 
-    private val TAG = GoogleSignInApiTest::class.java.simpleName
+    companion object {
+        private val TAG = GoogleSignInApiTest::class.java.simpleName
+    }
 
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
     private val clientHolder =
-        GoogleSignInClientHolder(context, arrayOf(PhotoScope.READ_ONLY), true, true)
+        GoogleSignInClientHolder(context, listOf(PhotoScope.READ_ONLY), true, true)
 
     private val signInApi: GoogleSignInApi = GoogleSignInApiImpl(clientHolder)
 
@@ -32,7 +36,7 @@ class GoogleSignInApiTest {
             val result = runBlocking {
                 signInApi.requestSilentSignIn()
             }
-            assertEquals(GoogleSignInApi.Result.SUCCEEDED, result)
+            assertEquals(ApiResult.SUCCEEDED, result)
 
             val account = GoogleSignInApi.getSignedInAccount(context)
             Log.i(TAG, "[Account Result]\n" +
@@ -45,7 +49,7 @@ class GoogleSignInApiTest {
             val result = runBlocking {
                 signInApi.requestSilentSignIn()
             }
-            assertEquals(GoogleSignInApi.Result.FAILED, result)
+            assertEquals(ApiResult.FAILED, result)
         }
     }
 
@@ -58,7 +62,7 @@ class GoogleSignInApiTest {
             val result = runBlocking {
                 signInApi.requestSignOut()
             }
-            assertEquals(GoogleSignInApi.Result.SUCCEEDED, result)
+            assertEquals(ApiResult.SUCCEEDED, result)
         } else {
             // サインアウト状態なので、サインアウトの異常系になる.
             Log.i(TAG, "Current status is signed out. Abnormal case will be checked.")
@@ -66,7 +70,7 @@ class GoogleSignInApiTest {
             val result = runBlocking {
                 signInApi.requestSignOut()
             }
-            assertEquals(GoogleSignInApi.Result.FAILED, result)
+            assertEquals(ApiResult.FAILED, result)
         }
     }
 
@@ -79,7 +83,7 @@ class GoogleSignInApiTest {
             val result = runBlocking {
                 signInApi.requestRevokeAccess()
             }
-            assertEquals(GoogleSignInApi.Result.SUCCEEDED, result)
+            assertEquals(ApiResult.SUCCEEDED, result)
         } else {
             // サインアウト状態なので、アカウントアクセス破棄の異常系になる.
             Log.i(TAG, "Current status is signed out. Abnormal case will be checked.")
@@ -87,7 +91,7 @@ class GoogleSignInApiTest {
             val result = runBlocking {
                 signInApi.requestRevokeAccess()
             }
-            assertEquals(GoogleSignInApi.Result.FAILED, result)
+            assertEquals(ApiResult.FAILED, result)
         }
     }
 }

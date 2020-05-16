@@ -1,11 +1,11 @@
-package org.fog_rock.photo_slideshow.core.webapi
+package org.fog_rock.photo_slideshow.core.webapi.client
 
 import android.content.Context
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.core.entity.PhotoScope
+import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
 
 /**
  * GoogleSignInClientをシングルトンで保持するHolderクラス.

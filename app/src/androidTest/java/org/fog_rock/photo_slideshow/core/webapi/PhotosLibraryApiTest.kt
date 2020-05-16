@@ -4,6 +4,8 @@ import android.util.Log
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import kotlinx.coroutines.runBlocking
+import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 import org.junit.Before
 import org.junit.Test
@@ -15,6 +17,8 @@ import org.junit.Test
 class PhotosLibraryApiTest {
 
     companion object {
+        private val TAG = PhotosLibraryApiTest::class.java.simpleName
+
         /**
          * それぞれ必要な情報を適宜更新すること.
          */
@@ -30,13 +34,11 @@ class PhotosLibraryApiTest {
         private const val MEDIA_ITEM_ID3 = ""
     }
 
-    private val TAG = PhotosLibraryApiTest::class.java.simpleName
-
-    private val tokenInfo = GoogleOAuth2Api.TokenInfo(ACCESS_TOKEN, null, EXPIRED_ACCESS_TOKEN_TIME_MILLIS)
+    private val tokenInfo = TokenInfo(ACCESS_TOKEN, null, EXPIRED_ACCESS_TOKEN_TIME_MILLIS)
 
     private var clientHolder = PhotosLibraryClientHolder(tokenInfo)
 
-    private val photosApi = PhotosLibraryApiImpl(clientHolder)
+    private val photosApi: PhotosLibraryApi = PhotosLibraryApiImpl(clientHolder)
 
     /**
      * テスト前にアクセストークンが有効か確認する.

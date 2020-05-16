@@ -8,6 +8,7 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import org.fog_rock.photo_slideshow.core.file.AssetsFileReader
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
+import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -19,9 +20,9 @@ class GoogleOAuth2ApiImpl(
     private val fileReader: AssetsFileReader
 ): GoogleOAuth2Api {
 
-    private val TAG = GoogleOAuth2ApiImpl::class.java.simpleName
-
     companion object {
+        private val TAG = GoogleOAuth2ApiImpl::class.java.simpleName
+
         private const val CLIENT_SECRET_FILE = "client_secret.json"
         private const val JSON_KEY_WEB = "web"
         private const val JSON_KEY_CLIENT_ID = "client_id"
@@ -32,7 +33,7 @@ class GoogleOAuth2ApiImpl(
     private var clientSecret: String = ""
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    override suspend fun requestTokenInfoWithAuthCode(serverAuthCode: String): GoogleOAuth2Api.TokenInfo? {
+    override suspend fun requestTokenInfoWithAuthCode(serverAuthCode: String): TokenInfo? {
         if (!loadClientSecrets()) {
             Log.i(TAG, "Failed to load client secrets.")
             return null
@@ -42,7 +43,7 @@ class GoogleOAuth2ApiImpl(
             val response = GoogleAuthorizationCodeTokenRequest(
                 NetHttpTransport(), JacksonFactory(), clientId, clientSecret, serverAuthCode, ""
             ).execute()
-            return GoogleOAuth2Api.TokenInfo(response)
+            return TokenInfo(response)
         } catch (e: TokenResponseException) {
             Log.e(TAG, "Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
@@ -55,7 +56,7 @@ class GoogleOAuth2ApiImpl(
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    override suspend fun requestTokenInfoWithRefreshToken(refreshToken: String): GoogleOAuth2Api.TokenInfo? {
+    override suspend fun requestTokenInfoWithRefreshToken(refreshToken: String): TokenInfo? {
         if (!loadClientSecrets()) {
             Log.i(TAG, "Failed to load client secrets.")
             return null
@@ -65,7 +66,7 @@ class GoogleOAuth2ApiImpl(
             val response = GoogleRefreshTokenRequest(
                 NetHttpTransport(), JacksonFactory(), refreshToken, clientId, clientSecret
             ).execute()
-            return GoogleOAuth2Api.TokenInfo(response, refreshToken)
+            return TokenInfo(response, refreshToken)
         } catch (e: TokenResponseException) {
             Log.e(TAG, "Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")

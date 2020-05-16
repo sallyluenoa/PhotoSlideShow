@@ -6,13 +6,15 @@ import com.google.photos.library.v1.proto.SearchMediaItemsRequest
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryApi
-import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
 
 class PhotosLibraryApiImpl(
     private var clientHolder: PhotosLibraryClientHolder
 ): PhotosLibraryApi {
 
-    private val TAG = PhotosLibraryApiImpl::class.java.simpleName
+    companion object {
+        private val TAG = PhotosLibraryApiImpl::class.java.simpleName
+    }
 
     override fun updateClientHolder(clientHolder: PhotosLibraryClientHolder) {
         this.clientHolder = clientHolder

@@ -1,4 +1,4 @@
-package org.fog_rock.photo_slideshow.core.entity
+package org.fog_rock.photo_slideshow.core.webapi.entity
 
 import com.google.android.gms.common.api.Scope
 
