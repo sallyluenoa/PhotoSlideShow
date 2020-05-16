@@ -20,16 +20,16 @@ class GoogleSignInApiTest {
         private val TAG = GoogleSignInApiTest::class.java.simpleName
     }
 
-    private val context = InstrumentationRegistry.getInstrumentation().targetContext
+    private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
 
     private val clientHolder =
-        GoogleSignInClientHolder(context, listOf(PhotoScope.READ_ONLY), true, true)
+        GoogleSignInClientHolder(appContext, listOf(PhotoScope.READ_ONLY), true, true)
 
     private val signInApi: GoogleSignInApi = GoogleSignInApiImpl(clientHolder)
 
     @Test
     fun requestSilentSignIn() {
-        if (GoogleSignInApi.isSignedInAccount(context)) {
+        if (GoogleSignInApi.isSignedInAccount(appContext)) {
             // サインイン情報があるので、サイレントサインインの正常系が通る.
             Log.i(TAG, "Current status is signed in. Normal case will be checked.")
 
@@ -38,7 +38,7 @@ class GoogleSignInApiTest {
             }
             assertEquals(ApiResult.SUCCEEDED, result)
 
-            val account = GoogleSignInApi.getSignedInAccount(context)
+            val account = GoogleSignInApi.getSignedInAccount(appContext)
             Log.i(TAG, "[Account Result]\n" +
                     "Name: ${account?.displayName}\nEmail: ${account?.email}\n" +
                     "IdToken: ${account?.idToken}\nServerAuthCode:${account?.serverAuthCode}")
@@ -55,7 +55,7 @@ class GoogleSignInApiTest {
 
     @Test
     fun requestSignOut() {
-        if (GoogleSignInApi.isSignedInAccount(context)) {
+        if (GoogleSignInApi.isSignedInAccount(appContext)) {
             // サインイン情報があるので、サインアウトの正常系が通る.
             Log.i(TAG, "Current status is signed in. Normal case will be checked.")
 
@@ -76,7 +76,7 @@ class GoogleSignInApiTest {
 
     @Test
     fun requestRevokeAccess() {
-        if (GoogleSignInApi.isSignedInAccount(context)) {
+        if (GoogleSignInApi.isSignedInAccount(appContext)) {
             // サインイン情報があるので、アカウントアクセス破棄の正常系が通る.
             Log.i(TAG, "Current status is signed in. Normal case will be checked.")
 

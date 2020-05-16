@@ -1,12 +1,14 @@
 package org.fog_rock.photo_slideshow.core.webapi
 
 import android.util.Log
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import kotlinx.coroutines.runBlocking
 import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
+import org.fog_rock.photo_slideshow.test.R
 import org.junit.Before
 import org.junit.Test
 
@@ -18,23 +20,15 @@ class PhotosLibraryApiTest {
 
     companion object {
         private val TAG = PhotosLibraryApiTest::class.java.simpleName
-
-        /**
-         * それぞれ必要な情報を適宜更新すること.
-         */
-        private const val ACCESS_TOKEN = ""
-        private const val EXPIRED_ACCESS_TOKEN_TIME_MILLIS = 0L
-
-        private const val ALBUM_ID1 = ""
-        private const val ALBUM_ID2 = ""
-        private const val ALBUM_ID3 = ""
-
-        private const val MEDIA_ITEM_ID1 = ""
-        private const val MEDIA_ITEM_ID2 = ""
-        private const val MEDIA_ITEM_ID3 = ""
     }
 
-    private val tokenInfo = TokenInfo(ACCESS_TOKEN, null, EXPIRED_ACCESS_TOKEN_TIME_MILLIS)
+    private val testContext = InstrumentationRegistry.getInstrumentation().context
+
+    private val tokenInfo = TokenInfo(
+        testContext.getString(R.string.access_token),
+        null,
+        testContext.getString(R.string.expired_access_token_time_millis).toLong()
+    )
 
     private var clientHolder = PhotosLibraryClientHolder(tokenInfo)
 
@@ -52,7 +46,7 @@ class PhotosLibraryApiTest {
 
     @Test
     fun requestAlbum() {
-        val albumId = ALBUM_ID1
+        val albumId = testContext.getString(R.string.album_id_1)
         val album = runBlocking {
             photosApi.requestAlbum(albumId)
         }
@@ -61,7 +55,7 @@ class PhotosLibraryApiTest {
 
     @Test
     fun requestMediaItem() {
-        val mediaItemId = MEDIA_ITEM_ID1
+        val mediaItemId = testContext.getString(R.string.album_id_2)
         val mediaItem = runBlocking {
             photosApi.requestMediaItem(mediaItemId)
         }
@@ -71,9 +65,9 @@ class PhotosLibraryApiTest {
     @Test
     fun requestUpdateAlbums() {
         val albums = listOf(
-            generateAlbum(ALBUM_ID1),
-            generateAlbum(ALBUM_ID2),
-            generateAlbum(ALBUM_ID3)
+            generateAlbum(testContext.getString(R.string.album_id_1)),
+            generateAlbum(testContext.getString(R.string.album_id_2)),
+            generateAlbum(testContext.getString(R.string.album_id_3))
         )
         val newAlbums = runBlocking {
             photosApi.requestUpdateAlbums(albums)
@@ -86,9 +80,9 @@ class PhotosLibraryApiTest {
     @Test
     fun requestUpdateMediaItems() {
         val mediaItems = listOf(
-            generateMediaItem(MEDIA_ITEM_ID1),
-            generateMediaItem(MEDIA_ITEM_ID2),
-            generateMediaItem(MEDIA_ITEM_ID3)
+            generateMediaItem(testContext.getString(R.string.media_item_id_1)),
+            generateMediaItem(testContext.getString(R.string.media_item_id_2)),
+            generateMediaItem(testContext.getString(R.string.media_item_id_3))
         )
         val newMediaItems = runBlocking {
             photosApi.requestUpdateMediaItems(mediaItems)
@@ -111,7 +105,7 @@ class PhotosLibraryApiTest {
 
     @Test
     fun requestMediaItems() {
-        val album = generateAlbum(ALBUM_ID3)
+        val album = generateAlbum(testContext.getString(R.string.album_id_1))
         val mediaItems = runBlocking {
             photosApi.requestMediaItems(album)
         }
