@@ -8,7 +8,7 @@ import com.google.android.gms.common.api.Scope
  * + https://developers.google.com/identity/protocols/googlescopes#photoslibraryv1
  * + https://developers.google.com/photos/library/guides/authentication-authorization
  */
-enum class PhotoScope(val value: String) {
+enum class PhotoScope(private val value: String) {
     /**
      * Read and write access. (Doesn't include sharing.)
      */
@@ -34,15 +34,5 @@ enum class PhotoScope(val value: String) {
      */
     SHARING("https://www.googleapis.com/auth/photoslibrary.sharing");
 
-    companion object {
-
-        fun generateScope(scopes: Array<PhotoScope>): Scope {
-            var tmp = ""
-            scopes.forEach {
-                if (tmp.isNotEmpty()) tmp += " "
-                tmp += it.value
-            }
-            return Scope(tmp)
-        }
-    }
+    fun scope(): Scope = Scope(value)
 }
