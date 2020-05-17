@@ -6,31 +6,32 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
-import org.fog_rock.photo_slideshow.core.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
-import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInClientHolder
 
 class SplashInteractor(
     private val context: Context,
-    scopes: Array<PhotoScope>,
-    requestIdToken: Boolean,
-    requestServerAuthCode: Boolean,
+    private val signInApi: GoogleSignInApi,
     private val callback: SplashContract.InteractorCallback
-): SplashContract.Interactor, GoogleSignInApi.Callback {
+): SplashContract.Interactor {
 
     private val TAG = SplashInteractor::class.java.simpleName
-
-    private val clientHolder =
-        GoogleSignInClientHolder(context, scopes, requestIdToken, requestServerAuthCode)
-
-    private val signInApi =
-        GoogleSignInApi(context, clientHolder, this)
 
     override fun destroy() {
     }
 
-    override fun getClientHolder(): GoogleSignInClientHolder = clientHolder
+    override fun requestGoogleSilentSignIn() {
+        GlobalScope.launch(Dispatchers.Main) {
+            val account = withContext(Dispatchers.Default) {
+                signInApi.requestSilentSignIn()
+            }
+            callback.requestGoogleSilentSignInResult(account != null)
+        }
+    }
 
     override fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -47,11 +48,6 @@ class SplashInteractor(
         return true
     }
 
-    override fun requestGoogleSilentSignIn() = signInApi.requestSilentSignIn()
-
     override fun isSucceededGoogleUserSignIn(data: Intent?): Boolean =
-        signInApi.isSucceededUserSignIn(data)
-
-    override fun requestSilentSignInResult(isSucceeded: Boolean) =
-        callback.requestGoogleSilentSignInResult(isSucceeded)
+        GoogleSignInApi.isSucceededUserSignIn(data)
 }

@@ -1,4 +1,4 @@
-package org.fog_rock.photo_slideshow.core.entity
+package org.fog_rock.photo_slideshow.app.splash.entity
 
 import org.fog_rock.photo_slideshow.R
 
