@@ -2,24 +2,29 @@ package org.fog_rock.photo_slideshow.app.splash.presenter
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
 import org.fog_rock.photo_slideshow.app.splash.router.SplashRouter
-import org.fog_rock.photo_slideshow.core.entity.PhotoScope
-import org.fog_rock.photo_slideshow.core.entity.SignInRequest
+import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
+import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
+import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 
 class SplashPresenter(
+    private val context: Context,
     private val callback: SplashContract.PresenterCallback
 ): SplashContract.Presenter, SplashContract.InteractorCallback {
 
     private val TAG = SplashPresenter::class.java.simpleName
 
-    private val interactor: SplashContract.Interactor = SplashInteractor(
-        activity().applicationContext, arrayOf(PhotoScope.READ_ONLY),
-        false, true, this
-    )
+    private val clientHolder = GoogleSignInClientHolder(
+        context, listOf(PhotoScope.READ_ONLY), requestIdToken = false, requestServerAuthCode = true)
+
+    private val interactor: SplashContract.Interactor =
+        SplashInteractor(context, GoogleSignInApiImpl(clientHolder), this)
 
     private val router: SplashContract.Router = SplashRouter()
 
@@ -42,7 +47,7 @@ class SplashPresenter(
                     presentSequence(SignInRequest.COMPLETED)
                 } else {
                     Log.i(TAG, "Failed google sign in.")
-                    callback.failedSignIn(SignInRequest.GOOGLE_SIGN_IN)
+                    callback.requestSignInResult(SignInRequest.GOOGLE_SIGN_IN)
                 }
             }
             else -> {
@@ -61,7 +66,7 @@ class SplashPresenter(
                     presentSequence(SignInRequest.GOOGLE_SIGN_IN)
                 } else {
                     Log.i(TAG, "Runtime permissions is denied.")
-                    callback.failedSignIn(SignInRequest.RUNTIME_PERMISSIONS)
+                    callback.requestSignInResult(SignInRequest.RUNTIME_PERMISSIONS)
                 }
             }
             else -> {
@@ -76,7 +81,7 @@ class SplashPresenter(
             presentSequence(SignInRequest.COMPLETED)
         } else {
             Log.i(TAG, "Failed silent sign in. Might be signed out. Present user sign in.")
-            router.startGoogleSignInActivity(activity(), interactor.getClientHolder(), SignInRequest.GOOGLE_SIGN_IN.code)
+            router.startGoogleSignInActivity(activity(), clientHolder, SignInRequest.GOOGLE_SIGN_IN.code)
         }
     }
 
@@ -126,6 +131,6 @@ class SplashPresenter(
      */
     private fun presentMainActivity() {
         router.startMainActivity(activity())
-        callback.succeededSignIn()
+        callback.requestSignInResult(SignInRequest.COMPLETED)
     }
 }

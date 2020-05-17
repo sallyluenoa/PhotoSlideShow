@@ -2,104 +2,53 @@ package org.fog_rock.photo_slideshow.core.webapi
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.api.ApiException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.fog_rock.photo_slideshow.core.entity.PhotoScope
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 /**
  * Googleサインインに関連するAPI.
  */
-class GoogleSignInApi(
-    private val context: Context,
-    private val clientHolder: GoogleSignInClientHolder,
-    private val callback: Callback
-) {
+interface GoogleSignInApi {
 
-    private val TAG = GoogleSignInApi::class.java.simpleName
-
-    interface Callback {
+    companion object {
+        /**
+         * 現在Googleアカウントでサインインしているか確認.
+         */
+        fun isSignedInAccount(context: Context): Boolean =
+            getSignedInAccount(context) != null
 
         /**
-         * サイレントサインインを要求に成功したか.
-         * @see requestSilentSignIn
+         * 現在サインインしているGoogleアカウント取得.
          */
-        fun requestSilentSignInResult(isSucceeded: Boolean)
+        fun getSignedInAccount(context: Context): GoogleSignInAccount? =
+            GoogleSignIn.getLastSignedInAccount(context)
+
+        /**
+         * Googleアカウントでのユーザーサインインに成功したか.
+         */
+        fun isSucceededUserSignIn(data: Intent?): Boolean =
+            GoogleSignIn.getSignedInAccountFromIntent(data).isSuccessful
     }
-
-    constructor(
-        context: Context, scopes: Array<PhotoScope>,
-        requestIdToken: Boolean, requestServerAuthCode: Boolean, callback: Callback
-    ): this(
-        context, GoogleSignInClientHolder(context, scopes, requestIdToken, requestServerAuthCode), callback
-    )
-
-    /**
-     * Googleアカウントでのユーザーサインインに成功したか.
-     */
-    fun isSucceededUserSignIn(data: Intent?): Boolean =
-        GoogleSignIn.getSignedInAccountFromIntent(data).isSuccessful
 
     /**
      * サイレントサインイン要求.
+     * コルーチン内で呼び出すこと.
      * https://developers.google.com/identity/sign-in/android/backend-auth
-     * @see Callback.requestSilentSignInResult
      */
-    fun requestSilentSignIn() {
-        GlobalScope.launch(Dispatchers.Main) {
-            if (GoogleSignIn.getLastSignedInAccount(context) == null) {
-                Log.i(TAG, "Sign out now.")
-                callback.requestSilentSignInResult(false)
-                return@launch
-            }
-            if (!withContext(Dispatchers.Default) { silentSignIn() }) {
-                Log.e(TAG, "Failed to silent sign in.")
-                callback.requestSilentSignInResult(false)
-                return@launch
-            }
-            Log.i(TAG, "Succeeded to silent sign in.")
-            callback.requestSilentSignInResult(true)
-        }
-    }
+    suspend fun requestSilentSignIn(): ApiResult
 
     /**
-     * サイレントサインイン.
-     * Suspendメソッドなので、Coroutine内で呼び出すこと.
+     * サインアウト要求.
+     * コルーチン内で呼び出すこと.
+     * https://developers.google.com/identity/sign-in/android/disconnect
      */
-    private suspend fun silentSignIn(): Boolean =
-        suspendCoroutine { continuation ->
-            clientHolder.client.silentSignIn().apply {
-                addOnCompleteListener {
-                    Log.i(TAG, "Completed to silent sign in.")
-                    try {
-                        val account = it.getResult(ApiException::class.java) ?: run {
-                            Log.e(TAG, "Failed to get account from result task.")
-                            continuation.resume(false)
-                            return@addOnCompleteListener
-                        }
-                        Log.i(TAG, "Succeeded to get account from result task.")
-                        continuation.resume(true)
-                    } catch (e: ApiException) {
-                        e.printStackTrace()
-                        continuation.resume(false)
-                    }
-                }
-                addOnFailureListener {
-                    Log.e(TAG, "Failed to silent sign in.")
-                    it.printStackTrace()
-                    continuation.resume(false)
-                }
-                addOnCanceledListener {
-                    Log.e(TAG, "Canceled to silent sign in.")
-                    continuation.resume(false)
-                }
-            }
-            return@suspendCoroutine
-        }
+    suspend fun requestSignOut(): ApiResult
+
+    /**
+     * アカウントアクセス破棄要求.
+     * コルーチン内で呼び出すこと.
+     * https://developers.google.com/identity/sign-in/android/disconnect
+     */
+    suspend fun requestRevokeAccess(): ApiResult
 }

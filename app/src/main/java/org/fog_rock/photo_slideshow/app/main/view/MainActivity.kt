@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
 
         presenter = MainPresenter(this)
-        presenter.requestAlbums()
+//        presenter.requestAlbums()
     }
 
     override fun onDestroy() {

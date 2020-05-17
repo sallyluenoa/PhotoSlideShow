@@ -28,8 +28,7 @@ org.fog_rock.photo_slideshow
   │  ├ module: UIに関連するライブラリモジュール  
   │  ├ select: アルバム選択画面
   │  └ splash: 起動画面
-  └ core: ライブラリやデータ等のサポートモジュール
-     ├ entity: データクラス
+  └ core: ライブラリやインターフェース等のサポートモジュール
      ├ file: ファイル関連の処理
      ├ math: Mathライブラリを活用した処理
      ├ viper: VIPERモジュールインターフェース

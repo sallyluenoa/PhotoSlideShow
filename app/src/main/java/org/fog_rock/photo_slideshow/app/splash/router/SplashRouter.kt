@@ -5,7 +5,7 @@ import android.content.Intent
 import androidx.core.app.ActivityCompat
 import org.fog_rock.photo_slideshow.app.main.view.MainActivity
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
-import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
 
 class SplashRouter : SplashContract.Router {
     override fun startRuntimePermissions(activity: Activity, permissions: Array<String>, requestCode: Int) {

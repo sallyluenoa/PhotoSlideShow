@@ -12,7 +12,7 @@ import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.presenter.SplashPresenter
-import org.fog_rock.photo_slideshow.core.entity.SignInRequest
+import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 
 class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, AppDialogFragment.Callback {
 
@@ -30,7 +30,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         setContentView(R.layout.activity_splash)
         replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.LOGO))
 
-        presenter = SplashPresenter(this)
+        presenter = SplashPresenter(this, this)
 
         Handler().postDelayed({
             Log.i(TAG, "Request sign in.")
@@ -64,19 +64,19 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
 
     override fun getActivity(): Activity = this
 
-    override fun succeededSignIn() {
-        Log.i(TAG, "Succeeded sign in.")
-        finish()
-    }
+    override fun requestSignInResult(request: SignInRequest) {
+        Log.i(TAG, "requestSignInResult: $request")
 
-    override fun failedSignIn(request: SignInRequest) {
-        Log.i(TAG, "Failed sign in.")
-        AppDialogFragment.Builder(this).apply {
-            setTitle(request.failedTitle)
-            setMessage(request.failedMessage)
-            setPositiveLabel(R.string.ok)
-            setCancelable(false)
-        }.show(fragmentManager, request.code)
+        if (request == SignInRequest.COMPLETED) {
+            finish()
+        } else {
+            AppDialogFragment.Builder(this).apply {
+                setTitle(request.failedTitle)
+                setMessage(request.failedMessage)
+                setPositiveLabel(R.string.ok)
+                setCancelable(false)
+            }.show(fragmentManager, request.code)
+        }
     }
 
     /**
