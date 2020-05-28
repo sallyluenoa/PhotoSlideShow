@@ -1,0 +1,99 @@
+@startuml
+[-> View
+activate View
+View -> View++: Show app logo 2 secs.
+
+View -> Presenter++: requestSignIn
+View--
+
+== Runtime Permissions ==
+
+Presenter -> Interactor++: isGrantedRuntimePermissions
+return Boolean
+
+opt !isGrantedRuntimePermissions
+  Presenter -> Router: startRuntimePermissions
+  [--> View
+  View --> Presenter: evaluateRequestPermissionsResult
+
+  Presenter -> Interactor++: isGrantedRuntimePermissions  
+  return Boolean
+
+  opt !isGrantedRuntimePermissions
+    View <-- Presenter: requestSignInResult
+    View -> View: Show error dialog
+  end
+end
+
+== Google Sign In ==
+
+Presenter -> Interactor++: isGoogleSignedIn
+  Interactor -> GoogleSignInApi++: isSignedInAccount
+  return Boolean
+return Boolean
+
+alt isGoogleSignedIn
+  Presenter -> Interactor++: requestGoogleSilentSignIn
+    Interactor -> GoogleSignInApi++: requestSilentSignIn
+    return ApiResult
+  return requestGoogleSilentSignInResult
+
+  opt ApiResult!=Succeeded
+    View <-- Presenter: requestSignInResult
+    View -> View: Show error dialog
+  end
+
+else
+  Presenter -> Router: startGoogleSignInActivity
+  [--> View
+  View --> Presenter: evaluateActivityResult
+
+  Presenter -> Interactor++: isSucceededGoogleUserSignIn
+    Interactor -> GoogleSignInApi++: isSucceededUserSignIn
+    return Boolean  
+  return Boolean
+
+  opt !isSucceededGoogleUserSignIn
+    View <-- Presenter: requestSignInResult
+    View -> View: Show error dialog
+  end
+end
+
+== Update User Info ==
+
+Presenter -> Interactor++: requestUpdateUserInfo
+  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithAuthCode
+  return TokenInfo
+
+alt TokenInfo.refreshToken!=null
+  Interactor -> DataBase: updateUserInfo
+
+else
+  Interactor -> DataBase++: findUserInfo
+  return UserInfo
+
+  alt UserInfo.refreshToken!=null
+    Interactor -> DataBase: updateUserInfo
+  else
+    Interactor -> GoogleSignInApi++: revokeAccess
+    return ApiResult
+    Presenter <-- Interactor: requestUpdateUserInfoResult
+    View <-- Presenter: requestSignInResult
+    View -> View: Show error dialog
+  end
+
+end
+
+return requestUpdateUserInfoResult
+
+====
+
+Presenter -> Router: startMainActivity
+View <-- Presenter--: requestSignInResult
+
+View -> Presenter++: destroy
+Presenter -> Interactor!!: destroy
+destroy Presenter
+destroy View
+
+@enduml

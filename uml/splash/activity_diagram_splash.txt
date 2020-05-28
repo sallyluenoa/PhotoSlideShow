@@ -1,0 +1,70 @@
+@startuml
+start
+:Show app logo 2 secs;
+
+(A)
+partition RuntimePermission {
+  if (IsGrantedRuntimePermissions?) then (YES)
+  else (NO)
+    :StartRuntimePermissions;
+
+    if (IsGrantedRuntimePermissions?) then (YES)
+    else (NO)
+      (E)
+      detach
+    endif
+  endif
+}
+
+partition GoogleSignIn {
+  if (IsSignedInAccount?) then (YES)
+    :RequestSilentSignIn;
+
+    if (Is succeeded?) then (YES)
+    else (NO)
+      (E)
+      detach
+    endif
+
+  else (NO)
+    :StartGoogleSignInActivity;
+
+    if (Is succeeded?) then (YES)
+    else (NO)
+      (E)
+      detach
+    endif
+
+  endif
+}
+
+partition GetRefreshToken {
+  :RequestTokenInfoWithAuthCode;
+
+  if (TokenInfo.RefreshToken is not null?) then (YES)
+    :UpdateUserInfo;
+  else (NO)
+    :FindUserInfo;
+    if (UserInfo.refreshToken is not null?) then (YES)
+      :UpdateUserInfo;
+    else (NO)
+      :RevokeAccess;
+      (E)
+      detach
+    endif
+  endif
+}
+
+:StartMainActivity;
+end
+
+partition Error {
+  (E)
+  :Show error dialog;
+  if (Retry sign in?) then (YES)
+    (A)
+  else (NO)
+    end
+  endif
+}
+@enduml
