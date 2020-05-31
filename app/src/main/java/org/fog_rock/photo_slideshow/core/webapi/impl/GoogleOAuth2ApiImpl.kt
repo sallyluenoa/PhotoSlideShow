@@ -13,9 +13,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 
-/**
- * Google OAuth2 認証に関連するAPI
- */
 class GoogleOAuth2ApiImpl(
     private val fileReader: AssetsFileReader
 ): GoogleOAuth2Api {
@@ -43,13 +40,16 @@ class GoogleOAuth2ApiImpl(
             val response = GoogleAuthorizationCodeTokenRequest(
                 NetHttpTransport(), JacksonFactory(), clientId, clientSecret, serverAuthCode, ""
             ).execute()
-            return TokenInfo(response)
+            return TokenInfo.newTokenInfo(response)
         } catch (e: TokenResponseException) {
             Log.e(TAG, "Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
             e.printStackTrace()
         } catch (e: IOException) {
             Log.e(TAG, "Failed to execute request.")
+            e.printStackTrace()
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "Failed to get TokenInfo.")
             e.printStackTrace()
         }
         return null
@@ -66,7 +66,7 @@ class GoogleOAuth2ApiImpl(
             val response = GoogleRefreshTokenRequest(
                 NetHttpTransport(), JacksonFactory(), refreshToken, clientId, clientSecret
             ).execute()
-            return TokenInfo(response, refreshToken)
+            return TokenInfo.newTokenInfo(response, refreshToken)
         } catch (e: TokenResponseException) {
             Log.e(TAG, "Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
