@@ -38,20 +38,23 @@ partition GoogleSignIn {
   endif
 }
 
-partition GetRefreshToken {
-  :RequestTokenInfoWithAuthCode;
+partition UpdateUserInfo {
+  :FindUserInfo from Database;
 
-  if (TokenInfo.RefreshToken is not null?) then (YES)
-    :UpdateUserInfo;
+  if (Is found userInfo?) then (YES)
+    :RequestTokenInfoWithRefreshToken;
+  endif
+
+  if (Is succeeded to get tokenInfo?) then (NO)
+    :RequestTokenInfoWithAuthCode;
+  endif
+
+  if (Is susceeded to get tokenInfo?) then (YES)
+    :UpdateUserInfo to Database;
   else (NO)
-    :FindUserInfo;
-    if (UserInfo.refreshToken is not null?) then (YES)
-      :UpdateUserInfo;
-    else (NO)
-      :RevokeAccess;
-      (E)
-      detach
-    endif
+    :RevokeAccess;
+    (E)
+    detach
   endif
 }
 

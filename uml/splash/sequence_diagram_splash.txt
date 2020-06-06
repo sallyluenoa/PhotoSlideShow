@@ -1,4 +1,14 @@
 @startuml
+participant View
+participant Presenter
+participant Interactor
+participant Router
+
+participant GoogleSignInApi
+participant GoogleOAuth2Api
+participant UserInfoDatabase
+
+
 [-> View
 activate View
 View -> View++: Show app logo 2 secs.
@@ -20,8 +30,9 @@ opt !isGrantedRuntimePermissions
   return Boolean
 
   opt !isGrantedRuntimePermissions
-    View <-- Presenter: requestSignInResult
-    View -> View: Show error dialog
+    View <-- Presenter: Callback#requestSignInResult
+    View -> View++: Show error dialog
+    destroy View
   end
 end
 
@@ -36,11 +47,12 @@ alt isGoogleSignedIn
   Presenter -> Interactor++: requestGoogleSilentSignIn
     Interactor -> GoogleSignInApi++: requestSilentSignIn
     return ApiResult
-  return requestGoogleSilentSignInResult
+  return Callback#requestGoogleSilentSignInResult
 
   opt ApiResult!=Succeeded
-    View <-- Presenter: requestSignInResult
-    View -> View: Show error dialog
+    View <-- Presenter: Callback#requestSignInResult
+    View -> View++: Show error dialog
+    destroy View
   end
 
 else
@@ -54,42 +66,45 @@ else
   return Boolean
 
   opt !isSucceededGoogleUserSignIn
-    View <-- Presenter: requestSignInResult
-    View -> View: Show error dialog
+    View <-- Presenter: Callback#requestSignInResult
+    View -> View++: Show error dialog
+    destroy View
   end
 end
 
-== Update User Info ==
+== Update UserInfo ==
 
 Presenter -> Interactor++: requestUpdateUserInfo
-  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithAuthCode
+
+Interactor -> UserInfoDatabase++: find
+return UserInfo
+
+opt UserInfo!=null
+  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithRefreshToken
   return TokenInfo
-
-alt TokenInfo.refreshToken!=null
-  Interactor -> DataBase: updateUserInfo
-
-else
-  Interactor -> DataBase++: findUserInfo
-  return UserInfo
-
-  alt UserInfo.refreshToken!=null
-    Interactor -> DataBase: updateUserInfo
-  else
-    Interactor -> GoogleSignInApi++: revokeAccess
-    return ApiResult
-    Presenter <-- Interactor: requestUpdateUserInfoResult
-    View <-- Presenter: requestSignInResult
-    View -> View: Show error dialog
-  end
-
 end
 
-return requestUpdateUserInfoResult
+opt UserInfo==null or TokenInfo==null
+  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithAuthCode
+  return TokenInfo
+end
+
+opt TokenInfo==null
+  Interactor -> GoogleSignInApi++: revokeAccess
+  return ApiResult
+  Presenter <-- Interactor: Callback#requestUpdateUserInfoResult
+  View <-- Presenter: Callback#requestSignInResult
+  View -> View++: Show error dialog
+  destroy View
+end
+
+Interactor -> UserInfoDatabase: update
+Presenter <-- Interactor--: Callback#requestUpdateUserInfoResult
 
 ====
 
 Presenter -> Router: startMainActivity
-View <-- Presenter--: requestSignInResult
+View <-- Presenter--: Callback#requestSignInResult
 
 View -> Presenter++: destroy
 Presenter -> Interactor!!: destroy

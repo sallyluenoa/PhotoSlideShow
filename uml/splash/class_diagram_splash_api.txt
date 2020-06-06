@@ -46,16 +46,16 @@ namespace core.webapi {
 
 namespace core.database {
   interface UserInfoDatabase {
-    + addUserInfo()
-    + deleteUserInfo()
-    + updateUserInfo()
-    + findUserInfo()
+    + update(email: String, tokenInfo: TokenInfo): Boolean
+    + delete(email: String)
+    + find(email: String): UserInfo?
+    + getAll(): List<UserInfo>
   }
 
   namespace entity {
     class UserInfo {
-      + id: String
-      + googleAcount: String
+      + id: Long
+      + emailAddress: String
       + accessToken: String
       + refreshToken: String
       + expiredAccessTokenTimeMillis: Long
