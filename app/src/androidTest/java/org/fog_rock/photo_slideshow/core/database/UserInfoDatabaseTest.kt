@@ -1,10 +1,10 @@
 package org.fog_rock.photo_slideshow.core.database
 
 import android.util.Log
-import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
 import org.fog_rock.photo_slideshow.core.database.impl.UserInfoDatabaseImpl
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
+import org.fog_rock.photo_slideshow.test.TestModuleGenerator
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -26,12 +26,10 @@ class UserInfoDatabaseTest {
         private val TAG = UserInfoDatabaseTest::class.java.simpleName
     }
 
-    private val context = InstrumentationRegistry.getInstrumentation().context
-
     private val tokenInfo1 = TokenInfo(ACCESS_TOKEN1, REFRESH_TOKEN1, EXPIRED_TIME_MILLIS1)
     private val tokenInfo2 = TokenInfo(ACCESS_TOKEN2, REFRESH_TOKEN2, EXPIRED_TIME_MILLIS2)
 
-    private val database: UserInfoDatabase = UserInfoDatabaseImpl(context)
+    private val database: UserInfoDatabase = UserInfoDatabaseImpl(TestModuleGenerator.testContext())
 
     @Before
     fun configDatabaseBefore() = showDatabase()

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="client_id" translatable="false"></string>
+    <string name="client_secret" translatable="false"></string>
+
     <string name="access_token" translatable="false"></string>
+    <string name="refresh_token" translatable="false"></string>
     <string name="expired_access_token_time_millis" translatable="false"></string>
 
     <string name="album_id_1" translatable="false"></string>

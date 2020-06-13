@@ -1,14 +1,13 @@
 package org.fog_rock.photo_slideshow.core.webapi
 
 import android.util.Log
-import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.runBlocking
-import org.fog_rock.photo_slideshow.test.R
-import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.file.AssetsFileReader
 import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
+import org.fog_rock.photo_slideshow.test.TestModuleGenerator
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 
@@ -22,14 +21,8 @@ class GoogleOAuth2ApiTest {
         private val TAG = GoogleOAuth2ApiTest::class.java.simpleName
     }
 
-    private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-    private val testContext = InstrumentationRegistry.getInstrumentation().context
-
     private val fileReader = object : AssetsFileReader {
-        override fun read(fileName: String): String? = "{\"web\":{" +
-                "\"client_id\":\"${testContext.getString(R.string.client_id)}\"," +
-                "\"client_secret\":\"${testContext.getString(R.string.client_secret)}\"" +
-                "}}"
+        override fun read(fileName: String): String? = TestModuleGenerator.webClientSecret()
     }
 
     private val oauth2Api: GoogleOAuth2Api = GoogleOAuth2ApiImpl(fileReader)
@@ -38,6 +31,7 @@ class GoogleOAuth2ApiTest {
     fun requestTokenInfoWithAuthCode() {
         // 毎回新しい ServerAuthCode が必要なので、前処理として ServerAuthCode を取得する.
         val serverAuthCode = runBlocking {
+            val appContext = TestModuleGenerator.appContext()
             val signInApi = GoogleSignInApiImpl(
                 GoogleSignInClientHolder(appContext, listOf(PhotoScope.READ_ONLY), false, true)
             )
@@ -61,7 +55,8 @@ class GoogleOAuth2ApiTest {
     @Test
     fun requestTokenInfoWithRefreshToken() {
         val tokenInfo = runBlocking {
-            oauth2Api.requestTokenInfoWithRefreshToken(testContext.getString(R.string.refresh_token))
+            val refreshToken = TestModuleGenerator.tokenInfo().refreshToken
+            oauth2Api.requestTokenInfoWithRefreshToken(refreshToken)
         }
         assertNotNull(tokenInfo)
 
