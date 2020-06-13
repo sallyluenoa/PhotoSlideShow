@@ -17,9 +17,7 @@ class UserInfoDatabaseImpl(context: Context): UserInfoDatabase {
         "userinfo_database"
     ).build()
 
-    override fun toString(): String = getAll().toString()
-
-    override fun update(email: String, tokenInfo: TokenInfo): Boolean {
+    override suspend fun update(email: String, tokenInfo: TokenInfo): Boolean {
         val userInfo = find(email) ?: run {
             // データが見つからない. 新規追加.
             return try {
@@ -36,16 +34,16 @@ class UserInfoDatabaseImpl(context: Context): UserInfoDatabase {
         return true
     }
 
-    override fun delete(email: String) {
+    override suspend fun delete(email: String) {
         val dao = database.dao()
         val usersInfo = dao.find(email)
         usersInfo.forEach { dao.delete(it) }
     }
 
-    override fun find(email: String): UserInfo? {
+    override suspend fun find(email: String): UserInfo? {
         val usersInfo = database.dao().find(email)
         return if (!usersInfo.isNullOrEmpty()) usersInfo[0] else null
     }
 
-    override fun getAll(): List<UserInfo> = database.dao().getAll()
+    override suspend fun getAll(): List<UserInfo> = database.dao().getAll()
 }
