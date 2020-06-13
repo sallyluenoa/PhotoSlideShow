@@ -6,7 +6,7 @@ import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
-import org.fog_rock.photo_slideshow.test.TestModuleGenerator
+import org.fog_rock.photo_slideshow.test.AndroidTestModuleGenerator
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -20,7 +20,7 @@ class GoogleSignInApiTest {
         private val TAG = GoogleSignInApiTest::class.java.simpleName
     }
 
-    private val appContext = TestModuleGenerator.appContext()
+    private val appContext = AndroidTestModuleGenerator.appContext()
 
     private val clientHolder =
         GoogleSignInClientHolder(appContext, listOf(PhotoScope.READ_ONLY), true, true)

@@ -7,7 +7,7 @@ import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
-import org.fog_rock.photo_slideshow.test.TestModuleGenerator
+import org.fog_rock.photo_slideshow.test.AndroidTestModuleGenerator
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 
@@ -22,7 +22,7 @@ class GoogleOAuth2ApiTest {
     }
 
     private val fileReader = object : AssetsFileReader {
-        override fun read(fileName: String): String? = TestModuleGenerator.webClientSecret()
+        override fun read(fileName: String): String? = AndroidTestModuleGenerator.webClientSecret()
     }
 
     private val oauth2Api: GoogleOAuth2Api = GoogleOAuth2ApiImpl(fileReader)
@@ -31,7 +31,7 @@ class GoogleOAuth2ApiTest {
     fun requestTokenInfoWithAuthCode() {
         // 毎回新しい ServerAuthCode が必要なので、前処理として ServerAuthCode を取得する.
         val serverAuthCode = runBlocking {
-            val appContext = TestModuleGenerator.appContext()
+            val appContext = AndroidTestModuleGenerator.appContext()
             val signInApi = GoogleSignInApiImpl(
                 GoogleSignInClientHolder(appContext, listOf(PhotoScope.READ_ONLY), false, true)
             )
@@ -55,7 +55,7 @@ class GoogleOAuth2ApiTest {
     @Test
     fun requestTokenInfoWithRefreshToken() {
         val tokenInfo = runBlocking {
-            val refreshToken = TestModuleGenerator.tokenInfo().refreshToken
+            val refreshToken = AndroidTestModuleGenerator.tokenInfo().refreshToken
             oauth2Api.requestTokenInfoWithRefreshToken(refreshToken)
         }
         assertNotNull(tokenInfo)

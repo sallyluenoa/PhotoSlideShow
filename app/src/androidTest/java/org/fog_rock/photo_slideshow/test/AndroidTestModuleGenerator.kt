@@ -6,7 +6,7 @@ import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
-class TestModuleGenerator {
+class AndroidTestModuleGenerator {
 
     companion object {
 

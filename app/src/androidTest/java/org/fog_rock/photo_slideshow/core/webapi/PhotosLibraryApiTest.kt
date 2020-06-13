@@ -6,7 +6,7 @@ import com.google.photos.types.proto.MediaItem
 import kotlinx.coroutines.runBlocking
 import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
-import org.fog_rock.photo_slideshow.test.TestModuleGenerator
+import org.fog_rock.photo_slideshow.test.AndroidTestModuleGenerator
 import org.junit.Before
 import org.junit.Test
 
@@ -20,7 +20,7 @@ class PhotosLibraryApiTest {
         private val TAG = PhotosLibraryApiTest::class.java.simpleName
     }
 
-    private var clientHolder = PhotosLibraryClientHolder(TestModuleGenerator.tokenInfo())
+    private var clientHolder = PhotosLibraryClientHolder(AndroidTestModuleGenerator.tokenInfo())
 
     private val photosApi: PhotosLibraryApi = PhotosLibraryApiImpl(clientHolder)
 
@@ -37,7 +37,7 @@ class PhotosLibraryApiTest {
     @Test
     fun requestAlbum() {
         val album = runBlocking {
-            photosApi.requestAlbum(TestModuleGenerator.albumId())
+            photosApi.requestAlbum(AndroidTestModuleGenerator.albumId())
         }
         showAlbum(album)
     }
@@ -45,7 +45,7 @@ class PhotosLibraryApiTest {
     @Test
     fun requestMediaItem() {
         val mediaItem = runBlocking {
-            photosApi.requestMediaItem(TestModuleGenerator.mediaItemId())
+            photosApi.requestMediaItem(AndroidTestModuleGenerator.mediaItemId())
         }
         showMediaItem(mediaItem)
     }
@@ -54,9 +54,9 @@ class PhotosLibraryApiTest {
     fun requestUpdateAlbums() {
         val newAlbums = runBlocking {
             val albums = listOf(
-                TestModuleGenerator.album(1),
-                TestModuleGenerator.album(2),
-                TestModuleGenerator.album(3)
+                AndroidTestModuleGenerator.album(1),
+                AndroidTestModuleGenerator.album(2),
+                AndroidTestModuleGenerator.album(3)
             )
             photosApi.requestUpdateAlbums(albums)
         }
@@ -67,9 +67,9 @@ class PhotosLibraryApiTest {
     fun requestUpdateMediaItems() {
         val newMediaItems = runBlocking {
             val mediaItems = listOf(
-                TestModuleGenerator.mediaItem(1),
-                TestModuleGenerator.mediaItem(2),
-                TestModuleGenerator.mediaItem(3)
+                AndroidTestModuleGenerator.mediaItem(1),
+                AndroidTestModuleGenerator.mediaItem(2),
+                AndroidTestModuleGenerator.mediaItem(3)
             )
             photosApi.requestUpdateMediaItems(mediaItems)
         }
@@ -88,7 +88,7 @@ class PhotosLibraryApiTest {
     @Test
     fun requestMediaItems() {
         val mediaItems = runBlocking {
-            photosApi.requestMediaItems(TestModuleGenerator.album())
+            photosApi.requestMediaItems(AndroidTestModuleGenerator.album())
         }
         Log.i(TAG, "[MediaItems Result] Count: ${mediaItems.size}")
         mediaItems.forEach {

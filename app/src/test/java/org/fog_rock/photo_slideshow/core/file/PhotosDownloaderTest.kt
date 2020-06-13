@@ -3,7 +3,7 @@ package org.fog_rock.photo_slideshow.core.file
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.fog_rock.photo_slideshow.core.file.impl.PhotosDownloaderImpl
-import org.fog_rock.photo_slideshow.core.webapi.PhotosGenerator
+import org.fog_rock.photo_slideshow.test.TestModuleGenerator
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -38,19 +38,19 @@ class PhotosDownloaderTest {
 
         val mediaItems = listOf(
             // 正常系.
-            PhotosGenerator.generateMediaItem("sample1.png", "https://example.com/example", PhotosGenerator.Type.PHOTO, WIDTH, HEIGHT),
+            TestModuleGenerator.mediaItem("sample1.png", "https://example.com/example", TestModuleGenerator.Type.PHOTO, WIDTH, HEIGHT),
             // 正常系.
-            PhotosGenerator.generateMediaItem("sample2.jpg",  "https://example.com/example", PhotosGenerator.Type.PHOTO, WIDTH, HEIGHT),
+            TestModuleGenerator.mediaItem("sample2.jpg",  "https://example.com/example", TestModuleGenerator.Type.PHOTO, WIDTH, HEIGHT),
             // 正常系.
-            PhotosGenerator.generateMediaItem("sample3.PNG", "https://example.com/example", PhotosGenerator.Type.PHOTO, WIDTH, HEIGHT),
+            TestModuleGenerator.mediaItem("sample3.PNG", "https://example.com/example", TestModuleGenerator.Type.PHOTO, WIDTH, HEIGHT),
             // 正常系.
-            PhotosGenerator.generateMediaItem("sample4.jpeg",  "https://example.com/example", PhotosGenerator.Type.PHOTO, WIDTH, HEIGHT),
+            TestModuleGenerator.mediaItem("sample4.jpeg",  "https://example.com/example", TestModuleGenerator.Type.PHOTO, WIDTH, HEIGHT),
             // 異常系: メタデータをもたない.
-            PhotosGenerator.generateMediaItem("sample5.txt", "https://example.com/example", null),
+            TestModuleGenerator.mediaItem("sample5.txt", "https://example.com/example", null),
             // 異常系: データタイプがビデオ.
-            PhotosGenerator.generateMediaItem("sample6.mp4", "https://example.com/example", PhotosGenerator.Type.VIDEO, WIDTH, HEIGHT),
+            TestModuleGenerator.mediaItem("sample6.mp4", "https://example.com/example", TestModuleGenerator.Type.VIDEO, WIDTH, HEIGHT),
             // 異常系: URLフォーマットが不正.
-            PhotosGenerator.generateMediaItem("sample7.jpg", "example.com/example", PhotosGenerator.Type.PHOTO, WIDTH, HEIGHT)
+            TestModuleGenerator.mediaItem("sample7.jpg", "example.com/example", TestModuleGenerator.Type.PHOTO, WIDTH, HEIGHT)
         )
 
         // 正常系
