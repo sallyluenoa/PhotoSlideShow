@@ -11,14 +11,16 @@ import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
-import org.fog_rock.photo_slideshow.app.splash.presenter.SplashPresenter
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
+import org.fog_rock.photo_slideshow.app.splash.presenter.SplashPresenter
 
 class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, AppDialogFragment.Callback {
 
-    private val TAG = SplashActivity::class.java.simpleName
+    companion object {
+        private val TAG = SplashActivity::class.java.simpleName
 
-    private val SHOW_LOGO_TIME_MILLIS = 2000L
+        private const val SHOW_LOGO_TIME_MILLIS = 2000L
+    }
 
     private val fragmentManager = supportFragmentManager
 
@@ -33,10 +35,8 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         presenter = SplashPresenter(this, this)
 
         Handler().postDelayed({
-            Log.i(TAG, "Request sign in.")
-
             replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.EMPTY))
-            presenter.requestSignIn()
+            requestSignIn()
         }, SHOW_LOGO_TIME_MILLIS)
     }
 
@@ -59,7 +59,11 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
     }
 
     override fun onDialogResult(requestCode: Int, resultCode: Int, data: Intent) {
-        finish()
+        if (resultCode == AppDialogFragment.BUTTON_POSITIVE) {
+            requestSignIn()
+        } else {
+            finish()
+        }
     }
 
     override fun getActivity(): Activity = this
@@ -73,7 +77,8 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
             AppDialogFragment.Builder(this).apply {
                 setTitle(request.failedTitle)
                 setMessage(request.failedMessage)
-                setPositiveLabel(R.string.ok)
+                setPositiveLabel(R.string.retry)
+                setNegativeLabel(R.string.cancel)
                 setCancelable(false)
             }.show(fragmentManager, request.code)
         }
@@ -86,5 +91,13 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         fragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container, fragment)
         }.commit()
+    }
+
+    /**
+     * サインインを要求する.
+     */
+    private fun requestSignIn() {
+        Log.i(TAG, "Request sign in.")
+        presenter.requestSignIn()
     }
 }
