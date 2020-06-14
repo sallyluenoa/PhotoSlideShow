@@ -44,9 +44,20 @@ class SplashContract {
         fun requestGoogleSilentSignIn()
 
         /**
+         * ユーザー情報の更新要求.
+         * @see InteractorCallback.requestUpdateUserInfoResult
+         */
+        fun requestUpdateUserInfo()
+
+        /**
          * ランタイムパーミッションが許可されているか.
          */
         fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean
+
+        /**
+         * Googleアカウントでサインインしているか.
+         */
+        fun isGoogleSignedIn(): Boolean
 
         /**
          * Googleアカウントでのユーザーサインインに成功したか.
@@ -56,10 +67,16 @@ class SplashContract {
 
     interface InteractorCallback: ViperContract.InteractorCallback {
         /**
-         * Googleアカウントでのサイレントサインインを要求の結果.
+         * Googleアカウントでのサイレントサインイン要求の結果.
          * @see Interactor.requestGoogleSilentSignIn
          */
         fun requestGoogleSilentSignInResult(isSucceeded: Boolean)
+
+        /**
+         * ユーザー情報の更新要求の結果.
+         * @see Interactor.requestUpdateUserInfo
+         */
+        fun requestUpdateUserInfoResult(isSucceeded: Boolean)
     }
 
     interface Router : ViperContract.Router {
