@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">PhotoSlideShow</string>
 
+    <string name="empty"></string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="yes">YES</string>
@@ -12,11 +13,16 @@
     <string name="license">License</string>
     <string name="sign_in">Sign In</string>
     <string name="sign_out">Sign Out</string>
+    <string name="retry">Retry</string>
 
     <string name="failed_runtime_permissions_title">Permissions are denied.</string>
-    <string name="failed_runtime_permissions_message">App will be finished.</string>
+    <string name="failed_runtime_permissions_message">Are you sure to request permissions again?</string>
     <string name="failed_google_sign_in_title">Failed to sign in with Google account.</string>
-    <string name="failed_google_sign_in_message">App will be finished.</string>
+    <string name="failed_google_sign_in_message">Are you sure to sign in again?</string>
+    <string name="failed_update_user_info_in_title">Failed to update user info.</string>
+    <string name="failed_update_user_info_in_message">Are you sure to sign in again?</string>
+    <string name="failed_unknown_request_title">Unexpected error occurs.</string>
+    <string name="failed_unknown_request_message">Are you sure to sign in again?</string>
 
     <string name="confirm_select_album_title">The album is selected.</string>
     <string name="confirm_select_album_message">Are you sure to start slide show?\nAlbum Name: %1$s</string>

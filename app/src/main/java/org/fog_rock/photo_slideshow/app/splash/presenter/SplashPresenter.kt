@@ -14,11 +14,18 @@ import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 
 class SplashPresenter(
-    private val context: Context,
+    context: Context,
     private val callback: SplashContract.PresenterCallback
 ): SplashContract.Presenter, SplashContract.InteractorCallback {
 
-    private val TAG = SplashPresenter::class.java.simpleName
+    companion object {
+        private val TAG = SplashPresenter::class.java.simpleName
+
+        private val RUNTIME_PERMISSIONS = arrayOf(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+    }
 
     private val clientHolder = GoogleSignInClientHolder(
         context, listOf(PhotoScope.READ_ONLY), requestIdToken = false, requestServerAuthCode = true)
@@ -32,9 +39,7 @@ class SplashPresenter(
         interactor.destroy()
     }
 
-    override fun requestSignIn() {
-        presentSequence(SignInRequest.RUNTIME_PERMISSIONS)
-    }
+    override fun requestSignIn() = presentSequence(SignInRequest.RUNTIME_PERMISSIONS)
 
     override fun evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.i(TAG, "evaluateActivityResult() " +
@@ -42,16 +47,12 @@ class SplashPresenter(
 
         when (requestCode) {
             SignInRequest.GOOGLE_SIGN_IN.code -> {
-                if (interactor.isSucceededGoogleUserSignIn(data)) {
-                    Log.i(TAG, "Succeeded google sign in.")
-                    presentSequence(SignInRequest.COMPLETED)
-                } else {
-                    Log.i(TAG, "Failed google sign in.")
-                    callback.requestSignInResult(SignInRequest.GOOGLE_SIGN_IN)
-                }
+                val isSucceeded = interactor.isSucceededGoogleUserSignIn(data)
+                presentSequenceResult(SignInRequest.GOOGLE_SIGN_IN, isSucceeded)
             }
             else -> {
                 Log.e(TAG, "Unknown requestCode: $requestCode")
+                callback.requestSignInResult(SignInRequest.UNKNOWN)
             }
         }
     }
@@ -61,29 +62,21 @@ class SplashPresenter(
 
         when (requestCode) {
             SignInRequest.RUNTIME_PERMISSIONS.code -> {
-                if (interactor.isGrantedRuntimePermissions(permissions)) {
-                    Log.i(TAG, "Runtime permissions is granted.")
-                    presentSequence(SignInRequest.GOOGLE_SIGN_IN)
-                } else {
-                    Log.i(TAG, "Runtime permissions is denied.")
-                    callback.requestSignInResult(SignInRequest.RUNTIME_PERMISSIONS)
-                }
+                val isSucceeded = interactor.isGrantedRuntimePermissions(permissions)
+                presentSequenceResult(SignInRequest.RUNTIME_PERMISSIONS, isSucceeded)
             }
             else -> {
                 Log.e(TAG, "Unknown requestCode: $requestCode")
+                callback.requestSignInResult(SignInRequest.UNKNOWN)
             }
         }
     }
 
-    override fun requestGoogleSilentSignInResult(isSucceeded: Boolean) {
-        if (isSucceeded) {
-            Log.i(TAG, "Succeeded silent sign in.")
-            presentSequence(SignInRequest.COMPLETED)
-        } else {
-            Log.i(TAG, "Failed silent sign in. Might be signed out. Present user sign in.")
-            router.startGoogleSignInActivity(activity(), clientHolder, SignInRequest.GOOGLE_SIGN_IN.code)
-        }
-    }
+    override fun requestGoogleSilentSignInResult(isSucceeded: Boolean) =
+        presentSequenceResult(SignInRequest.GOOGLE_SIGN_IN, isSucceeded)
+
+    override fun requestUpdateUserInfoResult(isSucceeded: Boolean) =
+        presentSequenceResult(SignInRequest.UPDATE_USER_INFO, isSucceeded)
 
     private fun activity(): Activity = callback.getActivity()
 
@@ -92,44 +85,57 @@ class SplashPresenter(
      * @param request サインインリクエスト
      */
     private fun presentSequence(request: SignInRequest) {
-        if (request <= SignInRequest.RUNTIME_PERMISSIONS) {
-            Log.i(TAG, "Check runtime permissions.")
-            if (presentRuntimePermissions()) {
-                Log.i(TAG, "Presented runtime permissions.")
-                return
-            }
+        when (request) {
+            SignInRequest.RUNTIME_PERMISSIONS -> presentRuntimePermissions()
+            SignInRequest.GOOGLE_SIGN_IN -> presentGoogleSignIn()
+            SignInRequest.UPDATE_USER_INFO -> presentUpdateUserInfo()
+            SignInRequest.COMPLETED -> presentMainActivity()
+            else -> callback.requestSignInResult(SignInRequest.UNKNOWN)
         }
-        if (request <= SignInRequest.GOOGLE_SIGN_IN) {
+    }
+
+    /**
+     * リクエストに応じたサインインシーケンスの結果を処理する.
+     * @param request サインインリクエスト
+     * @param isSucceeded リクエストの処理に成功したか
+     */
+    private fun presentSequenceResult(request: SignInRequest, isSucceeded: Boolean) {
+        if (isSucceeded) {
+            Log.i(TAG, "Succeeded to request: $request")
+            presentSequence(request.next())
+        } else {
+            Log.i(TAG, "Failed to request: $request")
+            callback.requestSignInResult(request)
+        }
+    }
+
+    private fun presentRuntimePermissions() {
+        if (interactor.isGrantedRuntimePermissions(RUNTIME_PERMISSIONS)) {
+            Log.i(TAG, "All permissions are granted.")
+            presentSequence(SignInRequest.GOOGLE_SIGN_IN)
+        } else {
+            Log.i(TAG, "Request runtime permissions.")
+            router.startRuntimePermissions(activity(), RUNTIME_PERMISSIONS, SignInRequest.RUNTIME_PERMISSIONS.code)
+        }
+    }
+
+    private fun presentGoogleSignIn() {
+        if (interactor.isGoogleSignedIn()) {
             Log.i(TAG, "Request google silent sign in.")
             interactor.requestGoogleSilentSignIn()
-            return
+        } else {
+            Log.i(TAG, "Request google user sign in.")
+            router.startGoogleSignInActivity(activity(), clientHolder, SignInRequest.GOOGLE_SIGN_IN.code)
         }
-        presentMainActivity()
-        Log.i(TAG, "Presented main activity.")
     }
 
-    /**
-     * ランタイムパーミッション許可の表示.
-     * @return 許可確認を表示した場合はtrue, そうでない場合はfalse
-     */
-    private fun presentRuntimePermissions(): Boolean {
-        val permissions = arrayOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
-        if (interactor.isGrantedRuntimePermissions(permissions)) {
-            Log.i(TAG, "Runtime permissions are granted.")
-            return false
-        }
-        Log.i(TAG, "Request runtime permissions.")
-        router.startRuntimePermissions(activity(), permissions, SignInRequest.RUNTIME_PERMISSIONS.code)
-        return true
+    private fun presentUpdateUserInfo() {
+        Log.i(TAG, "Request update user info.")
+        interactor.requestUpdateUserInfo()
     }
 
-    /**
-     * メイン画面の表示.
-     */
     private fun presentMainActivity() {
+        Log.i(TAG, "Start MainActivity.")
         router.startMainActivity(activity())
         callback.requestSignInResult(SignInRequest.COMPLETED)
     }
