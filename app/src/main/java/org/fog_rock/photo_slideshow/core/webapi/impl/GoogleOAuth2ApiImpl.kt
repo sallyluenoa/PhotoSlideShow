@@ -1,11 +1,12 @@
 package org.fog_rock.photo_slideshow.core.webapi.impl
 
-import android.util.Log
 import com.google.api.client.auth.oauth2.TokenResponseException
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest
 import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.file.AssetsFileReader
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
@@ -18,8 +19,6 @@ class GoogleOAuth2ApiImpl(
 ): GoogleOAuth2Api {
 
     companion object {
-        private val TAG = GoogleOAuth2ApiImpl::class.java.simpleName
-
         private const val CLIENT_SECRET_FILE = "client_secret.json"
         private const val JSON_KEY_WEB = "web"
         private const val JSON_KEY_CLIENT_ID = "client_id"
@@ -32,7 +31,7 @@ class GoogleOAuth2ApiImpl(
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun requestTokenInfoWithAuthCode(serverAuthCode: String): TokenInfo? {
         if (!loadClientSecrets()) {
-            Log.i(TAG, "Failed to load client secrets.")
+            logI("Failed to load client secrets.")
             return null
         }
 
@@ -42,14 +41,14 @@ class GoogleOAuth2ApiImpl(
             ).execute()
             return TokenInfo.newTokenInfo(response)
         } catch (e: TokenResponseException) {
-            Log.e(TAG, "Failed to get token response. " +
+            logE("Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
             e.printStackTrace()
         } catch (e: IOException) {
-            Log.e(TAG, "Failed to execute request.")
+            logE("Failed to execute request.")
             e.printStackTrace()
         } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Failed to get TokenInfo.")
+            logE("Failed to get TokenInfo.")
             e.printStackTrace()
         }
         return null
@@ -58,7 +57,7 @@ class GoogleOAuth2ApiImpl(
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun requestTokenInfoWithRefreshToken(refreshToken: String): TokenInfo? {
         if (!loadClientSecrets()) {
-            Log.i(TAG, "Failed to load client secrets.")
+            logI("Failed to load client secrets.")
             return null
         }
 
@@ -68,11 +67,11 @@ class GoogleOAuth2ApiImpl(
             ).execute()
             return TokenInfo.newTokenInfo(response, refreshToken)
         } catch (e: TokenResponseException) {
-            Log.e(TAG, "Failed to get token response. " +
+            logE("Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
             e.printStackTrace()
         } catch (e: IOException) {
-            Log.e(TAG, "Failed to execute request.")
+            logE("Failed to execute request.")
             e.printStackTrace()
         }
         return null
@@ -83,11 +82,11 @@ class GoogleOAuth2ApiImpl(
      */
     private fun loadClientSecrets(): Boolean {
         if (clientId.isNotEmpty() && clientSecret.isNotEmpty()) {
-            Log.i(TAG, "Client secrets are already loaded.")
+            logI("Client secrets are already loaded.")
             return true
         }
         val jsonString = fileReader.read(CLIENT_SECRET_FILE) ?: run {
-            Log.e(TAG, "Failed to read assets file.")
+            logE("Failed to read assets file.")
             return false
         }
 
@@ -97,7 +96,7 @@ class GoogleOAuth2ApiImpl(
             clientSecret = webSecret.getString(JSON_KEY_CLIENT_SECRET)
             true
         } catch (e : JSONException) {
-            Log.e(TAG, "Failed to get client secrets from json object.")
+            logE("Failed to get client secrets from json object.")
             e.printStackTrace()
             false
         }

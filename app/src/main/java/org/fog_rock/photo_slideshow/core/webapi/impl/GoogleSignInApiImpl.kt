@@ -1,6 +1,7 @@
 package org.fog_rock.photo_slideshow.core.webapi.impl
 
-import android.util.Log
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
 import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
@@ -11,29 +12,25 @@ class GoogleSignInApiImpl(
     private val clientHolder: GoogleSignInClientHolder
 ): GoogleSignInApi {
 
-    companion object {
-        private val TAG = GoogleSignInApiImpl::class.java.simpleName
-    }
-
     override suspend fun requestSilentSignIn(): ApiResult =
         suspendCoroutine { continuation ->
             var result = ApiResult.FAILED
             clientHolder.client.silentSignIn().apply {
                 addOnSuccessListener {
-                    Log.i(TAG, "Succeeded to silent sign in.")
+                    logI("Succeeded to silent sign in.")
                     result = ApiResult.SUCCEEDED
                 }
                 addOnFailureListener {
-                    Log.e(TAG, "Failed to silent sign in.")
+                    logE("Failed to silent sign in.")
                     it.printStackTrace()
                     result = ApiResult.FAILED
                 }
                 addOnCanceledListener {
-                    Log.e(TAG, "Canceled to silent sign in.")
+                    logE("Canceled to silent sign in.")
                     result = ApiResult.CANCELED
                 }
                 addOnCompleteListener {
-                    Log.i(TAG, "Completed to silent sign in.")
+                    logI("Completed to silent sign in.")
                     continuation.resume(result)
                 }
             }
@@ -45,20 +42,20 @@ class GoogleSignInApiImpl(
             var result = ApiResult.FAILED
             clientHolder.client.signOut().apply {
                 addOnSuccessListener {
-                    Log.i(TAG, "Succeeded to sign out.")
+                    logI("Succeeded to sign out.")
                     result = ApiResult.SUCCEEDED
                 }
                 addOnFailureListener {
-                    Log.e(TAG, "Failed to sign out.")
+                    logE("Failed to sign out.")
                     it.printStackTrace()
                     result = ApiResult.FAILED
                 }
                 addOnCanceledListener {
-                    Log.e(TAG, "Canceled to sign out.")
+                    logE("Canceled to sign out.")
                     result = ApiResult.CANCELED
                 }
                 addOnCompleteListener {
-                    Log.i(TAG, "Completed to sign out.")
+                    logI("Completed to sign out.")
                     continuation.resume(result)
                 }
             }
@@ -70,20 +67,20 @@ class GoogleSignInApiImpl(
             var result = ApiResult.FAILED
             clientHolder.client.revokeAccess().apply {
                 addOnSuccessListener {
-                    Log.i(TAG, "Succeeded to revoke access.")
+                    logI("Succeeded to revoke access.")
                     result = ApiResult.SUCCEEDED
                 }
                 addOnFailureListener {
-                    Log.e(TAG, "Failed to revoke access.")
+                    logE("Failed to revoke access.")
                     it.printStackTrace()
                     result = ApiResult.FAILED
                 }
                 addOnCanceledListener {
-                    Log.e(TAG, "Canceled to revoke access.")
+                    logE("Canceled to revoke access.")
                     result = ApiResult.CANCELED
                 }
                 addOnCompleteListener {
-                    Log.i(TAG, "Completed to revoke access.")
+                    logI("Completed to revoke access.")
                     continuation.resume(result)
                 }
             }

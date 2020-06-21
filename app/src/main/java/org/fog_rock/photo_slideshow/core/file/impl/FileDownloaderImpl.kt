@@ -1,10 +1,11 @@
 package org.fog_rock.photo_slideshow.core.file.impl
 
-import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.file.FileDownloader
 import java.io.*
 import java.net.URL
@@ -18,8 +19,6 @@ class FileDownloaderImpl(
     readTimeoutMilliSecs: Long,
     writeTimeoutMilliSecs: Long
 ): FileDownloader {
-
-    private val TAG = FileDownloaderImpl::class.java.simpleName
 
     private val client = OkHttpClient.Builder().apply {
         connectTimeout(connectionTimeoutMilliSecs, TimeUnit.MILLISECONDS)
@@ -37,11 +36,11 @@ class FileDownloaderImpl(
      */
     override suspend fun requestDownload(downloadUrl: URL, outputFile: File): Boolean {
         if (outputFile.exists()) {
-            Log.i(TAG, "OutputFile is already existed: $outputFile")
+            logI("OutputFile is already existed: $outputFile")
             return true
         }
 
-        Log.i(TAG, "Do download. DownloadURL: $downloadUrl, OutputFile: $outputFile")
+        logI("Do download. DownloadURL: $downloadUrl, OutputFile: $outputFile")
         return doDownload(downloadUrl, outputFile)
     }
 
@@ -56,15 +55,15 @@ class FileDownloaderImpl(
             val response = client.newCall(request).execute()
             writeOutputFile(response, outputFile)
         } catch (e: IOException) {
-            Log.e(TAG, "Failed network connection.")
+            logE("Failed network connection.")
             e.printStackTrace()
             false
         } catch (e: IllegalStateException) {
-            Log.e(TAG, "Request call has already been executed.")
+            logE("Request call has already been executed.")
             e.printStackTrace()
             false
         } catch (e: IllegalArgumentException ) {
-            Log.e(TAG, "Url scheme must be 'http' or 'https'.")
+            logE("Url scheme must be 'http' or 'https'.")
             e.printStackTrace()
             false
         }
@@ -76,11 +75,11 @@ class FileDownloaderImpl(
      */
     private fun writeOutputFile(response: Response, outputFile: File): Boolean {
         if (!response.isSuccessful) {
-            Log.e(TAG, "Failed network connection. Code: ${response.code}")
+            logE("Failed network connection. Code: ${response.code}")
             return false
         }
         val body = response.body ?: run {
-            Log.e(TAG, "Response body is null.")
+            logE("Response body is null.")
             return false
         }
         return writeOutputFile(body, outputFile)
@@ -99,20 +98,20 @@ class FileDownloaderImpl(
             inputStream = body.byteStream()
             outputStream = FileOutputStream(outputFile)
             inputStream.use { it.copyTo(outputStream) }
-            Log.i(TAG, "Succeeded to write output file.")
+            logI("Succeeded to write output file.")
             return true
         } catch (e: IOException) {
-            Log.e(TAG, "Failed to write OutputStream.")
+            logE("Failed to write OutputStream.")
             e.printStackTrace()
         } catch (e: FileNotFoundException) {
-            Log.e(TAG, "Failed to open OutputStream.")
+            logE("Failed to open OutputStream.")
             e.printStackTrace()
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close()
                 } catch (e: IOException) {
-                    Log.e(TAG, "Failed to close InputStream.")
+                    logE("Failed to close InputStream.")
                     e.printStackTrace()
                 }
             }
@@ -121,7 +120,7 @@ class FileDownloaderImpl(
                     outputStream.flush()
                     outputStream.close()
                 } catch (e: IOException) {
-                    Log.e(TAG, "Failed to close OutputStream.")
+                    logE("Failed to close OutputStream.")
                     e.printStackTrace()
                 }
             }

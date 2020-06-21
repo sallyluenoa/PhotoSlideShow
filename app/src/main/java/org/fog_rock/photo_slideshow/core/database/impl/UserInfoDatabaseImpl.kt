@@ -1,15 +1,13 @@
 package org.fog_rock.photo_slideshow.core.database.impl
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import org.fog_rock.photo_slideshow.core.database.UserInfoDatabase
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
+import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 class UserInfoDatabaseImpl(context: Context): UserInfoDatabase {
-
-    private val TAG = UserInfoDatabaseImpl::class.java.simpleName
 
     private val database = Room.databaseBuilder(
         context,
@@ -24,7 +22,7 @@ class UserInfoDatabaseImpl(context: Context): UserInfoDatabase {
                 database.dao().insert(UserInfo.newUserInfo(email, tokenInfo))
                 true
             } catch (e: java.lang.IllegalArgumentException) {
-                Log.e(TAG, "Failed to create UserInfo.")
+                logE("Failed to create UserInfo.")
                 e.printStackTrace()
                 false
             }

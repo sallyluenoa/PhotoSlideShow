@@ -1,20 +1,17 @@
 package org.fog_rock.photo_slideshow.core.webapi.impl
 
-import android.util.Log
 import com.google.android.gms.common.api.ApiException
 import com.google.photos.library.v1.proto.SearchMediaItemsRequest
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryApi
 import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
 
 class PhotosLibraryApiImpl(
     private var clientHolder: PhotosLibraryClientHolder
 ): PhotosLibraryApi {
-
-    companion object {
-        private val TAG = PhotosLibraryApiImpl::class.java.simpleName
-    }
 
     override fun updateClientHolder(clientHolder: PhotosLibraryClientHolder) {
         this.clientHolder = clientHolder
@@ -26,7 +23,7 @@ class PhotosLibraryApiImpl(
         try {
             clientHolder.client.getAlbum(albumId)
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get album.")
+            logE("Failed to get album.")
             e.printStackTrace()
             Album.newBuilder().apply { id = albumId }.build()
         }
@@ -35,7 +32,7 @@ class PhotosLibraryApiImpl(
         try {
             clientHolder.client.getMediaItem(mediaItemId)
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get mediaItem.")
+            logE("Failed to get mediaItem.")
             e.printStackTrace()
             MediaItem.newBuilder().apply { id = mediaItemId }.build()
         }
@@ -61,12 +58,12 @@ class PhotosLibraryApiImpl(
             val response = clientHolder.client.listSharedAlbums()
             val albums = emptyList<Album>()
             for (page in response.iteratePages()) {
-                Log.i(TAG, "Load ListSharedAlbumsPage. PageCount: ${page.pageElementCount}");
+                logI("Load ListSharedAlbumsPage. PageCount: ${page.pageElementCount}");
                 albums.plus(page.response.sharedAlbumsList)
             }
             albums
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get listSharedAlbums.")
+            logE("Failed to get listSharedAlbums.")
             e.printStackTrace()
             emptyList()
         }
@@ -79,14 +76,14 @@ class PhotosLibraryApiImpl(
             }.build()
             val response = clientHolder.client.searchMediaItems(request)
             val mediaItems = emptyList<MediaItem>()
-            Log.i(TAG, "Total mediaItem count: ${album.mediaItemsCount}")
+            logI("Total mediaItem count: ${album.mediaItemsCount}")
             for (page in response.iteratePages()) {
-                Log.i(TAG, "Load SearchMediaItemsPage. PageCount: ${page.pageElementCount}")
+                logI("Load SearchMediaItemsPage. PageCount: ${page.pageElementCount}")
                 mediaItems.plus(page.response.mediaItemsList)
             }
             mediaItems
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get searchMediaItems.")
+            logE("Failed to get searchMediaItems.")
             e.printStackTrace()
             emptyList()
         }

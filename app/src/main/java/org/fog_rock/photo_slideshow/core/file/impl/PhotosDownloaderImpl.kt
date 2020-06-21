@@ -1,8 +1,9 @@
 package org.fog_rock.photo_slideshow.core.file.impl
 
-import android.util.Log
 import com.google.photos.types.proto.MediaItem
 import com.google.photos.types.proto.MediaMetadata
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.file.FileDownloader
 import org.fog_rock.photo_slideshow.core.file.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.math.SizeCalculator
@@ -16,14 +17,12 @@ class PhotosDownloaderImpl(
     private val aspectHeight: Long
 ): PhotosDownloader {
 
-    private val TAG = PhotosDownloaderImpl::class.java.simpleName
-
     private val calculator = SizeCalculator()
 
     override suspend fun requestDownloads(mediaItems: List<MediaItem>, outputDir: File): List<String> {
         val outputFiles = mutableListOf<String>()
         if (!isValidOutputDir(outputDir)) {
-            Log.e(TAG, "Invalid output dir.");
+            logE("Invalid output dir.");
             return outputFiles
         }
         mediaItems.forEach {
@@ -48,12 +47,12 @@ class PhotosDownloaderImpl(
      */
     private fun getPhotoMetaData(mediaItem: MediaItem): MediaMetadata? {
         if (!mediaItem.hasMediaMetadata()) {
-            Log.i(TAG, "MediaItem does not have MetaData.")
+            logI("MediaItem does not have MetaData.")
             return null
         }
         val metadata = mediaItem.mediaMetadata
         if (metadata.metadataCase != MediaMetadata.MetadataCase.PHOTO) {
-            Log.i(TAG, "MetaData is not case of photo.")
+            logI("MetaData is not case of photo.")
             return null
         }
         return metadata
@@ -71,7 +70,7 @@ class PhotosDownloaderImpl(
         return try {
             URL("$baseUrl=w$width-h$height")
         } catch (e: MalformedURLException) {
-            Log.e(TAG, "Invalid url format.")
+            logE("Invalid url format.")
             e.printStackTrace()
             null
         }
@@ -82,11 +81,11 @@ class PhotosDownloaderImpl(
      */
     private fun isValidOutputDir(outputDir: File): Boolean {
         if (!outputDir.exists()) {
-            Log.e(TAG, "Output dir path does not exist.")
+            logE("Output dir path does not exist.")
             return false
         }
         if (!outputDir.isDirectory) {
-            Log.e(TAG, "Output dir path is not directory.")
+            logE("Output dir path is not directory.")
             return false
         }
         return true
