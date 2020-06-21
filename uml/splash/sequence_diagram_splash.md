@@ -76,20 +76,31 @@ end
 
 Presenter -> Interactor++: requestUpdateUserInfo
 
-Interactor -> UserInfoDatabase++: find
-return UserInfo
+Interactor -> GoogleSignInApi++: getSignedInAccount
+return GoogleSignInAccount
 
-opt UserInfo!=null
-  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithRefreshToken
-  return TokenInfo
+opt GoogleSignInAccount.email!=null
+
+  Interactor -> UserInfoDatabase++: find
+  return UserInfo
+
+  opt UserInfo!=null
+    Interactor -> GoogleOAuth2Api++: requestTokenInfoWithRefreshToken
+    return TokenInfo
+  end
+
+  opt TokenInfo==null
+    Interactor -> GoogleOAuth2Api++: requestTokenInfoWithAuthCode
+    return TokenInfo
+  end
+
+  opt TokenInfo!=null
+    Interactor -> UserInfoDatabase++: update
+    return Boolean
+  end
 end
 
-opt UserInfo==null or TokenInfo==null
-  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithAuthCode
-  return TokenInfo
-end
-
-opt TokenInfo==null
+opt Failed update database
   Interactor -> GoogleSignInApi++: revokeAccess
   return ApiResult
   Presenter <-- Interactor: Callback#requestUpdateUserInfoResult
@@ -98,7 +109,6 @@ opt TokenInfo==null
   destroy View
 end
 
-Interactor -> UserInfoDatabase: update
 Presenter <-- Interactor--: Callback#requestUpdateUserInfoResult
 
 ====
