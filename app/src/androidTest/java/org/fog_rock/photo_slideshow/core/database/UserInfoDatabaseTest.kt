@@ -1,8 +1,8 @@
 package org.fog_rock.photo_slideshow.core.database
 
-import android.util.Log
 import kotlinx.coroutines.runBlocking
 import org.fog_rock.photo_slideshow.core.database.impl.UserInfoDatabaseImpl
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import org.fog_rock.photo_slideshow.test.AndroidTestModuleGenerator
 import org.junit.After
@@ -22,8 +22,6 @@ class UserInfoDatabaseTest {
         private const val ACCESS_TOKEN2 = "access_token2"
         private const val REFRESH_TOKEN2 = "refresh_token2"
         private const val EXPIRED_TIME_MILLIS2 = 1010L
-
-        private val TAG = UserInfoDatabaseTest::class.java.simpleName
     }
 
     private val tokenInfo1 = TokenInfo(ACCESS_TOKEN1, REFRESH_TOKEN1, EXPIRED_TIME_MILLIS1)
@@ -73,9 +71,9 @@ class UserInfoDatabaseTest {
         val usersInfo = runBlocking {
             database.getAll()
         }
-        Log.i(TAG, "id\temailAddress\taccessToken\trefreshToken\texpAccessToken\tupdateDate")
+        logI("id\temailAddress\taccessToken\trefreshToken\texpAccessToken\tupdateDate")
         usersInfo.forEach {
-            Log.i(TAG, "${it.id}\t${it.emailAddress}\t" +
+            logI("${it.id}\t${it.emailAddress}\t" +
                     "${it.accessToken}\t${it.refreshToken}\t" +
                     "${it.expiredAccessTokenTimeMillis}\t${it.updateDateTimeMillis}")
         }

@@ -1,7 +1,7 @@
 package org.fog_rock.photo_slideshow.core.webapi
 
-import android.util.Log
 import kotlinx.coroutines.runBlocking
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
@@ -16,10 +16,6 @@ import org.junit.Test
  */
 class GoogleSignInApiTest {
 
-    companion object {
-        private val TAG = GoogleSignInApiTest::class.java.simpleName
-    }
-
     private val appContext = AndroidTestModuleGenerator.appContext()
 
     private val clientHolder =
@@ -31,7 +27,7 @@ class GoogleSignInApiTest {
     fun requestSilentSignIn() {
         if (GoogleSignInApi.isSignedInAccount(appContext)) {
             // サインイン情報があるので、サイレントサインインの正常系が通る.
-            Log.i(TAG, "Current status is signed in. Normal case will be checked.")
+            logI("Current status is signed in. Normal case will be checked.")
 
             val result = runBlocking {
                 signInApi.requestSilentSignIn()
@@ -39,12 +35,12 @@ class GoogleSignInApiTest {
             assertEquals(ApiResult.SUCCEEDED, result)
 
             val account = GoogleSignInApi.getSignedInAccount(appContext)
-            Log.i(TAG, "[Account Result]\n" +
+            logI("[Account Result]\n" +
                     "Name: ${account?.displayName}\nEmail: ${account?.email}\n" +
                     "IdToken: ${account?.idToken}\nServerAuthCode:${account?.serverAuthCode}")
         } else {
             // サインアウト状態なので、サイレントサインインの異常系になる.
-            Log.i(TAG, "Current status is signed out. Abnormal case will be checked.")
+            logI("Current status is signed out. Abnormal case will be checked.")
 
             val result = runBlocking {
                 signInApi.requestSilentSignIn()
@@ -57,7 +53,7 @@ class GoogleSignInApiTest {
     fun requestSignOut() {
         if (GoogleSignInApi.isSignedInAccount(appContext)) {
             // サインイン情報があるので、サインアウトの正常系が通る.
-            Log.i(TAG, "Current status is signed in. Normal case will be checked.")
+            logI("Current status is signed in. Normal case will be checked.")
 
             val result = runBlocking {
                 signInApi.requestSignOut()
@@ -65,7 +61,7 @@ class GoogleSignInApiTest {
             assertEquals(ApiResult.SUCCEEDED, result)
         } else {
             // サインアウト状態なので、サインアウトの異常系になる.
-            Log.i(TAG, "Current status is signed out. Abnormal case will be checked.")
+            logI("Current status is signed out. Abnormal case will be checked.")
 
             val result = runBlocking {
                 signInApi.requestSignOut()
@@ -78,7 +74,7 @@ class GoogleSignInApiTest {
     fun requestRevokeAccess() {
         if (GoogleSignInApi.isSignedInAccount(appContext)) {
             // サインイン情報があるので、アカウントアクセス破棄の正常系が通る.
-            Log.i(TAG, "Current status is signed in. Normal case will be checked.")
+            logI("Current status is signed in. Normal case will be checked.")
 
             val result = runBlocking {
                 signInApi.requestRevokeAccess()
@@ -86,7 +82,7 @@ class GoogleSignInApiTest {
             assertEquals(ApiResult.SUCCEEDED, result)
         } else {
             // サインアウト状態なので、アカウントアクセス破棄の異常系になる.
-            Log.i(TAG, "Current status is signed out. Abnormal case will be checked.")
+            logI("Current status is signed out. Abnormal case will be checked.")
 
             val result = runBlocking {
                 signInApi.requestRevokeAccess()

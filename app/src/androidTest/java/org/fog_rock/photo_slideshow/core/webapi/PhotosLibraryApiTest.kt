@@ -1,9 +1,10 @@
 package org.fog_rock.photo_slideshow.core.webapi
 
-import android.util.Log
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import kotlinx.coroutines.runBlocking
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 import org.fog_rock.photo_slideshow.test.AndroidTestModuleGenerator
@@ -16,10 +17,6 @@ import org.junit.Test
  */
 class PhotosLibraryApiTest {
 
-    companion object {
-        private val TAG = PhotosLibraryApiTest::class.java.simpleName
-    }
-
     private var clientHolder = PhotosLibraryClientHolder(AndroidTestModuleGenerator.tokenInfo())
 
     private val photosApi: PhotosLibraryApi = PhotosLibraryApiImpl(clientHolder)
@@ -30,7 +27,7 @@ class PhotosLibraryApiTest {
     @Before
     fun configClientHolder() {
         assert(!photosApi.isAvailableClientHolder()) {
-            Log.e(TAG, "ClientHolder is not available. AccessToken should be updated.")
+            logE("ClientHolder is not available. AccessToken should be updated.")
         }
     }
 
@@ -81,7 +78,7 @@ class PhotosLibraryApiTest {
         val albums = runBlocking {
             photosApi.requestSharedAlbums()
         }
-        Log.i(TAG, "[Albums Result] Count: ${albums.size}")
+        logI("[Albums Result] Count: ${albums.size}")
         albums.forEach { showAlbum(it) }
     }
 
@@ -90,17 +87,17 @@ class PhotosLibraryApiTest {
         val mediaItems = runBlocking {
             photosApi.requestMediaItems(AndroidTestModuleGenerator.album())
         }
-        Log.i(TAG, "[MediaItems Result] Count: ${mediaItems.size}")
+        logI("[MediaItems Result] Count: ${mediaItems.size}")
         mediaItems.forEach {
             showMediaItem(it)
         }
     }
 
     private fun showAlbum(album: Album) {
-        Log.i(TAG, "ID: ${album.id}, Title: ${album.title}, Count: ${album.mediaItemsCount}")
+        logI("ID: ${album.id}, Title: ${album.title}, Count: ${album.mediaItemsCount}")
     }
 
     private fun showMediaItem(mediaItem: MediaItem) {
-        Log.i(TAG, "ID: ${mediaItem.id}, FileName: ${mediaItem.filename}, BaseUrl: ${mediaItem.baseUrl}")
+        logI("ID: ${mediaItem.id}, FileName: ${mediaItem.filename}, BaseUrl: ${mediaItem.baseUrl}")
     }
 }

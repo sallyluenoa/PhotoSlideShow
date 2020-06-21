@@ -1,7 +1,7 @@
 package org.fog_rock.photo_slideshow.core.webapi
 
-import android.util.Log
 import kotlinx.coroutines.runBlocking
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.file.AssetsFileReader
 import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
@@ -16,10 +16,6 @@ import org.junit.Test
  * Googleアカウントでアプリ内にサインインした状態でテストすること.
  */
 class GoogleOAuth2ApiTest {
-
-    companion object {
-        private val TAG = GoogleOAuth2ApiTest::class.java.simpleName
-    }
 
     private val fileReader = object : AssetsFileReader {
         override fun read(fileName: String): String? = AndroidTestModuleGenerator.webClientSecret()
@@ -40,14 +36,14 @@ class GoogleOAuth2ApiTest {
             account?.serverAuthCode
         }
         assertNotNull(serverAuthCode)
-        Log.i(TAG, "ServerAuthCode: $serverAuthCode")
+        logI("ServerAuthCode: $serverAuthCode")
 
         val tokenInfo = runBlocking {
             oauth2Api.requestTokenInfoWithAuthCode(serverAuthCode!!)
         }
         assertNotNull(tokenInfo)
 
-        Log.i(TAG, "[TokenInfo Result]\n" +
+        logI("[TokenInfo Result]\n" +
                 "AccessToken: ${tokenInfo?.accessToken}\nRefreshToken: ${tokenInfo?.refreshToken}\n" +
                 "ExpiredAccessTokenTimeMillis: ${tokenInfo?.expiredAccessTokenTimeMillis}")
     }
@@ -60,7 +56,7 @@ class GoogleOAuth2ApiTest {
         }
         assertNotNull(tokenInfo)
 
-        Log.i(TAG, "[TokenInfo Result]\n" +
+        logI("[TokenInfo Result]\n" +
                 "AccessToken: ${tokenInfo?.accessToken}\nRefreshToken: ${tokenInfo?.refreshToken}\n" +
                 "ExpiredAccessTokenTimeMillis: ${tokenInfo?.expiredAccessTokenTimeMillis}")
     }
