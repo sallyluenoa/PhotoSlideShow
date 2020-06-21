@@ -10,7 +10,10 @@ import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
 import org.fog_rock.photo_slideshow.app.splash.router.SplashRouter
 import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
+import org.fog_rock.photo_slideshow.core.database.impl.UserInfoDatabaseImpl
+import org.fog_rock.photo_slideshow.core.file.impl.AssetsFileReaderImpl
 import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 
 class SplashPresenter(
@@ -30,8 +33,12 @@ class SplashPresenter(
     private val clientHolder = GoogleSignInClientHolder(
         context, listOf(PhotoScope.READ_ONLY), requestIdToken = false, requestServerAuthCode = true)
 
-    private val interactor: SplashContract.Interactor =
-        SplashInteractor(context, GoogleSignInApiImpl(clientHolder), this)
+    private val interactor: SplashContract.Interactor = SplashInteractor(
+        context,
+        GoogleSignInApiImpl(clientHolder),
+        GoogleOAuth2ApiImpl(AssetsFileReaderImpl(context)),
+        UserInfoDatabaseImpl(context),
+        this)
 
     private val router: SplashContract.Router = SplashRouter()
 

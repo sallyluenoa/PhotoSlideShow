@@ -11,25 +11,52 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
+import org.fog_rock.photo_slideshow.core.database.UserInfoDatabase
+import org.fog_rock.photo_slideshow.core.database.impl.UserInfoDatabaseImpl
+import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
+import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 class SplashInteractor(
     private val context: Context,
     private val signInApi: GoogleSignInApi,
+    private val oAuth2Api: GoogleOAuth2Api,
+    private val database: UserInfoDatabase,
     private val callback: SplashContract.InteractorCallback
 ): SplashContract.Interactor {
 
-    private val TAG = SplashInteractor::class.java.simpleName
+    companion object {
+        private val TAG = SplashInteractor::class.java.simpleName
+    }
 
     override fun destroy() {
     }
 
     override fun requestGoogleSilentSignIn() {
         GlobalScope.launch(Dispatchers.Main) {
-            val account = withContext(Dispatchers.Default) {
+            val result = withContext(Dispatchers.Default) {
                 signInApi.requestSilentSignIn()
             }
-            callback.requestGoogleSilentSignInResult(account != null)
+            callback.requestGoogleSilentSignInResult(result == ApiResult.SUCCEEDED)
+        }
+    }
+
+    override fun requestUpdateUserInfo() {
+        GlobalScope.launch(Dispatchers.Main) {
+            val account = GoogleSignInApi.getSignedInAccount(context)
+            val email = account?.email ?: run {
+                requestUpdateUserInfoResult(false)
+                return@launch
+            }
+            val tokenInfo = requestTokenInfo(email, account.serverAuthCode) ?: run {
+                requestUpdateUserInfoResult(false)
+                return@launch
+            }
+            val isSucceeded = withContext(Dispatchers.Default) {
+                database.update(email, tokenInfo)
+            }
+            requestUpdateUserInfoResult(isSucceeded)
         }
     }
 
@@ -48,6 +75,39 @@ class SplashInteractor(
         return true
     }
 
+    override fun isGoogleSignedIn(): Boolean =
+        GoogleSignInApi.isSignedInAccount(context)
+
     override fun isSucceededGoogleUserSignIn(data: Intent?): Boolean =
         GoogleSignInApi.isSucceededUserSignIn(data)
+
+    private suspend fun requestTokenInfo(email: String, serverAuthCode: String?): TokenInfo? {
+        val tokenInfo = withContext(Dispatchers.Default) {
+            val userInfo = database.find(email)
+            if (userInfo != null) {
+                oAuth2Api.requestTokenInfoWithRefreshToken(userInfo.refreshToken)
+            } else {
+                null
+            }
+        }
+        if (tokenInfo != null) return tokenInfo
+
+        return withContext(Dispatchers.Default) {
+            if (serverAuthCode != null) {
+                oAuth2Api.requestTokenInfoWithAuthCode(serverAuthCode)
+            } else {
+                null
+            }
+        }
+    }
+
+    private suspend fun requestUpdateUserInfoResult(isSucceeded: Boolean) {
+        if (!isSucceeded) {
+            // 失敗した場合はGoogleアカウントアクセス破棄をする.
+            withContext(Dispatchers.Default) {
+                signInApi.requestRevokeAccess()
+            }
+        }
+        callback.requestUpdateUserInfoResult(false)
+    }
 }
