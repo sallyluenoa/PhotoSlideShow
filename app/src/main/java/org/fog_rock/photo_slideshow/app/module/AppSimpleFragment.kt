@@ -1,20 +1,18 @@
 package org.fog_rock.photo_slideshow.app.module
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import org.fog_rock.photo_slideshow.R
+import org.fog_rock.photo_slideshow.core.extension.logE
 
 /**
  * 定められた画面レイアウトのフラグメントを表示するためのクラス.
  * レイアウトにはボタンイベントや処理がない.
  */
 class AppSimpleFragment : Fragment() {
-
-    private val TAG = AppSimpleFragment::class.java.simpleName
 
     companion object {
 
@@ -55,7 +53,7 @@ class AppSimpleFragment : Fragment() {
 
     private val args: Bundle by lazy {
         arguments ?: run {
-            Log.e(TAG, "Not found arguments.")
+            logE("Not found arguments.")
             Bundle()
         }
     }

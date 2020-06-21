@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -12,7 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.core.database.UserInfoDatabase
-import org.fog_rock.photo_slideshow.core.database.impl.UserInfoDatabaseImpl
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
@@ -25,10 +24,6 @@ class SplashInteractor(
     private val database: UserInfoDatabase,
     private val callback: SplashContract.InteractorCallback
 ): SplashContract.Interactor {
-
-    companion object {
-        private val TAG = SplashInteractor::class.java.simpleName
-    }
 
     override fun destroy() {
     }
@@ -62,16 +57,16 @@ class SplashInteractor(
 
     override fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            Log.i(TAG, "OS version is less than M.")
+            logI("OS version is less than M.")
             return true
         }
         for (permission in permissions) {
             if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                Log.i(TAG, "All runtime permissions are not granted.")
+                logI("All runtime permissions are not granted.")
                 return false
             }
         }
-        Log.i(TAG, "All runtime permissions are granted.")
+        logI("All runtime permissions are granted.")
         return true
     }
 

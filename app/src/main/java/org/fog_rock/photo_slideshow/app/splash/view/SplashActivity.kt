@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import org.fog_rock.photo_slideshow.R
@@ -13,12 +12,11 @@ import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.app.splash.presenter.SplashPresenter
+import org.fog_rock.photo_slideshow.core.extension.logI
 
 class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, AppDialogFragment.Callback {
 
     companion object {
-        private val TAG = SplashActivity::class.java.simpleName
-
         private const val SHOW_LOGO_TIME_MILLIS = 2000L
     }
 
@@ -69,7 +67,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
     override fun getActivity(): Activity = this
 
     override fun requestSignInResult(request: SignInRequest) {
-        Log.i(TAG, "requestSignInResult: $request")
+        logI("requestSignInResult: $request")
 
         if (request == SignInRequest.COMPLETED) {
             finish()
@@ -97,7 +95,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
      * サインインを要求する.
      */
     private fun requestSignIn() {
-        Log.i(TAG, "Request sign in.")
+        logI("Request sign in.")
         presenter.requestSignIn()
     }
 }

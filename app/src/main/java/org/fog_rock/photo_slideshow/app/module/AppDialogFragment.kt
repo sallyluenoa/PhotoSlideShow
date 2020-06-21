@@ -5,11 +5,12 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logW
 
 /**
  * ダイアログフラグメントを便利に表示するためのクラス.
@@ -18,8 +19,6 @@ import androidx.fragment.app.FragmentManager
 class AppDialogFragment : DialogFragment() {
 
     companion object {
-        private val TAG = AppDialogFragment::class.java.simpleName
-
         const val BUTTON_POSITIVE = DialogInterface.BUTTON_POSITIVE
         const val BUTTON_NEGATIVE = DialogInterface.BUTTON_NEGATIVE
         const val BUTTON_CANCEL = 0
@@ -114,7 +113,7 @@ class AppDialogFragment : DialogFragment() {
 
     private val args: Bundle by lazy {
         arguments ?: run {
-            Log.e(TAG, "Not found arguments.")
+            logE("Not found arguments.")
             Bundle()
         }
     }
@@ -161,6 +160,6 @@ class AppDialogFragment : DialogFragment() {
             activity.onDialogResult(requestCode, which, intent)
             return
         }
-        Log.w(TAG, "Not implemented callback.")
+        logW("Not implemented callback.")
     }
 }
