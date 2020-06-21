@@ -5,6 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
+import org.fog_rock.photo_slideshow.debug.test.R
 
 class AndroidTestModuleGenerator {
 
