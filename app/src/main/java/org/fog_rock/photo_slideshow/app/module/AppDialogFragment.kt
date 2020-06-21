@@ -6,24 +6,23 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 
+/**
+ * ダイアログフラグメントを便利に表示するためのクラス.
+ * AlertDialog(ボタン選択が1つ), ConfirmDialog(ボタン選択が2つ) に対応.
+ */
 class AppDialogFragment : DialogFragment() {
 
-    private val TAG = AppDialogFragment::class.java.simpleName
-
-    interface Callback {
-
-        fun onDialogResult(requestCode: Int, resultCode: Int, data: Intent)
-    }
-
     companion object {
+        private val TAG = AppDialogFragment::class.java.simpleName
 
-        val BUTTON_POSITIVE = DialogInterface.BUTTON_POSITIVE
-        val BUTTON_NEGATIVE = DialogInterface.BUTTON_NEGATIVE
-        val BUTTON_CANCEL = 0
+        const val BUTTON_POSITIVE = DialogInterface.BUTTON_POSITIVE
+        const val BUTTON_NEGATIVE = DialogInterface.BUTTON_NEGATIVE
+        const val BUTTON_CANCEL = 0
 
         private const val ARGS_REQUEST_CODE = "request_code"
         private const val ARGS_TITLE = "title"
@@ -32,6 +31,22 @@ class AppDialogFragment : DialogFragment() {
         private const val ARGS_NEGATIVE_LABEL = "negative_label"
     }
 
+    /**
+     * コールバック
+     */
+    interface Callback {
+        /**
+         * ユーザーの選択結果.
+         * @param requestCode リクエストコード
+         * @param resultCode 結果コード
+         * @param data 詳細情報
+         */
+        fun onDialogResult(requestCode: Int, resultCode: Int, data: Intent)
+    }
+
+    /**
+     * ビルダークラス
+     */
     class Builder(private val context: Context) {
         private var title: String? = null
         private var message: String? = null
@@ -43,7 +58,7 @@ class AppDialogFragment : DialogFragment() {
             this.title = title
             return this
         }
-        fun setTitle(title: Int): Builder =
+        fun setTitle(@StringRes title: Int): Builder =
             if (title != 0) setTitle(context.getString(title))
             else this
 
@@ -51,7 +66,7 @@ class AppDialogFragment : DialogFragment() {
             this.message = message
             return this
         }
-        fun setMessage(message: Int): Builder =
+        fun setMessage(@StringRes message: Int): Builder =
             if (message != 0) setMessage(context.getString(message))
             else this
 
@@ -59,7 +74,7 @@ class AppDialogFragment : DialogFragment() {
             this.positiveLabel = positiveLabel
             return this
         }
-        fun setPositiveLabel(positiveLabel: Int): Builder =
+        fun setPositiveLabel(@StringRes positiveLabel: Int): Builder =
             if (positiveLabel != 0) setPositiveLabel(context.getString(positiveLabel))
             else this
 
@@ -67,7 +82,7 @@ class AppDialogFragment : DialogFragment() {
             this.negativeLabel = negativeLabel
             return this
         }
-        fun setNegativeLabel(negativeLabel: Int): Builder =
+        fun setNegativeLabel(@StringRes negativeLabel: Int): Builder =
             if (negativeLabel != 0) setNegativeLabel(context.getString(negativeLabel))
             else this
 

@@ -8,6 +8,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import org.fog_rock.photo_slideshow.R
 
+/**
+ * 定められた画面レイアウトのフラグメントを表示するためのクラス.
+ * レイアウトにはボタンイベントや処理がない.
+ */
 class AppSimpleFragment : Fragment() {
 
     private val TAG = AppSimpleFragment::class.java.simpleName
@@ -16,6 +20,9 @@ class AppSimpleFragment : Fragment() {
 
         private const val ARGS_LAYOUT = "layout"
 
+        /**
+         * 新規インスタンス生成.
+         */
         fun newInstance(layout: Layout): Fragment {
             val args = Bundle().apply {
                 putSerializable(ARGS_LAYOUT, layout)
@@ -26,12 +33,23 @@ class AppSimpleFragment : Fragment() {
         }
     }
 
+    /**
+     * 画面レイアウト種別.
+     */
     enum class Layout(val resId: Int) {
-
+        /**
+         * 真っ白なレイアウト
+         */
         EMPTY(R.layout.fragment_empty),
 
+        /**
+         * アプリロゴが表示されたレイアウト
+         */
         LOGO(R.layout.fragment_logo),
 
+        /**
+         * プログレスが表示されたレイアウト
+         */
         PROGRESS(R.layout.fragment_progress),
     }
 
