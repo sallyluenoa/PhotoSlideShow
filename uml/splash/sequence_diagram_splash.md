@@ -1,12 +1,19 @@
 @startuml
-participant View
-participant Presenter
-participant Interactor
-participant Router
+box "VIPER" #FFFFEE
+  participant View
+  participant Presenter
+  participant Interactor
+  participant Router
+end box
 
-participant GoogleSignInApi
-participant GoogleOAuth2Api
-participant UserInfoDatabase
+box "Web API" #EEFFFF
+  participant GoogleSignInApi
+  participant GoogleOAuth2Api
+end box
+
+box "Database" #FFEEFF
+  participant UserInfoDatabase
+end box
 
 
 [-> View
