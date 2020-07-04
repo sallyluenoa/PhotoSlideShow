@@ -1,9 +1,9 @@
 @startuml
-namespace app.splash {
+namespace app.splash #FFFFEE {
   class SplashInteractor
 }
 
-namespace core.webapi {
+namespace core.webapi #EEFFFF {
   interface GoogleSignInApi {
     + requestSilentSignIn(): ApiResult
     + requestSignOut(): ApiResult
@@ -16,6 +16,8 @@ namespace core.webapi {
     + requestTokenInfoWithAuthCode(serverAuthCode: String): TokenInfo?
     + requestTokenInfoWithRefreshToken(refreshToken: String): TokenInfo?
   }
+
+  GoogleSignInApi -[hidden]-> GoogleOAuth2Api
 
   namespace client {
     class GoogleSignInClientHolder {
@@ -37,20 +39,24 @@ namespace core.webapi {
       SHARING
     }
     class TokenInfo {
-      + accessToken: String?
-      + refreshToken: String?
+      + accessToken: String
+      + refreshToken: String
       + expiredAccessTokenTimeMillis: Long
     }
   }
 }
 
-namespace core.database {
+namespace core.database #FFEEFF {
   interface UserInfoDatabase {
     + update(email: String, tokenInfo: TokenInfo): Boolean
     + delete(email: String)
     + find(email: String): UserInfo?
-    + getAll(): List<UserInfo>
   }
+  interface BaseDatabase<T> {
+    + getAll(): List<T>
+  }
+
+  UserInfoDatabase ..|> BaseDatabase
 
   namespace entity {
     class UserInfo {

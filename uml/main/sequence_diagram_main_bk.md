@@ -7,7 +7,6 @@ box "VIPER" #FFFFEE
 end box
 
 box "Web API" #EEFFFF
-  participant GoogleSignInApi
   participant GoogleOAuth2Api
   participant PhotosLibraryApi
 end box
@@ -22,16 +21,20 @@ box "File" #E6FFE9
   participant PhotosDownloader
 end box
 
+
 View++
-View -> Presenter++: requestUpdatePhotoData
+View -> Presenter++: requestUpdatePhotos
 View--
 
-Presenter -> Interactor++: isNeededPhotosUpdate
-  Interactor -> UserInfoDatabase++: find
-  return UserInfo
-return Boolean
+Presenter -> Interactor++: isNeededUpdatePhotos
+  opt this.userInfo==null
+    Interactor -> UserInfoDatabase++: find
+    return UserInfo
+  end
+return Callback#isNeededUpdatePhotosResult
 
-opt !isNeededPhotosUpdate
+opt !isNeededPhotosUpdateResult
+  View <-- Presenter: Callback#requestUpdatePhotosResult
   Presenter -> Presenter++
   destroy Presenter
 end
@@ -39,15 +42,20 @@ end
 == Update AccessToken ==
 
 Presenter -> Interactor++: isNeededUpdateAccessToken
-return Boolean
+  opt this.userInfo==null
+    Interactor -> UserInfoDatabase++: find
+    return UserInfo
+  end
+return Callback#isNeededUpdateAccessTokenResult
 
-opt !isNeededUpdateAccessToken
+opt !isNeededUpdateAccessTokenResult
   Presenter -> Interactor++: requestUpdateAccessToken
   Interactor -> GoogleOAuth2Api++: requestTokenInfoWithRefreshToken
   return TokenInfo
 
   opt TokenInfo==null
     Presenter <-- Interactor: Callback#requestUpdateAccessTokenResult
+    View <-- Presenter: Callback#requestUpdatePhotosResult
     Presenter -> Presenter++
     destroy Presenter
   end
@@ -59,20 +67,23 @@ end
 == Decide Selected Album ==
 
 Presenter -> Interactor++: hasSelectedAlbum
-  Interactor -> SelectedAlbumDatabase++: find
-  return SelectedAlbum
-return Boolean
+  opt this.selectedAlbum==null
+    Interactor -> SelectedAlbumDatabase++: find
+    return SelectedAlbum
+  end
+return Callback#hasSelectedAlbumResult
 
-opt !hasSelectedAlbum
+opt !hasSelectedAlbumResult
   Presenter -> Router: startSelectActivity
   [--> View
   View --> Presenter: evaluateActivityResult
 
-  alt Has selected albumId?
-    Presenter -> Interactor++: updateSelectedAlbumInfo
+  alt Has selected album?
+    Presenter -> Interactor++: requestUpdateSelectedAlbum
     Interactor -> SelectedAlbumDatabase: update
     Interactor--
   else
+    View <-- Presenter: Callback#requestUpdatePhotosResult
     Presenter -> Presenter++
     destroy Presenter
   end
@@ -92,9 +103,9 @@ Presenter -> Interactor++: requestDownloadMediaItems
 
   Interactor -> DisplayedMediaItemDatabase: replace
 
-Presenter <-- Interactor--: requestDownloadMediaItemsResult
+Presenter <-- Interactor--: Callback#requestDownloadMediaItemsResult
 
 ====
 
-View <-- Presenter--: notifyUpdatedPhotoData
+View <-- Presenter--: Callback#requestUpdatePhotosResult
 @enduml

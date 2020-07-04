@@ -1,5 +1,5 @@
 @startuml
-namespace app.splash {
+namespace app.splash #FFFFEE {
   SplashActivity o-- SplashPresenter: -presenter
   SplashPresenter o--- SplashInteractor: -interactor
   SplashPresenter o---- SplashRouter: -router
@@ -29,7 +29,7 @@ namespace app.splash {
   }
 }
 
-namespace app.splash.contract.SplashContract {
+namespace app.splash.contract.SplashContract #EEEEEE {
   interface Presenter {
     + requestSignIn()
     + evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
@@ -69,7 +69,7 @@ namespace app.splash.contract.SplashContract {
 
 app.splash +-- app.splash.contract.SplashContract
 
-namespace core.viper.ViperContract {
+namespace core.viper.ViperContract #DDDDDD {
   interface Presenter {
     + destroy()
   }
