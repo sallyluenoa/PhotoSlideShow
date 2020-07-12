@@ -18,20 +18,18 @@ class UserInfoDatabaseImpl: UserInfoDatabase {
         }
     }
 
-    override suspend fun delete(email: String) {
-        val dao = dao()
-//        val usersInfo = dao.find(email)
-//        usersInfo.forEach { dao.delete(it) }
+    override suspend fun delete(emailAddress: String) {
+        val userInfo = dao().findByEmailAddress(emailAddress)
+        if (userInfo != null) {
+            dao().delete(userInfo)
+        }
     }
 
-    override suspend fun find(email: String): UserInfo? {
-        return null
- //       val usersInfo = database.dao().find(email)
-//        return if (!usersInfo.isNullOrEmpty()) usersInfo[0] else null
-    }
+    override suspend fun find(emailAddress: String): UserInfo? =
+        dao().findByEmailAddress(emailAddress)
 
-    override suspend fun findWithSelectedAlbums(email: String): UserInfoWithSelectedAlbums? =
-        dao().findWithSelectedAlbums(email)
+    override suspend fun findWithSelectedAlbums(emailAddress: String): UserInfoWithSelectedAlbums? =
+        dao().findWithSelectedAlbums(emailAddress)
 
     private fun dao(): UserInfoDao = SingletonRoomObject.userInfoDao()
 }

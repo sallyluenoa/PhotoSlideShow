@@ -21,17 +21,17 @@ interface UserInfoDatabase {
     /**
      * ユーザー情報を削除する.
      * コルーチン内で呼び出すこと.
-     * @param email ユーザーアカウント(Email)
+     * @param emailAddress ユーザーアカウント(Email)
      */
-    suspend fun delete(email: String)
+    suspend fun delete(emailAddress: String)
 
     /**
      * ユーザー情報を検索する.
      * コルーチン内で呼び出すこと.
-     * @param email ユーザーアカウント(Email)
+     * @param emailAddress ユーザーアカウント(Email)
      * @return 検索にヒットしたユーザー情報、見つからなかった場合はNULL
      */
-    suspend fun find(email: String): UserInfo?
+    suspend fun find(emailAddress: String): UserInfo?
 
-    suspend fun findWithSelectedAlbums(email: String): UserInfoWithSelectedAlbums?
+    suspend fun findWithSelectedAlbums(emailAddress: String): UserInfoWithSelectedAlbums?
 }
