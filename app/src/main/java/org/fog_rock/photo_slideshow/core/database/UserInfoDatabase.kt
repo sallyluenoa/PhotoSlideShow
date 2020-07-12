@@ -1,11 +1,11 @@
 package org.fog_rock.photo_slideshow.core.database
 
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
+import org.fog_rock.photo_slideshow.core.database.entity.UserInfoWithSelectedAlbums
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 /**
  * ユーザー情報に関連するデータベース.
- * https://developer.android.com/training/data-storage/room?hl=ja
  */
 interface UserInfoDatabase {
 
@@ -16,7 +16,7 @@ interface UserInfoDatabase {
      * @param tokenInfo トークン情報
      * @return 追加更新した場合はtrue、情報不足により失敗した場合はfalse
      */
-    suspend fun update(email: String, tokenInfo: TokenInfo): Boolean
+    suspend fun update(emailAddress: String, tokenInfo: TokenInfo)
 
     /**
      * ユーザー情報を削除する.
@@ -33,10 +33,5 @@ interface UserInfoDatabase {
      */
     suspend fun find(email: String): UserInfo?
 
-    /**
-     * 登録されている全ユーザー情報を取得する.
-     * コルーチン内で呼び出すこと.
-     * @return 全ユーザー情報
-     */
-    suspend fun getAll(): List<UserInfo>
+    suspend fun findWithSelectedAlbums(email: String): UserInfoWithSelectedAlbums?
 }
