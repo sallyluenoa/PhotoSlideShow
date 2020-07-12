@@ -7,91 +7,126 @@ namespace core.database #FFEEFF {
       + createDateTimeMillis: Long
       + updateDateTimeMillis: Long
     }
-    class UserInfo <<(D, sandybrown)>> {
+    class UserInfo << (D, sandybrown) >> {
       + emailAdress: String
       + accessToken: String
       + refreshToken: String
       + expiredAccessTokenTimeMillis: Long
       + updatePhotosTimeMillis: Long
     }
-    class SelectedAlbum <<(D, sandybrown)>> {
-      + userId: Long
+    class SelectedAlbum << (D, sandybrown) >> {
+      + userInfoId: Long
       + albumId: String
       + albumTitle: String
-      + coverMediaItemId: String
+      + coveredMediaItemId: String
     }
-    class DisplayedPhotos <<(D, sandybrown)>> {
+    class DisplayedPhoto << (D, sandybrown) >> {
       + selectedAlbumId: Long
       + mediaItemId: String
       + fileName: String
-      + isCoveredAlbum: Boolean
+      + creationTime: Long
+      + contributorName: String
+      + isMyFavorite: Boolean
     }
+    class UserInfoWithSelectedAlbums << (D, sandybrown) >>
+    class SelectedAlbumWithDisplayedPhotos << (D, sandybrown) >>
+    class SelectedAlbumWithCoveredPhoto << (D, sandybrown) >>
 
-    UserInfo .up.|> BaseEntity
-    SelectedAlbum  .up.|> BaseEntity
-    DisplayedPhotos .up.|> BaseEntity
+    UserInfo .down.|> BaseEntity
+    SelectedAlbum .down.|> BaseEntity
+    DisplayedPhoto .down.|> BaseEntity
+
+    UserInfoWithSelectedAlbums "1" *-down- "1" UserInfo
+    UserInfoWithSelectedAlbums "1" *-down- "*" SelectedAlbum
+    SelectedAlbumWithDisplayedPhotos "1" *-down- "1" SelectedAlbum
+    SelectedAlbumWithDisplayedPhotos "1" *-down- "*" DisplayedPhoto
+    SelectedAlbumWithCoveredPhoto "1" *-down- "1" SelectedAlbum
+    SelectedAlbumWithCoveredPhoto "1" *-down- "1" DisplayedPhoto
   }
 
   namespace room {
-    abstract class AppRoomDatabase {
+    class SingletonRoomObject << (O, gold) Singleton >> {
+      + setup(context: Context)
+      + userInfoDao(): UserInfoDao
+      + selectedAlbumDao(): SelectedAlbumDao
+      + displayedPhotoDao(): DisplayedPhotoDao
+    }
+    abstract class SingletonRoomDatabase {
       + {abstract} userInfoDao(): UserInfoDao
       + {abstract} selectedAlbumDao(): SelectedAlbumDao
-      + {abstract} displayedPhotosDao(): DisplayedPhotosDao
+      + {abstract} displayedPhotoDao(): DisplayedPhotoDao
     }
+
+    SingletonRoomObject "1" *-down- "1" SingletonRoomDatabase
   }
 
   namespace dao {
-    interface BaseDao<KeyT, EntityT> {
+    interface BaseDao<EntityT> {
       + insert(entity: EntityT)
+      + insert(entities: List<EntityT>)
       + update(entity: EntityT)
+      + update(entities: List<EntityT>)
       + delete(entity: EntityT)
-      + getAll(): List<EntityT>
-      + findById(id: long): List<EntityT>
-      + findByKey(key: KeyT): List<EntityT>
+      + delete(entities: List<EntityT>)
+      + findById(id: long): EntityT?
     }
-    interface UserInfoDao
-    interface SelectedAlbumDao
-    interface DisplayedPhotosDao
+    interface UserInfoDao {
+      + findByEmailAddress(emailAddress: String): UserInfo?
+      + findWithSelectedAlbums(emailAddress: String): UserInfoWithSelectedAlbums?
+    }
+    interface SelectedAlbumDao {
+      + findByUserInfoIdAndAlbumId(userInfoId: Long, albumId: String): SelectedAlbum?
+      + findWithCoveredPhoto(albumId: String): SelectedAlbumWithCoveredPhoto?
+      + findWithDisplayedPhotos(albumId: String): SelectedAlbumWithDisplayedPhotos?
+    }
+    interface DisplayedPhotoDao {
+      + findBySelectedAlbumIdAndMediaItemId(selectedAlbumId: Long, mediaItemId: String): DisplayedPhoto?
+    }
 
     UserInfoDao ..|> BaseDao
     SelectedAlbumDao ..|> BaseDao
-    DisplayedPhotosDao ..|> BaseDao
+    DisplayedPhotoDao ..|> BaseDao
   }
 
   namespace impl {
-    class UserInfoDatabaseImpl
-    class SelectedAlbumDatabaseImpl
-    class DisplayedPhotosDatabaseImpl
+    class UserInfoDatabaseImpl {
+      - dao(): UserInfoDao
+    }
+    class SelectedAlbumDatabaseImpl {
+      - dao(): SelectedAlbumDao
+    }
+    class DisplayedPhotoDatabaseImpl {
+      - dao(): DisplayedPhotoDao
+    }
   }
 
-  interface BaseDatabase<KeyT, EntityT, ResourceT> {
-    + update(resource: ResourceT): Boolean
-    + deleteById(id: long)
-    + deleteByKey(key: KeyT)
-    + getAll(): List<EntityT>
-    + findById(id: long): EntityT?
-    + findByKey(key: KeyT): EntityT?
-    # dao(): BaseDao
+  interface UserInfoDatabase {
+    + update(emailAddress: String, tokenInfo: TokenInfo)
+    + delete(email: String)
+    + find(email: String): UserInfo?
+    + findWithSelectedAlbums(email: String): UserInfoWithSelectedAlbums?
   }
-  interface UserInfoDatabase
-  interface SelectedAlbumDatabase
-  interface DisplayedPhotosDatabase
-
-  UserInfoDatabase .up.|> BaseDatabase
-  SelectedAlbumDatabase .up.|> BaseDatabase
-  DisplayedPhotosDatabase .up.|> BaseDatabase
+  interface SelectedAlbumDatabase {
+    + update(userInfoId: Long, album: Album)
+    + delete(userInfoId: Long, albumId: String)
+    + findWithCoveredPhoto(albumId: String): SelectedAlbumWithCoveredPhoto?
+    + findWithDisplayedPhotos(albumId: String): SelectedAlbumWithDisplayedPhotos?
+  }
+  interface DisplayedPhotoDatabase {
+    + update(selectedAlbumId: Long, mediaItem: MediaItem)
+  }
 }
 
 core.database.impl.UserInfoDatabaseImpl .up.|> core.database.UserInfoDatabase
 core.database.impl.SelectedAlbumDatabaseImpl .up.|> core.database.SelectedAlbumDatabase
-core.database.impl.DisplayedPhotosDatabaseImpl .up.|> core.database.DisplayedPhotosDatabase
+core.database.impl.DisplayedPhotoDatabaseImpl .up.|> core.database.DisplayedPhotoDatabase
 
-core.database.impl.UserInfoDatabaseImpl o-down- core.database.room.AppRoomDatabase
-core.database.impl.SelectedAlbumDatabaseImpl o-down- core.database.room.AppRoomDatabase
-core.database.impl.DisplayedPhotosDatabaseImpl o-down- core.database.room.AppRoomDatabase
+core.database.impl.UserInfoDatabaseImpl o-down- core.database.room.SingletonRoomObject
+core.database.impl.SelectedAlbumDatabaseImpl o-down- core.database.room.SingletonRoomObject
+core.database.impl.DisplayedPhotoDatabaseImpl o-down- core.database.room.SingletonRoomObject
 
-core.database.room.AppRoomDatabase o-down- core.database.dao.UserInfoDao
-core.database.room.AppRoomDatabase o-down- core.database.dao.SelectedAlbumDao
-core.database.room.AppRoomDatabase o-down- core.database.dao.DisplayedPhotosDao
+core.database.room.SingletonRoomDatabase o-down- core.database.dao.UserInfoDao
+core.database.room.SingletonRoomDatabase o-down- core.database.dao.SelectedAlbumDao
+core.database.room.SingletonRoomDatabase o-down- core.database.dao.DisplayedPhotoDao
 
 @enduml
