@@ -41,17 +41,14 @@ class SplashInteractor(
         GlobalScope.launch(Dispatchers.Main) {
             val account = GoogleSignInApi.getSignedInAccount(context)
             val email = account?.email ?: run {
-                requestUpdateUserInfoResult(false)
+                requestUpdateUserInfoResult(null, null)
                 return@launch
             }
             val tokenInfo = requestTokenInfo(email, account.serverAuthCode) ?: run {
-                requestUpdateUserInfoResult(false)
+                requestUpdateUserInfoResult(email, null)
                 return@launch
             }
-            val isSucceeded = withContext(Dispatchers.Default) {
-                database.update(email, tokenInfo)
-            }
-            requestUpdateUserInfoResult(isSucceeded)
+            requestUpdateUserInfoResult(email, tokenInfo)
         }
     }
 
@@ -96,13 +93,18 @@ class SplashInteractor(
         }
     }
 
-    private suspend fun requestUpdateUserInfoResult(isSucceeded: Boolean) {
-        if (!isSucceeded) {
+    private suspend fun requestUpdateUserInfoResult(email: String?, tokenInfo: TokenInfo?) {
+        if (email != null && tokenInfo != null) {
+            withContext(Dispatchers.Default) {
+                database.update(email, tokenInfo)
+            }
+            callback.requestUpdateUserInfoResult(true)
+        } else {
             // 失敗した場合はGoogleアカウントアクセス破棄をする.
             withContext(Dispatchers.Default) {
                 signInApi.requestRevokeAccess()
             }
+            callback.requestUpdateUserInfoResult(false)
         }
-        callback.requestUpdateUserInfoResult(false)
     }
 }

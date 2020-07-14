@@ -42,9 +42,9 @@ object SingletonRoomObject {
         ).build()
     }
 
-    fun userInfoDao() = database.userInfoDao()
+    fun userInfoDao(): UserInfoDao = database.userInfoDao()
 
-    fun selectedAlbumDao() = database.selectedAlbumDao()
+    fun selectedAlbumDao(): SelectedAlbumDao = database.selectedAlbumDao()
 
-    fun displayedPhotoDao() = database.displayedPhotoDao()
+    fun displayedPhotoDao(): DisplayedPhotoDao = database.displayedPhotoDao()
 }

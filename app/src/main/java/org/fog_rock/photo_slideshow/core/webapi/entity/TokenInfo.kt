@@ -14,35 +14,24 @@ data class TokenInfo(
     val expiredAccessTokenTimeMillis: Long
 ) {
 
+    constructor(
+        response: TokenResponse
+    ): this(
+        response.accessToken,
+        (if (response.refreshToken.isNullOrEmpty()) response.refreshToken
+        else throw IllegalArgumentException("RefreshToken must not be null or empty.")),
+         convertExpiredAccessTokenTimeMillis(response.expiresInSeconds)
+    )
+
+    constructor(
+        response: TokenResponse, refreshToken: String
+    ): this (
+        response.accessToken,
+        refreshToken,
+        convertExpiredAccessTokenTimeMillis(response.expiresInSeconds)
+    )
+
     companion object {
-
-        /**
-         * レスポンスからトークン情報を生成する.
-         * @param response トークンレスポンス
-         * @exception IllegalArgumentException リフレッシュトークンがNULLの場合に発生
-         */
-        fun newTokenInfo(response: TokenResponse) =
-            if (!response.refreshToken.isNullOrEmpty()) {
-                TokenInfo(
-                    response.accessToken,
-                    response.refreshToken,
-                    convertExpiredAccessTokenTimeMillis(response.expiresInSeconds)
-                )
-            } else {
-                throw IllegalArgumentException("RefreshToken must not be null or empty.")
-            }
-
-        /**
-         * レスポンスからトークン情報を生成する.
-         * @param response トークンレスポンス
-         * @param refreshToken リフレッシュトークン
-         */
-        fun newTokenInfo(response: TokenResponse, refreshToken: String) = TokenInfo(
-            response.accessToken,
-            refreshToken,
-            convertExpiredAccessTokenTimeMillis(response.expiresInSeconds)
-        )
-
         private fun convertExpiredAccessTokenTimeMillis(expiresInSeconds: Long?): Long =
             if (expiresInSeconds != null) System.currentTimeMillis() + expiresInSeconds * 1000L else 0
     }

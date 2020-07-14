@@ -36,7 +36,7 @@ class SplashPresenter(
         context,
         GoogleSignInApiImpl(clientHolder),
         GoogleOAuth2ApiImpl(AssetsFileReaderImpl(context)),
-        UserInfoDatabaseImpl(context),
+        UserInfoDatabaseImpl(),
         this)
 
     private val router: SplashContract.Router = SplashRouter()

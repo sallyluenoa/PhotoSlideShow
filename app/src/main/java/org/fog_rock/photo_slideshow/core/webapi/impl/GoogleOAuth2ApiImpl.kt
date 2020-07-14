@@ -39,7 +39,7 @@ class GoogleOAuth2ApiImpl(
             val response = GoogleAuthorizationCodeTokenRequest(
                 NetHttpTransport(), JacksonFactory(), clientId, clientSecret, serverAuthCode, ""
             ).execute()
-            return TokenInfo.newTokenInfo(response)
+            return TokenInfo(response)
         } catch (e: TokenResponseException) {
             logE("Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
@@ -65,7 +65,7 @@ class GoogleOAuth2ApiImpl(
             val response = GoogleRefreshTokenRequest(
                 NetHttpTransport(), JacksonFactory(), refreshToken, clientId, clientSecret
             ).execute()
-            return TokenInfo.newTokenInfo(response, refreshToken)
+            return TokenInfo(response, refreshToken)
         } catch (e: TokenResponseException) {
             logE("Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
