@@ -3,21 +3,22 @@ package org.fog_rock.photo_slideshow.app.main.contract
 import android.app.Activity
 import android.content.Intent
 import com.google.photos.types.proto.Album
-import com.google.photos.types.proto.MediaItem
+import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 
 class MainContract {
 
     interface Presenter : ViperContract.Presenter {
         /**
-         * アルバム取得を要求.
+         * 写真更新に必要な一連処理をリクエストする.
+         * @see PresenterCallback.requestUpdatePhotosResult
          */
-        fun requestAlbums()
+        fun requestUpdatePhotos()
 
         /**
          * ライセンス表示を要求.
          */
-        fun requestLicense()
+        fun requestShowLicenses()
 
         /**
          * サインアウトを要求.
@@ -33,10 +34,10 @@ class MainContract {
 
     interface PresenterCallback : ViperContract.PresenterCallback {
         /**
-         * スライドショー開始を要求する.
-         * @param files 画像ファイルリスト
+         * 写真更新に必要な一連処理の結果.
+         * @see Presenter.requestUpdatePhotos
          */
-        fun requestSlideShow(files: List<String>)
+        fun requestUpdatePhotosResult(request: UpdatePhotosRequest)
 
         /**
          * ビューの終了処理を要求する.
@@ -46,53 +47,79 @@ class MainContract {
 
     interface Interactor : ViperContract.Interactor {
         /**
-         * 共有アルバム取得を要求.
-         * @see InteractorCallback.requestSharedAlbumsResult
+         * ユーザー情報の取得要求.
+         * @see InteractorCallback.requestLoadUserInfoResult
          */
-        fun requestSharedAlbums()
+        fun requestLoadUserInfo()
 
         /**
-         * メディアアイテム取得を要求.
-         * @param album メディアアイテムを取得するターゲットアルバム
+         * アクセストーンの更新要求.
+         * @see InteractorCallback.requestUpdateAccessTokenResult
          */
-        fun requestMediaItems(album: Album)
+        fun requestUpdateAccessToken()
 
         /**
-         * ファイルダウンロードを要求.
-         * @param mediaItems ダウンロードターゲットのメディアアイテムリスト
+         * 選択したアルバムの更新要求.
+         * @see InteractorCallback.requestUpdateSelectedAlbumsResult
          */
-        fun requestDownloadFiles(mediaItems: List<MediaItem>)
+        fun requestUpdateSelectedAlbums()
 
         /**
-         * サインアウトを要求.
+         * 写真リストのダウンロード要求.
+         * @see InteractorCallback.requestDownloadPhotosResult
+         */
+        fun requestDownloadPhotos()
+
+        /**
+         * サインアウト要求.
+         * @see InteractorCallback.requestSignOutResult
          */
         fun requestSignOut()
+
+        /**
+         * 写真更新する必要があるか.
+         */
+        fun isNeededUpdatePhotos(): Boolean
+
+        /**
+         * アクセストークンを更新する必要があるか.
+         */
+        fun isNeededUpdateAccessToken(): Boolean
+
+        /**
+         * 選択されたアルバムが存在するか.
+         */
+        fun hasSelectedAlbums(): Boolean
     }
 
     interface InteractorCallback : ViperContract.InteractorCallback {
         /**
-         * 共有アルバム取得結果.
-         * @param albums アルバムリスト
-         * @see Interactor.requestSharedAlbums
+         * ユーザー情報の取得要求の結果.
+         * @see Interactor.requestLoadUserInfo
          */
-        fun requestSharedAlbumsResult(albums: List<Album>?)
+        fun requestLoadUserInfoResult(isSucceeded: Boolean)
 
         /**
-         * メディアアイテム取得結果.
-         * @param mediaItems メディアアイテムリスト
-         * @see Interactor.requestMediaItems
+         * アクセストーンの更新要求の結果.
+         * @see Interactor.requestUpdateAccessToken
          */
-        fun requestMediaItemsResult(mediaItems: List<MediaItem>?)
+        fun requestUpdateAccessTokenResult(isSucceeded: Boolean)
 
         /**
-         * ファイルダウンロード完了.
-         * @param files ダウンロードに成功した画像ファイルリスト
-         * @see Interactor.requestDownloadFiles
+         * 選択したアルバムの更新要求の結果.
+         * @see Interactor.requestUpdateSelectedAlbums
          */
-        fun completedDownloadFiles(files: List<String>)
+        fun requestUpdateSelectedAlbumsResult(isSucceeded: Boolean)
 
         /**
-         * サインアウト完了.
+         * 写真リストのダウンロード要求の結果.
+         * @see Interactor.requestDownloadPhotos
+         */
+        fun requestDownloadPhotosResult(isSucceeded: Boolean)
+
+        /**
+         * サインアウト結果.
+         * @see Interactor.requestSignOut
          */
         fun requestSignOutResult(isSucceeded: Boolean)
     }
