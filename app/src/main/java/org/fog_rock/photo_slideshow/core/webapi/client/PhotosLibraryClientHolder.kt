@@ -11,16 +11,11 @@ import java.io.IOException
 /**
  * PhotosLibraryClientをシングルトンで保持するHolderクラス.
  */
-class PhotosLibraryClientHolder(tokenInfo: TokenInfo) {
-
-    companion object {
-        // 有効期限を確認してから実際にAPI実行するまでの時間を考慮.
-        private const val INTERVAL_TIME_MILLIS = 60 * 1000L
-    }
+class PhotosLibraryClientHolder(accessToken: String) {
 
     val client: PhotosLibraryClient =
         try {
-            val credentials = OAuth2Credentials.create(AccessToken(tokenInfo.accessToken, null))
+            val credentials = OAuth2Credentials.create(AccessToken(accessToken, null))
             val settings = PhotosLibrarySettings.newBuilder().apply {
                 credentialsProvider = FixedCredentialsProvider.create(credentials)
             }.build()
@@ -28,12 +23,4 @@ class PhotosLibraryClientHolder(tokenInfo: TokenInfo) {
         } catch (e : IOException) {
             throw IOException("Failed to initialize PhotosLibraryClient.")
         }
-
-    private val expiredTimeMillis = tokenInfo.expiredAccessTokenTimeMillis
-
-    /**
-     * Clientの有効期限が切れていないか確認する.
-     */
-    fun isAvailable(): Boolean =
-        System.currentTimeMillis() < expiredTimeMillis - INTERVAL_TIME_MILLIS
 }

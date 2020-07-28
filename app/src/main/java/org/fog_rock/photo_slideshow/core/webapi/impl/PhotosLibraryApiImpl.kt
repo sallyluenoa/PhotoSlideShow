@@ -17,8 +17,6 @@ class PhotosLibraryApiImpl(
         this.clientHolder = clientHolder
     }
 
-    override fun isAvailableClientHolder(): Boolean = clientHolder.isAvailable()
-
     override suspend fun requestAlbum(albumId: String): Album =
         try {
             clientHolder.client.getAlbum(albumId)

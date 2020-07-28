@@ -5,6 +5,7 @@ import android.content.Intent
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 class MainContract {
 
@@ -40,29 +41,28 @@ class MainContract {
         fun requestUpdatePhotosResult(request: UpdatePhotosRequest)
 
         /**
-         * ビューの終了処理を要求する.
+         * サインアウトの要求結果.
          */
-        fun requestFinish()
+        fun requestSignOutResult(result: ApiResult)
     }
 
     interface Interactor : ViperContract.Interactor {
         /**
          * ユーザー情報の取得要求.
-         * @see InteractorCallback.requestLoadUserInfoResult
+         * @see InteractorCallback.requestLoadFromDatabaseResult
          */
-        fun requestLoadUserInfo()
+        fun requestLoadFromDatabase()
 
         /**
-         * アクセストーンの更新要求.
-         * @see InteractorCallback.requestUpdateAccessTokenResult
+         * アルバム一覧の要求.
          */
-        fun requestUpdateAccessToken()
+        fun requestAlbums()
 
         /**
          * 選択したアルバムの更新要求.
          * @see InteractorCallback.requestUpdateSelectedAlbumsResult
          */
-        fun requestUpdateSelectedAlbums()
+        fun requestUpdateSelectedAlbums(albums: List<Album>)
 
         /**
          * 写真リストのダウンロード要求.
@@ -82,11 +82,6 @@ class MainContract {
         fun isNeededUpdatePhotos(): Boolean
 
         /**
-         * アクセストークンを更新する必要があるか.
-         */
-        fun isNeededUpdateAccessToken(): Boolean
-
-        /**
          * 選択されたアルバムが存在するか.
          */
         fun hasSelectedAlbums(): Boolean
@@ -95,15 +90,14 @@ class MainContract {
     interface InteractorCallback : ViperContract.InteractorCallback {
         /**
          * ユーザー情報の取得要求の結果.
-         * @see Interactor.requestLoadUserInfo
+         * @see Interactor.requestLoadFromDatabase
          */
-        fun requestLoadUserInfoResult(isSucceeded: Boolean)
+        fun requestLoadFromDatabaseResult(isSucceeded: Boolean)
 
         /**
-         * アクセストーンの更新要求の結果.
-         * @see Interactor.requestUpdateAccessToken
+         * アルバム一覧の要求.
          */
-        fun requestUpdateAccessTokenResult(isSucceeded: Boolean)
+        fun requestAlbumsResult(albums: List<Album>?)
 
         /**
          * 選択したアルバムの更新要求の結果.
@@ -121,7 +115,7 @@ class MainContract {
          * サインアウト結果.
          * @see Interactor.requestSignOut
          */
-        fun requestSignOutResult(isSucceeded: Boolean)
+        fun requestSignOutResult(result: ApiResult)
     }
 
     interface Router : ViperContract.Router {

@@ -70,4 +70,20 @@ data class UserInfo(
         updateDateTimeMillis = System.currentTimeMillis(),
         updatePhotosTimeMillis = updatePhotosTimeMillis
     )
+
+    /**
+     * 写真更新が必要か.
+     * @param intervalTimeMillis 写真更新をしなくてもよい間隔
+     * @return 現在の時間が「最終更新時間 + 指定された間隔」より過ぎていれば true
+     */
+    fun isNeededUpdatePhotos(intervalTimeMillis: Long): Boolean =
+        System.currentTimeMillis() > updatePhotosTimeMillis + intervalTimeMillis
+
+    /**
+     * アクセストークンが有効か.
+     * @param intervalTimeMillis 有効期限までのバッファー間隔
+     * @return 現在の時間が「アクセストークン有効期限 - 指定された間隔」を過ぎていなければ true
+     */
+    fun isAvailableAccessToken(intervalTimeMillis: Long): Boolean =
+        System.currentTimeMillis() < expiredAccessTokenTimeMillis - intervalTimeMillis
 }

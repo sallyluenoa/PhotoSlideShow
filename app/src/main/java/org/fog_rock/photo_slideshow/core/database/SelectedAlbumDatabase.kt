@@ -8,6 +8,8 @@ interface SelectedAlbumDatabase {
 
     suspend fun update(userInfoId: Long, album: Album)
 
+    suspend fun update(userInfoId: Long, albums: List<Album>)
+
     suspend fun delete(userInfoId: Long, albumId: String)
 
     suspend fun findWithCoveredPhoto(albumId: String): SelectedAlbumWithCoveredPhoto?

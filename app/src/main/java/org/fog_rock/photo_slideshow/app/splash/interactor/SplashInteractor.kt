@@ -39,16 +39,22 @@ class SplashInteractor(
 
     override fun requestUpdateUserInfo() {
         GlobalScope.launch(Dispatchers.Main) {
-            val account = GoogleSignInApi.getSignedInAccount(context)
-            val email = account?.email ?: run {
-                requestUpdateUserInfoResult(null, null)
-                return@launch
+            val email = GoogleSignInApi.getSignedInEmailAddress(context)
+            val serverAuthCode = GoogleSignInApi.getSignedInAccount(context).serverAuthCode
+            val tokenInfo = requestTokenInfo(email, serverAuthCode)
+
+            if (tokenInfo != null) {
+                withContext(Dispatchers.Default) {
+                    database.update(email, tokenInfo)
+                }
+                callback.requestUpdateUserInfoResult(true)
+            } else {
+                // 失敗した場合はGoogleアカウントアクセス破棄をする.
+                withContext(Dispatchers.Default) {
+                    signInApi.requestRevokeAccess()
+                }
+                callback.requestUpdateUserInfoResult(false)
             }
-            val tokenInfo = requestTokenInfo(email, account.serverAuthCode) ?: run {
-                requestUpdateUserInfoResult(email, null)
-                return@launch
-            }
-            requestUpdateUserInfoResult(email, tokenInfo)
         }
     }
 
@@ -90,21 +96,6 @@ class SplashInteractor(
             } else {
                 null
             }
-        }
-    }
-
-    private suspend fun requestUpdateUserInfoResult(email: String?, tokenInfo: TokenInfo?) {
-        if (email != null && tokenInfo != null) {
-            withContext(Dispatchers.Default) {
-                database.update(email, tokenInfo)
-            }
-            callback.requestUpdateUserInfoResult(true)
-        } else {
-            // 失敗した場合はGoogleアカウントアクセス破棄をする.
-            withContext(Dispatchers.Default) {
-                signInApi.requestRevokeAccess()
-            }
-            callback.requestUpdateUserInfoResult(false)
         }
     }
 }

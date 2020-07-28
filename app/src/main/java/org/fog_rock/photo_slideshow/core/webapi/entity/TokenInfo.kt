@@ -14,6 +14,8 @@ data class TokenInfo(
     val expiredAccessTokenTimeMillis: Long
 ) {
 
+    constructor(): this("", "", 0)
+
     constructor(
         response: TokenResponse
     ): this(

@@ -17,5 +17,9 @@ class DisplayedPhotoDatabaseImpl: DisplayedPhotoDatabase {
         }
     }
 
+    override suspend fun update(selectedAlbumId: Long, mediaItems: List<MediaItem>) {
+        mediaItems.forEach { update(selectedAlbumId, it) }
+    }
+
     private fun dao(): DisplayedPhotoDao = SingletonRoomObject.displayedPhotoDao()
 }

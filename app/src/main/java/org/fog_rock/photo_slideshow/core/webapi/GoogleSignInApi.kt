@@ -16,13 +16,23 @@ interface GoogleSignInApi {
          * 現在Googleアカウントでサインインしているか確認.
          */
         fun isSignedInAccount(context: Context): Boolean =
-            getSignedInAccount(context) != null
+            GoogleSignIn.getLastSignedInAccount(context) != null
 
         /**
          * 現在サインインしているGoogleアカウント取得.
+         * @throws NullPointerException
          */
-        fun getSignedInAccount(context: Context): GoogleSignInAccount? =
-            GoogleSignIn.getLastSignedInAccount(context)
+        fun getSignedInAccount(context: Context): GoogleSignInAccount =
+            GoogleSignIn.getLastSignedInAccount(context) ?:
+            throw NullPointerException("There are no sign in account.")
+
+        /**
+         * 現在サインインしているE-mailアドレス取得.
+         * @throws NullPointerException
+         */
+        fun getSignedInEmailAddress(context: Context): String =
+            GoogleSignIn.getLastSignedInAccount(context)?.email ?:
+            throw NullPointerException("There are no sign in account.")
 
         /**
          * Googleアカウントでのユーザーサインインに成功したか.

@@ -17,11 +17,6 @@ interface PhotosLibraryApi {
     fun updateClientHolder(clientHolder: PhotosLibraryClientHolder)
 
     /**
-     * ClientHolderの有効期限が切れていないか確認する.
-     */
-    fun isAvailableClientHolder(): Boolean
-
-    /**
      * アルバム取得要求.
      * コルーチン内で呼び出すこと.
      * @param albumId アルバムID

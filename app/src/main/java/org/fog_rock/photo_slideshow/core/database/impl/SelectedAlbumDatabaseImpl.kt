@@ -19,6 +19,10 @@ class SelectedAlbumDatabaseImpl: SelectedAlbumDatabase {
         }
     }
 
+    override suspend fun update(userInfoId: Long, albums: List<Album>) {
+        albums.forEach { update(userInfoId, it) }
+    }
+
     override suspend fun delete(userInfoId: Long, albumId: String) {
         val selectedAlbum = dao().findByUserInfoIdAndAlbumId(userInfoId, albumId)
         if (selectedAlbum != null) {

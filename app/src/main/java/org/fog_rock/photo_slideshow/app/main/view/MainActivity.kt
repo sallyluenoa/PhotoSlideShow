@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -12,14 +11,18 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.activity_main.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
+import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
 import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
 import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
-    private val TAG = MainActivity::class.java.simpleName
-
-    private val PRESENT_TIME_MILLISECS = 5000L
+    companion object {
+        private const val PRESENT_TIME_MILLISECS = 5000L
+    }
 
     private val fragmentManager = supportFragmentManager
 
@@ -67,21 +70,21 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean =
         when (item?.itemId) {
             R.id.action_menu -> {
-                Log.i(TAG, "Menu action is selected.")
+                logI("Menu action is selected.")
                 true
             }
             R.id.action_license -> {
-                Log.i(TAG, "License action is selected.")
-                presenter.requestLicense()
+                logI("License action is selected.")
+                presenter.requestShowLicenses()
                 true
             }
             R.id.action_sign_out -> {
-                Log.i(TAG, "Sign out action is selected.")
+                logI("Sign out action is selected.")
                 presenter.requestSignOut()
                 true
             }
             else -> {
-                Log.e(TAG, "No actions are found.")
+                logE("No actions are found.")
                 super.onOptionsItemSelected(item)
             }
         }
@@ -94,16 +97,16 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     override fun getActivity(): Activity = this
 
-    override fun requestSlideShow(files: List<String>) {
+    override fun requestUpdatePhotosResult(request: UpdatePhotosRequest) {
         slideShowFiles = files
         handler.removeCallbacksAndMessages(null)
 
         if (slideShowFiles.isEmpty()) {
-            Log.e(TAG, "Files for slide show is empty.")
+            logE("Files for slide show is empty.")
             return
         }
         if (slideShowFiles.size == 1) {
-            Log.i(TAG, "Present one image.")
+            logE("Present one image.")
             presentImage(slideShowFiles[0])
             return
         }
@@ -111,7 +114,11 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         presentSlideShow()
     }
 
-    override fun requestFinish() = finish()
+    override fun requestSignOutResult(result: ApiResult) {
+        if (result == ApiResult.SUCCEEDED) {
+            finish();
+        }
+    }
 
     /**
      * 新しいフラグメントに置換する.
@@ -129,12 +136,12 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     private fun presentImage(filePath: String) {
         for (fragment in fragmentManager.fragments) {
             if (fragment is SlideShowFragment) {
-                Log.i(TAG, "Update image to fragment. FilePath: $filePath")
+                logI("Update image to fragment. FilePath: $filePath")
                 fragment.setImageView(filePath)
                 return
             }
         }
-        Log.i(TAG, "Set image to new fragment. FilePath: $filePath")
+        logI("Set image to new fragment. FilePath: $filePath")
         replaceFragment(SlideShowFragment.newInstance(filePath))
     }
 
@@ -142,7 +149,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
      * ファイルリストからインデックスに該当するファイルをスライドショーに表示する.
      */
     private fun presentSlideShow() {
-        Log.i(TAG, "Present image. Index: $index")
+        logI("Present image. Index: $index")
         presentImage(slideShowFiles[index])
 
         handler.postDelayed({
