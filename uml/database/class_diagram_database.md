@@ -4,44 +4,76 @@ namespace core.database #FFEEFF {
   namespace entity {
     interface BaseEntity {
       + id: Long
-      + createDateTimeMillis: Long
-      + updateDateTimeMillis: Long
+      + createTimeMillis: Long
+      + updateTimeMillis: Long
     }
     class UserInfo << (D, sandybrown) >> {
       + emailAdress: String
-      + accessToken: String
-      + refreshToken: String
-      + expiredAccessTokenTimeMillis: Long
+      - tokenInfo: String
       + updatePhotosTimeMillis: Long
+      + tokenInfo(): TokenInfo
+      + copy(tokenInfo: TokenInfo): UserInfo
+      + updatePhotos(): UserInfo
+      + isNeededUpdatePhotos(intervalTimeMillis: Long): Boolean
+      + isAvailableAccessToken(intervalTimeMillis: Long): Boolean
     }
     class SelectedAlbum << (D, sandybrown) >> {
       + userInfoId: Long
       + albumId: String
-      + albumTitle: String
-      + coveredMediaItemId: String
+      - album: String
+      + album(): Album
+      + copy(album: Album): SelectedAlbum
     }
     class DisplayedPhoto << (D, sandybrown) >> {
       + selectedAlbumId: Long
       + mediaItemId: String
-      + fileName: String
-      + creationTime: Long
-      + contributorName: String
+      - mediaItem: String
       + isMyFavorite: Boolean
+      + mediaItem(): MediaItem
+      + copy(mediaItem: MediaItem): DisplayedPhoto
     }
     class UserInfoWithSelectedAlbums << (D, sandybrown) >>
     class SelectedAlbumWithDisplayedPhotos << (D, sandybrown) >>
-    class SelectedAlbumWithCoveredPhoto << (D, sandybrown) >>
 
-    UserInfo .down.|> BaseEntity
-    SelectedAlbum .down.|> BaseEntity
-    DisplayedPhoto .down.|> BaseEntity
+    UserInfo ..|> BaseEntity
+    SelectedAlbum ..|> BaseEntity
+    DisplayedPhoto ..|> BaseEntity
 
-    UserInfoWithSelectedAlbums "1" *-down- "1" UserInfo
-    UserInfoWithSelectedAlbums "1" *-down- "*" SelectedAlbum
-    SelectedAlbumWithDisplayedPhotos "1" *-down- "1" SelectedAlbum
-    SelectedAlbumWithDisplayedPhotos "1" *-down- "*" DisplayedPhoto
-    SelectedAlbumWithCoveredPhoto "1" *-down- "1" SelectedAlbum
-    SelectedAlbumWithCoveredPhoto "1" *-down- "1" DisplayedPhoto
+    UserInfoWithSelectedAlbums "1" *-- "1" UserInfo
+    UserInfoWithSelectedAlbums "1" *-- "*" SelectedAlbum
+    SelectedAlbumWithDisplayedPhotos "1" *-- "1" SelectedAlbum
+    SelectedAlbumWithDisplayedPhotos "1" *-- "*" DisplayedPhoto
+  }
+
+  namespace dao {
+    interface BaseDao<EntityT> {
+      + insert(entity: EntityT)
+      + insert(entities: List<EntityT>)
+      + update(entity: EntityT)
+      + update(entities: List<EntityT>)
+      + delete(entity: EntityT)
+      + delete(entities: List<EntityT>)
+      + findById(id: long): EntityT?
+    }
+    interface UserInfoDao {
+      + findByEmailAddress(emailAddress: String): UserInfo?
+      + findWithSelectedAlbums(id: Long): UserInfoWithSelectedAlbums?
+      + findWithSelectedAlbums(emailAddress: String): UserInfoWithSelectedAlbums?
+    }
+    interface SelectedAlbumDao {
+      + findByUniqueKeys(userInfoId: Long, albumId: String): SelectedAlbum?
+      + findWithDisplayedPhotos(id: Long): SelectedAlbumWithDisplayedPhotos?
+    }
+    interface DisplayedPhotoDao {
+      + findByUniqueKeys(selectedAlbumId: Long, mediaItemId: String): DisplayedPhoto?
+    }
+
+    UserInfoDao ..|> BaseDao
+    SelectedAlbumDao ..|> BaseDao
+    DisplayedPhotoDao ..|> BaseDao
+
+    UserInfoDao -[hidden]-> SelectedAlbumDao
+    SelectedAlbumDao -[hidden]-> DisplayedPhotoDao
   }
 
   namespace room {
@@ -59,74 +91,23 @@ namespace core.database #FFEEFF {
 
     SingletonRoomObject "1" *-down- "1" SingletonRoomDatabase
   }
-
-  namespace dao {
-    interface BaseDao<EntityT> {
-      + insert(entity: EntityT)
-      + insert(entities: List<EntityT>)
-      + update(entity: EntityT)
-      + update(entities: List<EntityT>)
-      + delete(entity: EntityT)
-      + delete(entities: List<EntityT>)
-      + findById(id: long): EntityT?
-    }
-    interface UserInfoDao {
-      + findByEmailAddress(emailAddress: String): UserInfo?
-      + findWithSelectedAlbums(emailAddress: String): UserInfoWithSelectedAlbums?
-    }
-    interface SelectedAlbumDao {
-      + findByUserInfoIdAndAlbumId(userInfoId: Long, albumId: String): SelectedAlbum?
-      + findWithCoveredPhoto(albumId: String): SelectedAlbumWithCoveredPhoto?
-      + findWithDisplayedPhotos(albumId: String): SelectedAlbumWithDisplayedPhotos?
-    }
-    interface DisplayedPhotoDao {
-      + findBySelectedAlbumIdAndMediaItemId(selectedAlbumId: Long, mediaItemId: String): DisplayedPhoto?
-    }
-
-    UserInfoDao ..|> BaseDao
-    SelectedAlbumDao ..|> BaseDao
-    DisplayedPhotoDao ..|> BaseDao
-  }
-
-  namespace impl {
-    class UserInfoDatabaseImpl {
-      - dao(): UserInfoDao
-    }
-    class SelectedAlbumDatabaseImpl {
-      - dao(): SelectedAlbumDao
-    }
-    class DisplayedPhotoDatabaseImpl {
-      - dao(): DisplayedPhotoDao
-    }
-  }
-
-  interface UserInfoDatabase {
-    + update(emailAddress: String, tokenInfo: TokenInfo)
-    + delete(email: String)
-    + find(email: String): UserInfo?
-    + findWithSelectedAlbums(email: String): UserInfoWithSelectedAlbums?
-  }
-  interface SelectedAlbumDatabase {
-    + update(userInfoId: Long, album: Album)
-    + delete(userInfoId: Long, albumId: String)
-    + findWithCoveredPhoto(albumId: String): SelectedAlbumWithCoveredPhoto?
-    + findWithDisplayedPhotos(albumId: String): SelectedAlbumWithDisplayedPhotos?
-  }
-  interface DisplayedPhotoDatabase {
-    + update(selectedAlbumId: Long, mediaItem: MediaItem)
-  }
 }
 
-core.database.impl.UserInfoDatabaseImpl .up.|> core.database.UserInfoDatabase
-core.database.impl.SelectedAlbumDatabaseImpl .up.|> core.database.SelectedAlbumDatabase
-core.database.impl.DisplayedPhotoDatabaseImpl .up.|> core.database.DisplayedPhotoDatabase
+namespace app.module #FFFFEE {
+    class AppDatabase {
+      + updateUserInfo(emailAddress: String, tokenInfo: TokenInfo)
+      + updateSelectedAlbums(userInfoId: Long, albums: List<Album>)
+      + updateDisplayedPhotos(selctedAlbumId: Long, mediaItems: List<MediaItem>)
+      + findUserInfoByEmailAddress(emailAddress: String): UserInfo?
+      + findUserInfoWithSelectedAlbums(emailAddress: String): UserInfoWithSelectedAlbums?
+      + findSelectedAlbumWithDisplayedPhotos(id: Long): SelectedAlbumWithDisplayedPhotos?
+    }
+}
 
-core.database.impl.UserInfoDatabaseImpl o-down- core.database.room.SingletonRoomObject
-core.database.impl.SelectedAlbumDatabaseImpl o-down- core.database.room.SingletonRoomObject
-core.database.impl.DisplayedPhotoDatabaseImpl o-down- core.database.room.SingletonRoomObject
+core.database.room.SingletonRoomDatabase o-right- core.database.dao.UserInfoDao
+core.database.room.SingletonRoomDatabase o-right- core.database.dao.SelectedAlbumDao
+core.database.room.SingletonRoomDatabase o-right- core.database.dao.DisplayedPhotoDao
 
-core.database.room.SingletonRoomDatabase o-down- core.database.dao.UserInfoDao
-core.database.room.SingletonRoomDatabase o-down- core.database.dao.SelectedAlbumDao
-core.database.room.SingletonRoomDatabase o-down- core.database.dao.DisplayedPhotoDao
+app.module.AppDatabase -- core.database.room.SingletonRoomObject
 
 @enduml

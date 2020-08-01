@@ -2,45 +2,42 @@
 
 ### Base Interface
 
-| TableName | Type | Primary | KeyT | Foreign | Note | Example |
+| TableName | Type | PrimaryKeys | ForeignKeys | Note | Example |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| id | Long | o | - | AutoGenerate | 1 |
+| create_date | Long | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
+| update_date | Long | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
+
+### UserInfo DB
+
+| TableName | Type | PrimaryKey | UniqueKeys | ForeignKeys | Note | Example |
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| id | Long | o | - | A | AutoGenerate | 1 |
+| create_date | Long | - | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
+| update_date | Long | - | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
+| email_address | String | - | o | - | GoogleSignInAccount#email | test@example.com |
+| token_info | String | - | - | - | TokenInfo (JSON) | - |
+| update_photos_date | Long | - | - | - | - | 2020-01-01 00:00:00 |
+
+### SelectedAlbum DB
+
+| TableName | Type | PrimaryKey | UniqueKeys | ForeignKeys | Note | Example |
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| id | Long | o | - | B | AutoGenerate | 1 |
+| create_date | Long | - | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
+| update_date | Long | - | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
+| user_info_id | Long | - | o | a | UserInfo#id | 1 |
+| album_id | String | - | o | - | Album#id | - |
+| album | String | - | - | - | Album (JSON) | - |
+
+### DisplayedPhotos DB
+
+| TableName | Type | PrimaryKey | UniqueKeys | ForeignKeys | Note | Example |
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 | id | Long | o | - | - | AutoGenerate | 1 |
 | create_date | Long | - | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
 | update_date | Long | - | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
-
-### UserInfo DB
-
-| TableName | Type | Primary | KeyT | Foreign | Note | Example |
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| id | Long | o | - | o | SelectedAlbum#user_id | 1 |
-| create_date | Long | - | - | - | - | 2020-01-01 00:00:00 |
-| update_date | Long | - | - | - | - | 2020-01-01 00:00:00 |
-| email_address | String | - | o | - | GoogleSignInAccount#email | test@example.com |
-| access_token | String | - | - | - | TokenInfo#accessToken | - |
-| refresh_token | String | - | - | - | TokenInfo#refreshToken | - |
-| expired_access_token | Long | - | - | - | TokenInfo#expiredAccessTokenTimeMillis | 2020-01-01 00:00:00 |
-| update_photos | Long | - | - | - | - | 2020-01-01 00:00:00 |
-
-### SelectedAlbum DB
-
-| TableName | Type | Primary | KeyT | Foreign | Note | Example |
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| id | Long | o | - | o | DisplayedPhotos#selected_album_id | 1 |
-| create_date | Long | - | - | - | - | 2020-01-01 00:00:00 |
-| update_date | Long | - | - | - | - | 2020-01-01 00:00:00 |
-| user_id | Long | - | - | o | UserInfo#id | - |
-| album_id | String | - | o | - | Album#id | - |
-| album_title | String | - | - | - | Album#title | test_album |
-| cover_media_item_id | String | - | - | - | Album#coverPhotoMediaItemId | - |
-
-### DisplayedPhotos DB
-
-| TableName | Type | Primary | KeyT | Foreign | Note | Example |
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| id | Long | o | - | - | - | 1 |
-| create_date | Long | - | - | - | - | 2020-01-01 00:00:00 |
-| update_date | Long | - | - | - | - | 2020-01-01 00:00:00 |
-| selected_album_id | Long | - | - | o | SelectedAlbum#id | - |
+| selected_album_id | Long | - | o | b | SelectedAlbum#id | 1 |
 | media_item_id | String | - | o | - | MediaItem#id | - |
-| file_name | String | - | - | - | MediaItem#filename | test01.png |
-| is_covered_album | Boolean | - | - | - | - | true |
+| media_item | String | - | - | - | MediaItem | - |
+| is_my_favorite | Boolean | - | - | - | User favorite | true |
