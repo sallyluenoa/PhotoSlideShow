@@ -1,5 +1,31 @@
 @startuml
 namespace app.splash #FFFFEE {
+
+  namespace entity {
+    enum SignInRequest {
+      RUNTIME_PERMISSIONS
+      GOOGLE_SIGN_IN
+      UPDATE_USER_INFO
+      COMPLETED
+
+      + code: Int
+      + failedTitle: Int
+      + failedMessage: Int
+      + next(): SignInRequest
+    }
+
+    SignInRequest -[hidden]-> app.splash.SplashActivity
+  }
+
+  class SplashActivity
+  class SplashPresenter
+  class SplashInteractor {
+    - appDatabase: AppDatabase
+    - googleSignInApi: GoogleSignInApi
+    - googleOAuth2Api: GoogleOAuth2Api
+  }
+  class SplashRouter
+
   SplashActivity o-- SplashPresenter: -presenter
   SplashPresenter o--- SplashInteractor: -interactor
   SplashPresenter o---- SplashRouter: -router
@@ -17,16 +43,6 @@ namespace app.splash #FFFFEE {
   app.splash.contract.SplashContract.Interactor -[hidden]> SplashInteractor
   app.splash.contract.SplashContract.Router -[hidden]> SplashRouter
 
-  namespace entity {
-    enum SignInRequest {
-      RUNTIME_PERMISSIONS
-      GOOGLE_SIGN_IN
-      UPDATE_USER_INFO
-      COMPLETED
-    }
-
-    SignInRequest -[hidden]-> app.splash.SplashActivity
-  }
 }
 
 namespace app.splash.contract.SplashContract #EEEEEE {
