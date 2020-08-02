@@ -2,7 +2,6 @@ package org.fog_rock.photo_slideshow.core.webapi
 
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
-import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
 
 /**
  * Google Photos に関連するAPI
@@ -10,11 +9,6 @@ import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
  * https://google.github.io/java-photoslibrary/1.4.0/
  */
 interface PhotosLibraryApi {
-
-    /**
-     * ClientHolderの更新.
-     */
-    fun updateClientHolder(clientHolder: PhotosLibraryClientHolder)
 
     /**
      * アルバム取得要求.

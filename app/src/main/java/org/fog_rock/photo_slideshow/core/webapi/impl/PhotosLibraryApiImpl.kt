@@ -7,19 +7,13 @@ import com.google.photos.types.proto.MediaItem
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryApi
-import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 
-class PhotosLibraryApiImpl(
-    private var clientHolder: PhotosLibraryClientHolder
-): PhotosLibraryApi {
-
-    override fun updateClientHolder(clientHolder: PhotosLibraryClientHolder) {
-        this.clientHolder = clientHolder
-    }
+class PhotosLibraryApiImpl(): PhotosLibraryApi {
 
     override suspend fun requestAlbum(albumId: String): Album =
         try {
-            clientHolder.client.getAlbum(albumId)
+            SingletonWebHolder.photosLibraryClient!!.getAlbum(albumId)
         } catch (e: ApiException) {
             logE("Failed to get album.")
             e.printStackTrace()
@@ -28,7 +22,7 @@ class PhotosLibraryApiImpl(
 
     override suspend fun requestMediaItem(mediaItemId: String): MediaItem =
         try {
-            clientHolder.client.getMediaItem(mediaItemId)
+            SingletonWebHolder.photosLibraryClient!!.getMediaItem(mediaItemId)
         } catch (e: ApiException) {
             logE("Failed to get mediaItem.")
             e.printStackTrace()
@@ -53,7 +47,7 @@ class PhotosLibraryApiImpl(
 
     override suspend fun requestSharedAlbums(): List<Album> =
         try {
-            val response = clientHolder.client.listSharedAlbums()
+            val response = SingletonWebHolder.photosLibraryClient!!.listSharedAlbums()
             val albums = emptyList<Album>()
             for (page in response.iteratePages()) {
                 logI("Load ListSharedAlbumsPage. PageCount: ${page.pageElementCount}");
@@ -72,7 +66,7 @@ class PhotosLibraryApiImpl(
                 albumId = album.id
                 pageSize = 100
             }.build()
-            val response = clientHolder.client.searchMediaItems(request)
+            val response = SingletonWebHolder.photosLibraryClient!!.searchMediaItems(request)
             val mediaItems = emptyList<MediaItem>()
             logI("Total mediaItem count: ${album.mediaItemsCount}")
             for (page in response.iteratePages()) {

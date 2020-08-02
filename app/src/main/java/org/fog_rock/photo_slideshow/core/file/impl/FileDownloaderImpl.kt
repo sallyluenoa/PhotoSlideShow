@@ -1,39 +1,17 @@
 package org.fog_rock.photo_slideshow.core.file.impl
 
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.file.FileDownloader
+import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 import java.io.*
 import java.net.URL
-import java.util.concurrent.TimeUnit
 
-/**
- * ファイルダウンロード専用クラス.
- */
-class FileDownloaderImpl(
-    connectionTimeoutMilliSecs: Long,
-    readTimeoutMilliSecs: Long,
-    writeTimeoutMilliSecs: Long
-): FileDownloader {
+class FileDownloaderImpl(): FileDownloader {
 
-    private val client = OkHttpClient.Builder().apply {
-        connectTimeout(connectionTimeoutMilliSecs, TimeUnit.MILLISECONDS)
-        readTimeout(readTimeoutMilliSecs, TimeUnit.MILLISECONDS)
-        writeTimeout(writeTimeoutMilliSecs, TimeUnit.MILLISECONDS)
-    }.build()
-
-    constructor(timeoutMilliSecs: Long): this(timeoutMilliSecs, timeoutMilliSecs, timeoutMilliSecs)
-
-    /**
-     * ファイルダウンロードを行う. UIスレッドから呼び出さないこと.
-     * @param downloadUrl ダウンロードURL
-     * @param outputFile 出力先ファイル
-     * @return ダウンロード成功やすでに存在などによりファイルが存在する場合はtrue、それ以外はfalse
-     */
     override suspend fun requestDownload(downloadUrl: URL, outputFile: File): Boolean {
         if (outputFile.exists()) {
             logI("OutputFile is already existed: $outputFile")
@@ -52,7 +30,7 @@ class FileDownloaderImpl(
             val request = Request.Builder().apply {
                 url(downloadUrl)
             }.build()
-            val response = client.newCall(request).execute()
+            val response = SingletonWebHolder.okHttpClient.newCall(request).execute()
             writeOutputFile(response, outputFile)
         } catch (e: IOException) {
             logE("Failed network connection.")

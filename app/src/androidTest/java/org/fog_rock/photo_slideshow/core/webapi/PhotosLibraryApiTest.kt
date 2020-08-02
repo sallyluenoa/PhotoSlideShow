@@ -5,7 +5,7 @@ import com.google.photos.types.proto.MediaItem
 import kotlinx.coroutines.runBlocking
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
-import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.holder.PhotosLibraryClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 import org.fog_rock.photo_slideshow.test.AndroidTestModuleGenerator
 import org.junit.Before

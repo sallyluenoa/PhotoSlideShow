@@ -3,7 +3,7 @@ package org.fog_rock.photo_slideshow.core.webapi
 import kotlinx.coroutines.runBlocking
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.file.AssetsFileReader
-import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.holder.GoogleSignInClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl

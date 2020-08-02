@@ -3,19 +3,17 @@ package org.fog_rock.photo_slideshow.core.webapi.impl
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
-import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
+import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class GoogleSignInApiImpl(
-    private val clientHolder: GoogleSignInClientHolder
-): GoogleSignInApi {
+class GoogleSignInApiImpl(): GoogleSignInApi {
 
     override suspend fun requestSilentSignIn(): ApiResult =
         suspendCoroutine { continuation ->
             var result = ApiResult.FAILED
-            clientHolder.client.silentSignIn().apply {
+            SingletonWebHolder.googleSignInClient.silentSignIn().apply {
                 addOnSuccessListener {
                     logI("Succeeded to silent sign in.")
                     result = ApiResult.SUCCEEDED
@@ -40,7 +38,7 @@ class GoogleSignInApiImpl(
     override suspend fun requestSignOut(): ApiResult =
         suspendCoroutine { continuation ->
             var result = ApiResult.FAILED
-            clientHolder.client.signOut().apply {
+            SingletonWebHolder.googleSignInClient.signOut().apply {
                 addOnSuccessListener {
                     logI("Succeeded to sign out.")
                     result = ApiResult.SUCCEEDED
@@ -65,7 +63,7 @@ class GoogleSignInApiImpl(
     override suspend fun requestRevokeAccess(): ApiResult =
         suspendCoroutine { continuation ->
             var result = ApiResult.FAILED
-            clientHolder.client.revokeAccess().apply {
+            SingletonWebHolder.googleSignInClient.revokeAccess().apply {
                 addOnSuccessListener {
                     logI("Succeeded to revoke access.")
                     result = ApiResult.SUCCEEDED
