@@ -6,13 +6,13 @@ box "VIPER" #FFFFEE
   participant Router
 end box
 
+box "Database" #FFEEFF
+  participant AppDatabase
+end box
+
 box "Web API" #EEFFFF
   participant GoogleSignInApi
   participant GoogleOAuth2Api
-end box
-
-box "Database" #FFEEFF
-  participant UserInfoDatabase
 end box
 
 
@@ -86,28 +86,22 @@ Presenter -> Interactor++: requestUpdateUserInfo
 Interactor -> GoogleSignInApi++: getSignedInAccount
 return GoogleSignInAccount
 
-opt GoogleSignInAccount.email!=null
+Interactor -> AppDatabase++: findUserInfoByEmailAddress
+return UserInfo?
 
-  Interactor -> UserInfoDatabase++: find
-  return UserInfo
-
-  opt UserInfo!=null
-    Interactor -> GoogleOAuth2Api++: requestTokenInfoWithRefreshToken
-    return TokenInfo
-  end
-
-  opt TokenInfo==null
-    Interactor -> GoogleOAuth2Api++: requestTokenInfoWithAuthCode
-    return TokenInfo
-  end
-
-  opt TokenInfo!=null
-    Interactor -> UserInfoDatabase++: update
-    return Boolean
-  end
+opt UserInfo!=null
+  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithRefreshToken
+  return TokenInfo?
 end
 
-opt Failed update database
+opt TokenInfo==null
+  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithAuthCode
+  return TokenInfo?
+end
+
+alt TokenInfo!=null
+  Interactor -> AppDatabase: updateUserInfo
+else
   Interactor -> GoogleSignInApi++: revokeAccess
   return ApiResult
   Presenter <-- Interactor: Callback#requestUpdateUserInfoResult

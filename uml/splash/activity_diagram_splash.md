@@ -41,23 +41,19 @@ partition GoogleSignIn {
 partition UpdateUserInfo {
   :getSignedInAccount;
 
-  if (Is email contained in account?) then (YES)
-    :UserInfoDatabase find;
+  :AppDatabase findUserInfoByEmailAddress;
 
-    if (Is userInfo found?) then (YES)
-      :RequestTokenInfoWithRefreshToken;
-    endif
-
-    if (Is succeeded to get tokenInfo?) then (NO)
-      :RequestTokenInfoWithAuthCode;
-    endif
-
-    if (Is succeeded to get tokenInfo?) then (YES)
-      :UserInfoDatabase update;
-    endif
+  if (Is userInfo found?) then (YES)
+    :RequestTokenInfoWithRefreshToken;
   endif
 
-  if (Is succeeded to update database?) then (NO)
+  if (Is succeeded to get tokenInfo?) then (NO)
+    :RequestTokenInfoWithAuthCode;
+  endif
+
+  if (Is succeeded to get tokenInfo?) then (YES)
+    :AppDatabase updateUserInfo;
+  else 
     :RevokeAccess;
     (E)
     detach
