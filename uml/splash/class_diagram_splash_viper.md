@@ -7,10 +7,11 @@ namespace app.splash #FFFFEE {
       GOOGLE_SIGN_IN
       UPDATE_USER_INFO
       COMPLETED
-
+      ==
       + code: Int
       + failedTitle: Int
       + failedMessage: Int
+      __
       + next(): SignInRequest
     }
 

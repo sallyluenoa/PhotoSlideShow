@@ -13,8 +13,9 @@ namespace core.webapi #EEFFFF {
       WRITE_ONLY
       READ_ONLY_APP
       SHARING
-
+      ==
       - value: String
+      __
       + scope(): Scope
     }
     class WebInfo << (D, sandybrown) >> {
