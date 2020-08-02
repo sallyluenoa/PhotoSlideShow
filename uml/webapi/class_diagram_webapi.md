@@ -61,10 +61,10 @@ namespace core.webapi #EEFFFF {
     + requestSilentSignIn(): ApiResult
     + requestSignOut(): ApiResult
     + requestRevokeAccess(): ApiResult
-    + {static} isSignedInAccount(context: Context): Boolean
-    + {static} getSignedInAccount(context: Context): GoogleSignInAccount
-    + {static} getSignedInEmailAddress(context: Context): String
-    + {static} isSucceededUserSignIn(data: Intent?): Boolean
+    + getSignedInAccount(context: Context): GoogleSignInAccount
+    + getSignedInEmailAddress(context: Context): String
+    + isSignedInAccount(context: Context): Boolean
+    + isSucceededUserSignIn(data: Intent?): Boolean
   }
   interface GoogleOAuth2Api {
     + requestTokenInfoWithAuthCode(serverAuthCode: String): TokenInfo?

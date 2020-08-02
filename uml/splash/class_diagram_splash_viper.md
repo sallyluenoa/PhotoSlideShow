@@ -18,12 +18,18 @@ namespace app.splash #FFFFEE {
     SignInRequest -[hidden]-> app.splash.SplashActivity
   }
 
-  class SplashActivity
+  class SplashActivity {
+    - fragmentManager: FragmentManager
+    - replaceFragment(fragment: Fragment)
+    - requestSignIn()
+  }
   class SplashPresenter
   class SplashInteractor {
+    - context: Context
     - appDatabase: AppDatabase
     - googleSignInApi: GoogleSignInApi
     - googleOAuth2Api: GoogleOAuth2Api
+    - requestTokenInfo(emailAddress: String, serverAuthCode: String?): TokenInfo?
   }
   class SplashRouter
 
@@ -88,12 +94,14 @@ app.splash +-- app.splash.contract.SplashContract
 
 namespace core.viper.ViperContract #DDDDDD {
   interface Presenter {
+    + create(callback: SplashContract.PresenterCallback)
     + destroy()
   }
   interface PresenterCallback {
     + getActivity(): Activity
   }
   interface Interactor {
+    + create(callback: SplashContract.InteractorCallback)
     + destroy()
   }
   interface InteractorCallback
