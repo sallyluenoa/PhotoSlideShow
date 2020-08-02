@@ -13,11 +13,18 @@ import org.fog_rock.photo_slideshow.core.database.entity.UserInfoWithSelectedAlb
 @Dao
 interface UserInfoDao: BaseDao<UserInfo> {
 
+    @Query("select * from users_info")
+    override fun getAll(): List<UserInfo>
+
     @Query("select * from users_info where id = :id")
     override fun findById(id: Long): UserInfo?
 
     @Query("select * from users_info where email_address = :emailAddress")
     fun findByEmailAddress(emailAddress: String): UserInfo?
+
+    @Transaction
+    @Query("select * from users_info where id = :id")
+    fun findWithSelectedAlbums(id: Long): UserInfoWithSelectedAlbums?
 
     @Transaction
     @Query("select * from users_info where email_address = :emailAddress")

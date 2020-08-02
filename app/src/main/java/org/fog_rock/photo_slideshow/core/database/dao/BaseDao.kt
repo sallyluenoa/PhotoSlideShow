@@ -24,5 +24,7 @@ interface BaseDao<EntityT: BaseEntity> {
     @Delete
     fun delete(entities: List<EntityT>)
 
+    fun getAll(): List<EntityT>
+
     fun findById(id: Long): EntityT?
 }

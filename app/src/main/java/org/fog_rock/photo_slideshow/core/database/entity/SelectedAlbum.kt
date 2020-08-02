@@ -1,6 +1,7 @@
 package org.fog_rock.photo_slideshow.core.database.entity
 
 import androidx.room.*
+import com.google.gson.Gson
 import com.google.photos.types.proto.Album
 
 @Entity(
@@ -22,10 +23,10 @@ data class SelectedAlbum(
     override val id: Long,
 
     @ColumnInfo(name = "create_date")
-    override val createDateTimeMillis: Long,
+    override val createTimeMillis: Long,
 
     @ColumnInfo(name = "update_date")
-    override val updateDateTimeMillis: Long,
+    override val updateTimeMillis: Long,
 
     @ColumnInfo(name = "user_info_id")
     val userInfoId: Long,
@@ -33,11 +34,8 @@ data class SelectedAlbum(
     @ColumnInfo(name = "album_id")
     val albumId: String,
 
-    @ColumnInfo(name = "album_title")
-    val albumTitle: String,
-
-    @ColumnInfo(name = "covered_media_item_id")
-    val coveredMediaItemId: String
+    @ColumnInfo(name = "album")
+    private val album: String
 
 ): BaseEntity {
 
@@ -49,14 +47,14 @@ data class SelectedAlbum(
         System.currentTimeMillis(),
         userInfoId,
         album.id,
-        album.title,
-        album.coverPhotoMediaItemId
+        Gson().toJson(album)
     )
 
+    fun album(): Album = Gson().fromJson(album, Album::class.java)
+
     fun copy(album: Album): SelectedAlbum = this.copy(
-        updateDateTimeMillis = System.currentTimeMillis(),
+        updateTimeMillis = System.currentTimeMillis(),
         albumId = album.id,
-        albumTitle = album.title,
-        coveredMediaItemId = album.coverPhotoMediaItemId
+        album = Gson().toJson(album)
     )
 }

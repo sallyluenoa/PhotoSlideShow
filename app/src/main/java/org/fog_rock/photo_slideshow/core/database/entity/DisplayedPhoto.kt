@@ -1,6 +1,7 @@
 package org.fog_rock.photo_slideshow.core.database.entity
 
 import androidx.room.*
+import com.google.gson.Gson
 import com.google.photos.types.proto.MediaItem
 
 @Entity(
@@ -22,10 +23,10 @@ data class DisplayedPhoto(
     override val id: Long,
 
     @ColumnInfo(name = "create_date")
-    override val createDateTimeMillis: Long,
+    override val createTimeMillis: Long,
 
     @ColumnInfo(name = "update_date")
-    override val updateDateTimeMillis: Long,
+    override val updateTimeMillis: Long,
 
     @ColumnInfo(name = "selected_album_id")
     val selectedAlbumId: Long,
@@ -33,14 +34,8 @@ data class DisplayedPhoto(
     @ColumnInfo(name = "media_item_id")
     val mediaItemId: String,
 
-    @ColumnInfo(name = "file_name")
-    val fileName: String,
-
-    @ColumnInfo(name="creation_time")
-    val creationTime: Long,
-
-    @ColumnInfo(name="contributor_name")
-    val contributorName: String,
+    @ColumnInfo(name = "media_item")
+    private val mediaItem: String,
 
     @ColumnInfo(name="is_my_favorite")
     val isMyFavorite: Boolean
@@ -55,17 +50,15 @@ data class DisplayedPhoto(
         System.currentTimeMillis(),
         selectedAlbumId,
         mediaItem.id,
-        mediaItem.filename,
-        if (mediaItem.hasMediaMetadata()) mediaItem.mediaMetadata.creationTime.seconds * 1000L else 0L,
-        if (mediaItem.hasContributorInfo()) mediaItem.contributorInfo.displayName else "",
+        Gson().toJson(mediaItem),
         false
     )
 
+    fun mediaItem(): MediaItem = Gson().fromJson(mediaItem, MediaItem::class.java)
+
     fun copy(mediaItem: MediaItem): DisplayedPhoto = this.copy(
-        updateDateTimeMillis = System.currentTimeMillis(),
+        updateTimeMillis = System.currentTimeMillis(),
         mediaItemId = mediaItem.id,
-        fileName = mediaItem.filename,
-        creationTime = if (mediaItem.hasMediaMetadata()) mediaItem.mediaMetadata.creationTime.seconds * 1000L else 0L,
-        contributorName = if (mediaItem.hasContributorInfo()) mediaItem.contributorInfo.displayName else ""
+        mediaItem = Gson().toJson(mediaItem)
     )
 }

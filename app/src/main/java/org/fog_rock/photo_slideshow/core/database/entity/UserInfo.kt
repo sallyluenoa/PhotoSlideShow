@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.google.gson.Gson
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 /**
@@ -24,24 +25,18 @@ data class UserInfo(
     override val id: Long,
 
     @ColumnInfo(name = "create_date")
-    override val createDateTimeMillis: Long,
+    override val createTimeMillis: Long,
 
     @ColumnInfo(name = "update_date")
-    override val updateDateTimeMillis: Long,
+    override val updateTimeMillis: Long,
 
     @ColumnInfo(name = "email_address")
     val emailAddress: String,
 
-    @ColumnInfo(name = "access_token")
-    val accessToken: String,
+    @ColumnInfo(name = "token_info")
+    private val tokenInfo: String,
 
-    @ColumnInfo(name = "refresh_token")
-    val refreshToken: String,
-
-    @ColumnInfo(name = "expired_access_token")
-    val expiredAccessTokenTimeMillis: Long,
-
-    @ColumnInfo(name = "update_photos")
+    @ColumnInfo(name = "update_photos_date")
     val updatePhotosTimeMillis: Long
 
 ): BaseEntity {
@@ -53,22 +48,20 @@ data class UserInfo(
         System.currentTimeMillis(),
         System.currentTimeMillis(),
         emailAddress,
-        tokenInfo.accessToken,
-        tokenInfo.refreshToken,
-        tokenInfo.expiredAccessTokenTimeMillis,
+        Gson().toJson(tokenInfo),
         0
     )
 
+    fun tokenInfo(): TokenInfo = Gson().fromJson(tokenInfo, TokenInfo::class.javaObjectType)
+
     fun copy(tokenInfo: TokenInfo): UserInfo = this.copy(
-        updateDateTimeMillis = System.currentTimeMillis(),
-        accessToken = tokenInfo.accessToken,
-        refreshToken = tokenInfo.refreshToken,
-        expiredAccessTokenTimeMillis = tokenInfo.expiredAccessTokenTimeMillis
+        updateTimeMillis = System.currentTimeMillis(),
+        tokenInfo = Gson().toJson(tokenInfo)
     )
 
-    fun copy(updatePhotosTimeMillis: Long): UserInfo = this.copy(
-        updateDateTimeMillis = System.currentTimeMillis(),
-        updatePhotosTimeMillis = updatePhotosTimeMillis
+    fun updatePhotos(): UserInfo = this.copy(
+        updateTimeMillis = System.currentTimeMillis(),
+        updatePhotosTimeMillis = System.currentTimeMillis()
     )
 
     /**
@@ -85,5 +78,5 @@ data class UserInfo(
      * @return 現在の時間が「アクセストークン有効期限 - 指定された間隔」を過ぎていなければ true
      */
     fun isAvailableAccessToken(intervalTimeMillis: Long): Boolean =
-        System.currentTimeMillis() < expiredAccessTokenTimeMillis - intervalTimeMillis
+        System.currentTimeMillis() < tokenInfo().expiredAccessTokenTimeMillis - intervalTimeMillis
 }

@@ -14,11 +14,11 @@ interface BaseEntity {
      * データが生成された時間 (millisecs)
      * @ColumnInfo(name = "create_date")
      */
-    val createDateTimeMillis: Long
+    val createTimeMillis: Long
 
     /**
      * データが更新された時間 (millisecs)
      * @ColumnInfo(name = "update_date")
      */
-    val updateDateTimeMillis: Long
+    val updateTimeMillis: Long
 }
