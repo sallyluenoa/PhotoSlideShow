@@ -9,8 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
-import org.fog_rock.photo_slideshow.core.database.UserInfoDatabase
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
@@ -19,9 +19,9 @@ import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 class SplashInteractor(
     private val context: Context,
-    private val signInApi: GoogleSignInApi,
-    private val oAuth2Api: GoogleOAuth2Api,
-    private val database: UserInfoDatabase,
+    private val googleSignInApi: GoogleSignInApi,
+    private val googleOAuth2Api: GoogleOAuth2Api,
+    private val appDatabase: AppDatabase,
     private val callback: SplashContract.InteractorCallback
 ): SplashContract.Interactor {
 
@@ -31,7 +31,7 @@ class SplashInteractor(
     override fun requestGoogleSilentSignIn() {
         GlobalScope.launch(Dispatchers.Main) {
             val result = withContext(Dispatchers.Default) {
-                signInApi.requestSilentSignIn()
+                googleSignInApi.requestSilentSignIn()
             }
             callback.requestGoogleSilentSignInResult(result == ApiResult.SUCCEEDED)
         }
@@ -39,19 +39,19 @@ class SplashInteractor(
 
     override fun requestUpdateUserInfo() {
         GlobalScope.launch(Dispatchers.Main) {
-            val email = GoogleSignInApi.getSignedInEmailAddress(context)
-            val serverAuthCode = GoogleSignInApi.getSignedInAccount(context).serverAuthCode
+            val email = googleSignInApi.getSignedInEmailAddress()
+            val serverAuthCode = googleSignInApi.getSignedInAccount().serverAuthCode
             val tokenInfo = requestTokenInfo(email, serverAuthCode)
 
             if (tokenInfo != null) {
                 withContext(Dispatchers.Default) {
-                    database.update(email, tokenInfo)
+                    appDatabase.updateUserInfo(email, tokenInfo)
                 }
                 callback.requestUpdateUserInfoResult(true)
             } else {
                 // 失敗した場合はGoogleアカウントアクセス破棄をする.
                 withContext(Dispatchers.Default) {
-                    signInApi.requestRevokeAccess()
+                    googleSignInApi.requestRevokeAccess()
                 }
                 callback.requestUpdateUserInfoResult(false)
             }
@@ -73,17 +73,15 @@ class SplashInteractor(
         return true
     }
 
-    override fun isGoogleSignedIn(): Boolean =
-        GoogleSignInApi.isSignedInAccount(context)
+    override fun isGoogleSignedIn(): Boolean = googleSignInApi.isSignedInAccount()
 
-    override fun isSucceededGoogleUserSignIn(data: Intent?): Boolean =
-        GoogleSignInApi.isSucceededUserSignIn(data)
+    override fun isSucceededGoogleUserSignIn(data: Intent?): Boolean = googleSignInApi.isSucceededUserSignIn(data)
 
-    private suspend fun requestTokenInfo(email: String, serverAuthCode: String?): TokenInfo? {
+    private suspend fun requestTokenInfo(emailAddress: String, serverAuthCode: String?): TokenInfo? {
         val tokenInfo = withContext(Dispatchers.Default) {
-            val userInfo = database.find(email)
+            val userInfo = appDatabase.findUserInfoByEmailAddress(emailAddress)
             if (userInfo != null) {
-                oAuth2Api.requestTokenInfoWithRefreshToken(userInfo.refreshToken)
+                googleOAuth2Api.requestTokenInfoWithRefreshToken(userInfo.tokenInfo().refreshToken)
             } else {
                 null
             }
@@ -92,7 +90,7 @@ class SplashInteractor(
 
         return withContext(Dispatchers.Default) {
             if (serverAuthCode != null) {
-                oAuth2Api.requestTokenInfoWithAuthCode(serverAuthCode)
+                googleOAuth2Api.requestTokenInfoWithAuthCode(serverAuthCode)
             } else {
                 null
             }

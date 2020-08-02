@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
-import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
 
 class SplashContract {
 
@@ -88,7 +87,7 @@ class SplashContract {
         /**
          * Googleサインインの表示.
          */
-        fun startGoogleSignInActivity(activity: Activity, clientHolder: GoogleSignInClientHolder, requestCode: Int)
+        fun startGoogleSignInActivity(activity: Activity, requestCode: Int)
 
         /**
          * MainActivityの表示.

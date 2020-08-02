@@ -4,16 +4,13 @@ import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
 import org.fog_rock.photo_slideshow.app.splash.router.SplashRouter
-import org.fog_rock.photo_slideshow.core.database.impl.UserInfoDatabaseImpl
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
-import org.fog_rock.photo_slideshow.core.file.impl.AssetsFileReaderImpl
-import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
-import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 
@@ -29,14 +26,11 @@ class SplashPresenter(
         )
     }
 
-    private val clientHolder = GoogleSignInClientHolder(
-        context, listOf(PhotoScope.READ_ONLY), requestIdToken = false, requestServerAuthCode = true)
-
     private val interactor: SplashContract.Interactor = SplashInteractor(
         context,
-        GoogleSignInApiImpl(clientHolder),
-        GoogleOAuth2ApiImpl(AssetsFileReaderImpl(context)),
-        UserInfoDatabaseImpl(),
+        GoogleSignInApiImpl(context),
+        GoogleOAuth2ApiImpl(),
+        AppDatabase(),
         this)
 
     private val router: SplashContract.Router = SplashRouter()
@@ -131,7 +125,7 @@ class SplashPresenter(
             interactor.requestGoogleSilentSignIn()
         } else {
             logI("Request google user sign in.")
-            router.startGoogleSignInActivity(activity(), clientHolder, SignInRequest.GOOGLE_SIGN_IN.code)
+            router.startGoogleSignInActivity(activity(), SignInRequest.GOOGLE_SIGN_IN.code)
         }
     }
 
