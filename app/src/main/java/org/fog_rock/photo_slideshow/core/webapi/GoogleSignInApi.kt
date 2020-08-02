@@ -10,28 +10,6 @@ import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 interface GoogleSignInApi {
 
     /**
-     * 現在Googleアカウントでサインインしているか確認.
-     */
-    fun isSignedInAccount(): Boolean
-
-    /**
-     * 現在サインインしているGoogleアカウント取得.
-     * @throws NullPointerException
-     */
-    fun getSignedInAccount(): GoogleSignInAccount
-
-    /**
-     * 現在サインインしているE-mailアドレス取得.
-     * @throws NullPointerException
-     */
-    fun getSignedInEmailAddress(): String
-
-    /**
-     * Googleアカウントでのユーザーサインインに成功したか.
-     */
-    fun isSucceededUserSignIn(data: Intent?): Boolean
-
-    /**
      * サイレントサインイン要求.
      * コルーチン内で呼び出すこと.
      * https://developers.google.com/identity/sign-in/android/backend-auth
@@ -51,4 +29,26 @@ interface GoogleSignInApi {
      * https://developers.google.com/identity/sign-in/android/disconnect
      */
     suspend fun requestRevokeAccess(): ApiResult
+
+    /**
+     * 現在サインインしているGoogleアカウント取得.
+     * @throws NullPointerException
+     */
+    fun getSignedInAccount(): GoogleSignInAccount
+
+    /**
+     * 現在サインインしているE-mailアドレス取得.
+     * @throws NullPointerException
+     */
+    fun getSignedInEmailAddress(): String
+
+    /**
+     * 現在Googleアカウントでサインインしているか確認.
+     */
+    fun isSignedInAccount(): Boolean
+
+    /**
+     * Googleアカウントでのユーザーサインインに成功したか.
+     */
+    fun isSucceededUserSignIn(data: Intent?): Boolean
 }

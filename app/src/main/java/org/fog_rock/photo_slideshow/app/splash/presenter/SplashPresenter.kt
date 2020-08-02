@@ -2,21 +2,15 @@ package org.fog_rock.photo_slideshow.app.splash.presenter
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
-import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
-import org.fog_rock.photo_slideshow.app.splash.router.SplashRouter
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
-import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
-import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 
 class SplashPresenter(
-    context: Context,
-    private val callback: SplashContract.PresenterCallback
+    private var interactor: SplashContract.Interactor?,
+    private var router: SplashContract.Router?
 ): SplashContract.Presenter, SplashContract.InteractorCallback {
 
     companion object {
@@ -26,17 +20,16 @@ class SplashPresenter(
         )
     }
 
-    private val interactor: SplashContract.Interactor = SplashInteractor(
-        context,
-        GoogleSignInApiImpl(context),
-        GoogleOAuth2ApiImpl(),
-        AppDatabase(),
-        this)
+    private var callback: SplashContract.PresenterCallback? = null
 
-    private val router: SplashContract.Router = SplashRouter()
+    override fun create(callback: SplashContract.PresenterCallback) {
+        this.callback = callback
+        interactor?.create(this)
+    }
 
     override fun destroy() {
-        interactor.destroy()
+        interactor?.destroy()
+        callback = null
     }
 
     override fun requestSignIn() = presentSequence(SignInRequest.RUNTIME_PERMISSIONS)
@@ -47,12 +40,12 @@ class SplashPresenter(
 
         when (requestCode) {
             SignInRequest.GOOGLE_SIGN_IN.code -> {
-                val isSucceeded = interactor.isSucceededGoogleUserSignIn(data)
+                val isSucceeded = interactor?.isSucceededGoogleUserSignIn(data) ?: return
                 presentSequenceResult(SignInRequest.GOOGLE_SIGN_IN, isSucceeded)
             }
             else -> {
                 logE("Unknown requestCode: $requestCode")
-                callback.requestSignInResult(SignInRequest.UNKNOWN)
+                callback?.requestSignInResult(SignInRequest.UNKNOWN)
             }
         }
     }
@@ -62,12 +55,12 @@ class SplashPresenter(
 
         when (requestCode) {
             SignInRequest.RUNTIME_PERMISSIONS.code -> {
-                val isSucceeded = interactor.isGrantedRuntimePermissions(permissions)
+                val isSucceeded = interactor?.isGrantedRuntimePermissions(permissions) ?: return
                 presentSequenceResult(SignInRequest.RUNTIME_PERMISSIONS, isSucceeded)
             }
             else -> {
                 logE("Unknown requestCode: $requestCode")
-                callback.requestSignInResult(SignInRequest.UNKNOWN)
+                callback?.requestSignInResult(SignInRequest.UNKNOWN)
             }
         }
     }
@@ -78,7 +71,7 @@ class SplashPresenter(
     override fun requestUpdateUserInfoResult(isSucceeded: Boolean) =
         presentSequenceResult(SignInRequest.UPDATE_USER_INFO, isSucceeded)
 
-    private fun activity(): Activity = callback.getActivity()
+    private fun activity(): Activity? = callback?.getActivity()
 
     /**
      * リクエストに応じたサインインシーケンスを行う.
@@ -90,7 +83,7 @@ class SplashPresenter(
             SignInRequest.GOOGLE_SIGN_IN -> presentGoogleSignIn()
             SignInRequest.UPDATE_USER_INFO -> presentUpdateUserInfo()
             SignInRequest.COMPLETED -> presentMainActivity()
-            else -> callback.requestSignInResult(SignInRequest.UNKNOWN)
+            else -> callback?.requestSignInResult(SignInRequest.UNKNOWN)
         }
     }
 
@@ -105,38 +98,39 @@ class SplashPresenter(
             presentSequence(request.next())
         } else {
             logI( "Failed to request: $request")
-            callback.requestSignInResult(request)
+            callback?.requestSignInResult(request)
         }
     }
 
     private fun presentRuntimePermissions() {
-        if (interactor.isGrantedRuntimePermissions(RUNTIME_PERMISSIONS)) {
+        if (interactor?.isGrantedRuntimePermissions(RUNTIME_PERMISSIONS) ?: return) {
             logI("All permissions are granted.")
             presentSequence(SignInRequest.GOOGLE_SIGN_IN)
         } else {
             logI("Request runtime permissions.")
-            router.startRuntimePermissions(activity(), RUNTIME_PERMISSIONS, SignInRequest.RUNTIME_PERMISSIONS.code)
+            router?.startRuntimePermissions(
+                (activity() ?: return), RUNTIME_PERMISSIONS, SignInRequest.RUNTIME_PERMISSIONS.code)
         }
     }
 
     private fun presentGoogleSignIn() {
-        if (interactor.isGoogleSignedIn()) {
+        if (interactor?.isGoogleSignedIn() ?: return) {
             logI("Request google silent sign in.")
-            interactor.requestGoogleSilentSignIn()
+            interactor?.requestGoogleSilentSignIn()
         } else {
             logI("Request google user sign in.")
-            router.startGoogleSignInActivity(activity(), SignInRequest.GOOGLE_SIGN_IN.code)
+            router?.startGoogleSignInActivity((activity() ?: return), SignInRequest.GOOGLE_SIGN_IN.code)
         }
     }
 
     private fun presentUpdateUserInfo() {
         logI("Request update user info.")
-        interactor.requestUpdateUserInfo()
+        interactor?.requestUpdateUserInfo()
     }
 
     private fun presentMainActivity() {
         logI("Start MainActivity.")
-        router.startMainActivity(activity())
-        callback.requestSignInResult(SignInRequest.COMPLETED)
+        router?.startMainActivity((activity() ?: return))
+        callback?.requestSignInResult(SignInRequest.COMPLETED)
     }
 }

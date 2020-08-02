@@ -14,20 +14,6 @@ import kotlin.coroutines.suspendCoroutine
 
 class GoogleSignInApiImpl(private val context: Context): GoogleSignInApi {
 
-    override fun isSignedInAccount(): Boolean =
-        GoogleSignIn.getLastSignedInAccount(context) != null
-
-    override fun getSignedInAccount(): GoogleSignInAccount =
-        GoogleSignIn.getLastSignedInAccount(context) ?:
-        throw NullPointerException("There are no sign in account.")
-
-    override fun getSignedInEmailAddress(): String =
-        GoogleSignIn.getLastSignedInAccount(context)?.email ?:
-        throw NullPointerException("There are no sign in account.")
-
-    override fun isSucceededUserSignIn(data: Intent?): Boolean =
-        GoogleSignIn.getSignedInAccountFromIntent(data).isSuccessful
-
     override suspend fun requestSilentSignIn(): ApiResult =
         suspendCoroutine { continuation ->
             var result = ApiResult.FAILED
@@ -102,4 +88,18 @@ class GoogleSignInApiImpl(private val context: Context): GoogleSignInApi {
             }
             return@suspendCoroutine
         }
+
+    override fun getSignedInAccount(): GoogleSignInAccount =
+        GoogleSignIn.getLastSignedInAccount(context) ?:
+        throw NullPointerException("There are no sign in account.")
+
+    override fun getSignedInEmailAddress(): String =
+        GoogleSignIn.getLastSignedInAccount(context)?.email ?:
+        throw NullPointerException("There are no sign in account.")
+
+    override fun isSignedInAccount(): Boolean =
+        GoogleSignIn.getLastSignedInAccount(context) != null
+
+    override fun isSucceededUserSignIn(data: Intent?): Boolean =
+        GoogleSignIn.getSignedInAccountFromIntent(data).isSuccessful
 }

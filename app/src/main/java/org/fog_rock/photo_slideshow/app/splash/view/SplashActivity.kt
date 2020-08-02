@@ -7,12 +7,17 @@ import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import org.fog_rock.photo_slideshow.R
+import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
+import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
 import org.fog_rock.photo_slideshow.app.splash.presenter.SplashPresenter
+import org.fog_rock.photo_slideshow.app.splash.router.SplashRouter
 import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
+import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 
 class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, AppDialogFragment.Callback {
 
@@ -22,7 +27,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
 
     private val fragmentManager = supportFragmentManager
 
-    private lateinit var presenter: SplashContract.Presenter
+    private var presenter: SplashContract.Presenter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +35,11 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         setContentView(R.layout.activity_splash)
         replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.LOGO))
 
-        presenter = SplashPresenter(this, this)
+        presenter = SplashPresenter(
+            SplashInteractor(this, AppDatabase(), GoogleSignInApiImpl(this), GoogleOAuth2ApiImpl()),
+            SplashRouter()
+        )
+        presenter?.create(this)
 
         Handler().postDelayed({
             replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.EMPTY))
@@ -39,7 +48,8 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
     }
 
     override fun onDestroy() {
-        presenter.destroy()
+        presenter?.destroy()
+        presenter = null
 
         super.onDestroy()
     }
@@ -47,13 +57,13 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        presenter.evaluateActivityResult(requestCode, resultCode, data)
+        presenter?.evaluateActivityResult(requestCode, resultCode, data)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        presenter.evaluateRequestPermissionsResult(requestCode, permissions, grantResults)
+        presenter?.evaluateRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     override fun onDialogResult(requestCode: Int, resultCode: Int, data: Intent) {
@@ -96,6 +106,6 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
      */
     private fun requestSignIn() {
         logI("Request sign in.")
-        presenter.requestSignIn()
+        presenter?.requestSignIn()
     }
 }

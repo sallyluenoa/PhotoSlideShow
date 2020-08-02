@@ -19,13 +19,19 @@ import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 class SplashInteractor(
     private val context: Context,
-    private val googleSignInApi: GoogleSignInApi,
-    private val googleOAuth2Api: GoogleOAuth2Api,
     private val appDatabase: AppDatabase,
-    private val callback: SplashContract.InteractorCallback
+    private val googleSignInApi: GoogleSignInApi,
+    private val googleOAuth2Api: GoogleOAuth2Api
 ): SplashContract.Interactor {
 
+    private var callback: SplashContract.InteractorCallback? = null
+
+    override fun create(callback: SplashContract.InteractorCallback) {
+        this.callback = callback
+    }
+
     override fun destroy() {
+        callback = null
     }
 
     override fun requestGoogleSilentSignIn() {
@@ -33,7 +39,7 @@ class SplashInteractor(
             val result = withContext(Dispatchers.Default) {
                 googleSignInApi.requestSilentSignIn()
             }
-            callback.requestGoogleSilentSignInResult(result == ApiResult.SUCCEEDED)
+            callback?.requestGoogleSilentSignInResult(result == ApiResult.SUCCEEDED)
         }
     }
 
@@ -47,13 +53,13 @@ class SplashInteractor(
                 withContext(Dispatchers.Default) {
                     appDatabase.updateUserInfo(email, tokenInfo)
                 }
-                callback.requestUpdateUserInfoResult(true)
+                callback?.requestUpdateUserInfoResult(true)
             } else {
                 // 失敗した場合はGoogleアカウントアクセス破棄をする.
                 withContext(Dispatchers.Default) {
                     googleSignInApi.requestRevokeAccess()
                 }
-                callback.requestUpdateUserInfoResult(false)
+                callback?.requestUpdateUserInfoResult(false)
             }
         }
     }

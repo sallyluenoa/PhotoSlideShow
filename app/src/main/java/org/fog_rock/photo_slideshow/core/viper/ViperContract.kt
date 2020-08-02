@@ -1,6 +1,7 @@
 package org.fog_rock.photo_slideshow.core.viper
 
 import android.app.Activity
+import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 
 /**
  * VIPERモジュールの規定クラス.
@@ -12,6 +13,11 @@ class ViperContract {
      * View(Activity)からPresenterへ処理を受け渡す.
      */
     interface Presenter {
+        /**
+         * オブジェクトの初期処理. 主にCallbackを指定する.
+         */
+        fun create(callback: SplashContract.PresenterCallback)
+
         /**
          * オブジェクトの終了処理.
          * Activity#onDestroy() にて呼び出すこと.
@@ -36,6 +42,11 @@ class ViperContract {
      * PresenterからInteractorへ処理を受け渡す.
      */
     interface Interactor {
+        /**
+         * オブジェクトの初期処理. 主にCallbackを指定する.
+         */
+        fun create(callback: SplashContract.InteractorCallback)
+
         /**
          * オブジェクトの終了処理.
          * Activity#onDestroy() にて呼び出すこと.
