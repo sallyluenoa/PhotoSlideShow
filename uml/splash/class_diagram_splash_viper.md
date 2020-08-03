@@ -94,14 +94,14 @@ app.splash +-- app.splash.contract.SplashContract
 
 namespace core.viper.ViperContract #DDDDDD {
   interface Presenter {
-    + create(callback: SplashContract.PresenterCallback)
+    + create(callback: PresenterCallback)
     + destroy()
   }
   interface PresenterCallback {
     + getActivity(): Activity
   }
   interface Interactor {
-    + create(callback: SplashContract.InteractorCallback)
+    + create(callback: InteractorCallback)
     + destroy()
   }
   interface InteractorCallback
