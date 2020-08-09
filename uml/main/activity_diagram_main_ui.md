@@ -2,25 +2,24 @@
 start
 
 :Show Progress;
-:Request background task;
 
 repeat
-  :load MediaItem from DB;
-  
-  if (mediaItems.isEmpty()) then (YES)
+  :requestLoadDisplayedPhotos;
+
+  if (displayedPhotos.isEmpty()) then (YES)
     stop
   endif
 
   repeat
-    :Show MediaItem image;
-    :Wait a few secs;
-
-    if (LastIndex?) then (YES)
-      :Request background task;
+    if (Is Index 0?) then (YES)
+      :requestUpdateDisplayedPhotos;
     endif
 
+    :Displayed photos;
+    :Wait a moment...;
+
     backward:Next Index;
-  repeat while (No received DB update by background thread)
+  repeat while (No notified update photos?)
 
 repeat while
 @enduml

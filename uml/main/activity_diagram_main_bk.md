@@ -1,29 +1,31 @@
 @startuml
-:requestUpdatePhotoData;
+:requestUpdateDisplayedPhotos;
 
-if (Is needed photo update?) then (NO)
+if (isNeededUpdatePhotos) then (NO)
   stop
 endif
 
-partition UpdateAccessToken {
-  if (Is expired accessToken?) then (YES)
-    :requestAccessTokenWithRefreshToken;
-  endif
-}
-
 partition DecideAlbum {
-  if (Has selected album in DB?) then (YES)
+  if (hasSelectedAlbums) then (NO)
     :requestSharedAlbums;
     :startSelectActivity;
-    :ActivityResult;
+    :onActivityResult;
+
+    if (resultCode == OK) then (NO)
+      stop
+    endif
+
+    :updateSelectedAlbums;
   endif
 }
 
 partition DownloadImages_and_UpdateDB {
-  :requestMediaItemsFromAlbumId;
-  :Make random photo MediaItems;
-  :Download MediaItem image files;
-  :update MediaItems DB;
+  while (selectedAlbums.foreach)
+    :requestMediaItemsFromAlbumId;
+    :Make random photo MediaItems;
+    :requestDownloadMediaItems;
+    :updateDisplayedPhotos;
+  end while
 }
 
 :notifyUpdatedPhotoData;
