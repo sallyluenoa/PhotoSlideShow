@@ -20,9 +20,8 @@ namespace app.splash #FFFFEE {
   namespace entity {
     enum UpdatePhotoRequest {
       SKIPPED
-      UPDATE_REFRESH_TOKEN
       SELECT_ALBUM
-      DOWNLOAD_MEDIA_ITEMS
+      DOWNLOAD_PHOTOS
       COMPLETED
       UNKOWN
     }
@@ -33,26 +32,25 @@ namespace app.splash #FFFFEE {
 
 namespace app.splash.contract.SplashContract #EEEEEE {
   interface Presenter {
-    + requestUpdatePhotos()
+    + requestLoadDisplayedPhotos()
+    + requestUpdateDisplayedPhotos()
     + evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
   }
   interface PresenterCallback {
-    + requestUpdatePhotosResult()
+    + requestLoadDisplayedPhotosResult()
+    + requestUpdateDisplayedPhotosResult()
   }
   interface Interactor {
-    + requestUpdateAccessToken()
-    + requestUpdateSelectedAlbum()
-    + requestDownloadMediaItems()
-    + isNeededUpdatePhotos()
-    + isNeededUpdateAccessToken()
-    + hasSelectedAlbum()
+    + requestLoadDisplayedPhotos()
+    + requestUpdateSelectedAlbums()
+    + requestDownloadPhotos()
+    + isNeededUpdatePhotos(): Boolean
+    + hasSelectedAlbum(): Boolean
   }
   interface InteractorCallback {
-    + requestUpdateAccessTokenResult(isSucceeded: Boolean)
-    + requestDownloadMediaItemsResult(isSucceeded: Boolean)
-    + isNeededUpdatePhotosResult(isSucceeded: Boolean)
-    + isNeededUpdateAccessTokenResult(isSucceeded: Boolean)
-    + hasSelectedAlbumResult(isSucceeded: Boolean)
+    + requestLoadDisplayedPhotosResult(isSucceeded: Boolean)
+    + requestUpdateSelectedAlbumsResult(isSucceeded: Boolean)
+    + requestDownloadPhotosResult(isSucceeded: Boolean)
   }
   interface Router {
     + startSelectActivity(activity: Activity)
@@ -74,12 +72,14 @@ app.splash +-- app.splash.contract.SplashContract
 
 namespace core.viper.ViperContract #DDDDDD {
   interface Presenter {
+    + create(callback: PresenterCallback)
     + destroy()
   }
   interface PresenterCallback {
     + getActivity(): Activity
   }
   interface Interactor {
+    + create(callback: InteractorCallback)
     + destroy()
   }
   interface InteractorCallback
@@ -90,5 +90,4 @@ namespace core.viper.ViperContract #DDDDDD {
   InteractorCallback -[hidden]-> Interactor
   Interactor -[hidden]-> Router
 }
-
 @enduml

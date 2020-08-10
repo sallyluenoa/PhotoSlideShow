@@ -6,82 +6,66 @@ box "VIPER" #FFFFEE
   participant Router
 end box
 
-box "Web API" #EEFFFF
-  participant GoogleOAuth2Api
-  participant PhotosLibraryApi
-end box
-
 box "Database" #FFEEFF
-  participant UserInfoDatabase
-  participant SelectedAlbumDatabase
-  participant DisplayedMediaItemDatabase
+  participant AppDatabase
 end box
 
 box "File" #E6FFE9
   participant PhotosDownloader
 end box
 
+box "Web API" #EEFFFF
+  participant PhotosLibraryApi
+end box
 
 View++
-View -> Presenter++: requestUpdatePhotos
+View -> Presenter++: requestLoadDisplayedPhotos
+  Presenter -> Interactor++: requestLoadDisplayedPhotos
+
+  opt this.userInfo.id == 0
+    Interactor -> AppDatabase++: findUserInfoWithSelectedAlbums
+    return UserInfoWithSelectedAlbums?
+    Interactor -> Interactor: Update this.userInfo
+    Interactor -> Interactor: Update this.selectedAlbums
+
+    loop selectedAlbums.foreach
+      Interactor -> AppDatabase++: findSelectedAlbumWithDisplayedPhotos
+      return SelectedAlbumWithDisplayedPhotos?
+      Interactor -> Interactor: Update this.displayedPhotos
+    end
+  end
+
+  return List<DisplayedPhoto>
+return List<DisplayedPhoto>
+
+View -> Presenter++: requestUpdateDisplayedPhotos
 View--
 
 Presenter -> Interactor++: isNeededUpdatePhotos
-  opt this.userInfo==null
-    Interactor -> UserInfoDatabase++: find
-    return UserInfo
-  end
-return Callback#isNeededUpdatePhotosResult
+return Boolean
 
-opt !isNeededPhotosUpdateResult
+opt !isNeededUpdatePhotos
   View <-- Presenter: Callback#requestUpdatePhotosResult
   Presenter -> Presenter++
   destroy Presenter
 end
 
-== Update AccessToken ==
-
-Presenter -> Interactor++: isNeededUpdateAccessToken
-  opt this.userInfo==null
-    Interactor -> UserInfoDatabase++: find
-    return UserInfo
-  end
-return Callback#isNeededUpdateAccessTokenResult
-
-opt !isNeededUpdateAccessTokenResult
-  Presenter -> Interactor++: requestUpdateAccessToken
-  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithRefreshToken
-  return TokenInfo
-
-  opt TokenInfo==null
-    Presenter <-- Interactor: Callback#requestUpdateAccessTokenResult
-    View <-- Presenter: Callback#requestUpdatePhotosResult
-    Presenter -> Presenter++
-    destroy Presenter
-  end
-
-  Interactor -> UserInfoDatabase: update
-  Presenter <-- Interactor--: Callback#requestUpdateAccessTokenResult
-end
-
 == Decide Selected Album ==
 
-Presenter -> Interactor++: hasSelectedAlbum
-  opt this.selectedAlbum==null
-    Interactor -> SelectedAlbumDatabase++: find
-    return SelectedAlbum
-  end
-return Callback#hasSelectedAlbumResult
+Presenter -> Interactor++: hasSelectedAlbums
+return Boolean
 
-opt !hasSelectedAlbumResult
+opt !hasSelectedAlbums
   Presenter -> Router: startSelectActivity
   [--> View
   View --> Presenter: evaluateActivityResult
 
   alt Has selected album?
     Presenter -> Interactor++: requestUpdateSelectedAlbum
-    Interactor -> SelectedAlbumDatabase: update
-    Interactor--
+    Interactor -> AppDatabase: updateSelectedAlbums
+    Interactor -> AppDatabase++: findUserInfoWithSelectedAlbums
+    return UserInfoWithSelectedAlbums?
+    Interactor -> Interactor: Update this.selectedAlbums
   else
     View <-- Presenter: Callback#requestUpdatePhotosResult
     Presenter -> Presenter++
@@ -91,17 +75,18 @@ end
 
 == Download Images ==
 
-Presenter -> Interactor++: requestDownloadMediaItems
+Presenter -> Interactor++: requestDownloadPhotos
 
-  Interactor -> PhotosLibraryApi++: requestMediaItems
-  return List<MediaItem>
-
-  Interactor -> Interactor: Make random photo MediaItems
+  loop this.selectedAlbums.foreach
+    Interactor -> PhotosLibraryApi++: requestMediaItems
+    return List<MediaItem>
+    Interactor -> Interactor: Make random photo MediaItems
+  end
 
   Interactor -> PhotosDownloader++: requestDownloads
   return List<String>
 
-  Interactor -> DisplayedMediaItemDatabase: replace
+  Interactor -> AppDatabase: replace
 
 Presenter <-- Interactor--: Callback#requestDownloadMediaItemsResult
 
