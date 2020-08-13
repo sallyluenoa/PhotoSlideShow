@@ -28,21 +28,22 @@ namespace core.database #FFEEFF {
       + selectedAlbumId: Long
       + mediaItemId: String
       - mediaItem: String
+      + outputPath: String
       + isMyFavorite: Boolean
       + mediaItem(): MediaItem
-      + copy(mediaItem: MediaItem): DisplayedPhoto
+      + copy(mediaItem: MediaItem, outputPath: String): DisplayedPhoto
     }
-    class UserInfoWithSelectedAlbums << (D, sandybrown) >>
-    class SelectedAlbumWithDisplayedPhotos << (D, sandybrown) >>
+    class UserInfoData << (D, sandybrown) >>
+    class SelectedData << (D, sandybrown) >>
 
     UserInfo ..|> BaseEntity
     SelectedAlbum ..|> BaseEntity
     DisplayedPhoto ..|> BaseEntity
 
-    UserInfoWithSelectedAlbums "1" *-- "1" UserInfo
-    UserInfoWithSelectedAlbums "1" *-- "*" SelectedAlbum
-    SelectedAlbumWithDisplayedPhotos "1" *-- "1" SelectedAlbum
-    SelectedAlbumWithDisplayedPhotos "1" *-- "*" DisplayedPhoto
+    UserInfoData "1" *-- "1" UserInfo: userInfo
+    UserInfoData "1" *-- "*" SelectedData: dataList 
+    SelectedData "1" *-- "1" SelectedAlbum: selectedAlbum
+    SelectedData "1" *-- "*" DisplayedPhoto: displayedPhotos
   }
 
   namespace dao {
@@ -57,12 +58,13 @@ namespace core.database #FFEEFF {
     }
     interface UserInfoDao {
       + findByEmailAddress(emailAddress: String): UserInfo?
-      + findWithSelectedAlbums(id: Long): UserInfoWithSelectedAlbums?
-      + findWithSelectedAlbums(emailAddress: String): UserInfoWithSelectedAlbums?
+      + findUserInfoDataById(id: Long): UserInfoData?
+      + findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData?
     }
     interface SelectedAlbumDao {
       + findByUniqueKeys(userInfoId: Long, albumId: String): SelectedAlbum?
-      + findWithDisplayedPhotos(id: Long): SelectedAlbumWithDisplayedPhotos?
+      + findSelectedDataById(id: Long): SelectedData?
+      + findSelectedDataByUniqueKeys(userInfoId: Long, albumId: String): SelectedData?
     }
     interface DisplayedPhotoDao {
       + findByUniqueKeys(selectedAlbumId: Long, mediaItemId: String): DisplayedPhoto?
@@ -94,14 +96,27 @@ namespace core.database #FFEEFF {
 }
 
 namespace app.module #FFFFEE {
-    class AppDatabase {
-      + updateUserInfo(emailAddress: String, tokenInfo: TokenInfo)
-      + updateSelectedAlbums(userInfoId: Long, albums: List<Album>)
-      + updateDisplayedPhotos(selctedAlbumId: Long, mediaItems: List<MediaItem>)
-      + findUserInfoByEmailAddress(emailAddress: String): UserInfo?
-      + findUserInfoWithSelectedAlbums(emailAddress: String): UserInfoWithSelectedAlbums?
-      + findSelectedAlbumWithDisplayedPhotos(id: Long): SelectedAlbumWithDisplayedPhotos?
+
+  namespace entity {
+    class PhotoInfo << (D, sandybrown) >> {
+      + album: Album
     }
+    class MediaDetail << (D, sandybrown) >> {
+      + mediaItem: MediaItem
+      + outputPath: String
+    }
+
+    PhotoInfo "1" *-right- "*" MediaDetail: mediaDetails
+  } 
+
+  class AppDatabase {
+    + updateUserInfo(emailAddress: String, tokenInfo: TokenInfo)
+    + deleteUserInfo(id: Long)
+    + replaceUserInfoData(userInfo: UserInfo, photosInfo: List<PhotoInfo>)
+    + findUserInfoByEmailAddress(emailAddress: String): UserInfo?
+    + findUserInfoDataById(id: Long): UserInfoData?
+    + findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData?
+   }
 }
 
 core.database.room.SingletonRoomDatabase o-right- core.database.dao.UserInfoDao

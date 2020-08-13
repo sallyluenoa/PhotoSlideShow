@@ -22,24 +22,18 @@ View++
 View -> Presenter++: requestLoadDisplayedPhotos
   Presenter -> Interactor++: requestLoadDisplayedPhotos
 
-  opt this.userInfo.id == 0
-    Interactor -> AppDatabase++: findUserInfoWithSelectedAlbums
-    return UserInfoWithSelectedAlbums?
-    Interactor -> Interactor: Update this.userInfo
-    Interactor -> Interactor: Update this.selectedAlbums
-
-    loop selectedAlbums.foreach
-      Interactor -> AppDatabase++: findSelectedAlbumWithDisplayedPhotos
-      return SelectedAlbumWithDisplayedPhotos?
-      Interactor -> Interactor: Update this.displayedPhotos
-    end
+  opt this.userInfoData.id == 0
+    Interactor -> AppDatabase++: findUserInfoDataByEmailAddress
+    return UserInfoData?
   end
 
-  return List<DisplayedPhoto>
-return List<DisplayedPhoto>
+  return Callback#requestLoadDisplayedPhotos
+return Callback#requestLoadDisplayedPhotos
 
 View -> Presenter++: requestUpdateDisplayedPhotos
 View--
+
+== Config Update ==
 
 Presenter -> Interactor++: isNeededUpdatePhotos
 return Boolean
@@ -60,13 +54,7 @@ opt !hasSelectedAlbums
   [--> View
   View --> Presenter: evaluateActivityResult
 
-  alt Has selected album?
-    Presenter -> Interactor++: requestUpdateSelectedAlbum
-    Interactor -> AppDatabase: updateSelectedAlbums
-    Interactor -> AppDatabase++: findUserInfoWithSelectedAlbums
-    return UserInfoWithSelectedAlbums?
-    Interactor -> Interactor: Update this.selectedAlbums
-  else
+  opt Is selected album not found or canceled?
     View <-- Presenter: Callback#requestUpdatePhotosResult
     Presenter -> Presenter++
     destroy Presenter
@@ -77,18 +65,25 @@ end
 
 Presenter -> Interactor++: requestDownloadPhotos
 
-  loop this.selectedAlbums.foreach
+  loop albums.foreach
     Interactor -> PhotosLibraryApi++: requestMediaItems
     return List<MediaItem>
+
     Interactor -> Interactor: Make random photo MediaItems
+
+    Interactor -> PhotosDownloader++: requestDownloads
+    return List<String>
   end
 
-  Interactor -> PhotosDownloader++: requestDownloads
-  return List<String>
+return Callback#requestDownloadPhotosResult
 
-  Interactor -> AppDatabase: replace
+== Update Database ==
 
-Presenter <-- Interactor--: Callback#requestDownloadMediaItemsResult
+Presenter -> Interactor++: requestUpdateDatabase
+  Interactor -> AppDatabase: replaceSelectedData
+  Interactor -> AppDatabase++: findUserInfoDataById
+  return UserInfoData?
+return Callback#requestUpdateDatabaseResult
 
 ====
 

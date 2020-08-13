@@ -7,27 +7,28 @@ endif
 
 partition DecideAlbum {
   if (hasSelectedAlbums) then (NO)
-    :requestSharedAlbums;
     :startSelectActivity;
     :onActivityResult;
 
-    if (resultCode == OK) then (NO)
+    if (Is selected album found?) then (NO)
       stop
     endif
-
-    :updateSelectedAlbums;
   endif
 }
 
-partition DownloadImages_and_UpdateDB {
+partition DownloadImages {
   while (selectedAlbums.foreach)
-    :requestMediaItemsFromAlbumId;
+    :PhotosLibraryApi#requestMediaItems;
     :Make random photo MediaItems;
-    :requestDownloadMediaItems;
-    :updateDisplayedPhotos;
+    :PhotosDownloader#requestMediaItems;
   end while
 }
 
-:notifyUpdatedPhotoData;
+partition UpdateDatabase {
+  :Database#replaceSelectedData;
+  :Database#findUserInfoData;
+}
+
+:requestUpdatePhotosResult;
 stop
 @enduml
