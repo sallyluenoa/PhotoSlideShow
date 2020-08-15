@@ -46,11 +46,11 @@ class AppDatabase {
     fun findUserInfoByEmailAddress(emailAddress: String): UserInfo? =
         userInfoDao().findByEmailAddress(emailAddress)
 
-    fun findUserInfoWithSelectedAlbums(emailAddress: String): UserInfoWithSelectedAlbums? =
-        userInfoDao().findWithSelectedAlbums(emailAddress)
+    fun findUserInfoWithAllById(id: Long): UserInfoData? =
+        userInfoDao().findWithAllById(id)
 
-    fun findSelectedAlbumWithDisplayedPhotos(id: Long): SelectedAlbumWithDisplayedPhotos? =
-        selectedAlbumDao().findWithDisplayedPhotos(id)
+    fun findUserInfoWithAllByEmailAddress(emailAddress: String): UserInfoData? =
+        userInfoDao().findWithAllByEmailAddress(emailAddress)
 
     private fun userInfoDao() = SingletonRoomObject.userInfoDao()
 

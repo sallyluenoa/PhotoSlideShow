@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
-import org.fog_rock.photo_slideshow.core.database.entity.UserInfoWithSelectedAlbums
+import org.fog_rock.photo_slideshow.core.database.entity.UserInfoData
 
 /**
  * データベース (Dao)
@@ -24,9 +24,9 @@ interface UserInfoDao: BaseDao<UserInfo> {
 
     @Transaction
     @Query("select * from users_info where id = :id")
-    fun findWithSelectedAlbums(id: Long): UserInfoWithSelectedAlbums?
+    fun findUserInfoDataById(id: Long): UserInfoData?
 
     @Transaction
     @Query("select * from users_info where email_address = :emailAddress")
-    fun findWithSelectedAlbums(emailAddress: String): UserInfoWithSelectedAlbums?
+    fun findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData?
 }

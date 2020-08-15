@@ -37,13 +37,16 @@ data class DisplayedPhoto(
     @ColumnInfo(name = "media_item")
     private val mediaItem: String,
 
+    @ColumnInfo(name = "output_path")
+    val outputPath: String,
+
     @ColumnInfo(name="is_my_favorite")
     val isMyFavorite: Boolean
 
 ): BaseEntity {
 
     constructor(
-        selectedAlbumId: Long, mediaItem: MediaItem
+        selectedAlbumId: Long, mediaItem: MediaItem, outputPath: String
     ): this(
         0,
         System.currentTimeMillis(),
@@ -51,14 +54,16 @@ data class DisplayedPhoto(
         selectedAlbumId,
         mediaItem.id,
         Gson().toJson(mediaItem),
+        outputPath,
         false
     )
 
     fun mediaItem(): MediaItem = Gson().fromJson(mediaItem, MediaItem::class.java)
 
-    fun copy(mediaItem: MediaItem): DisplayedPhoto = this.copy(
+    fun copy(mediaItem: MediaItem, outputPath: String): DisplayedPhoto = this.copy(
         updateTimeMillis = System.currentTimeMillis(),
         mediaItemId = mediaItem.id,
-        mediaItem = Gson().toJson(mediaItem)
+        mediaItem = Gson().toJson(mediaItem),
+        outputPath = outputPath
     )
 }
