@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
+import org.fog_rock.photo_slideshow.app.module.entity.PhotoInfo
+import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
@@ -11,10 +13,16 @@ class MainContract {
 
     interface Presenter : ViperContract.Presenter {
         /**
-         * 写真更新に必要な一連処理をリクエストする.
-         * @see PresenterCallback.requestUpdatePhotosResult
+         * 写真のロードをリクエストする.
+         * @see PresenterCallback.requestLoadDisplayedPhotosResult
          */
-        fun requestUpdatePhotos()
+        fun requestLoadDisplayedPhotos()
+
+        /**
+         * 写真更新に必要な一連処理をリクエストする.
+         * @see PresenterCallback.requestUpdateDisplayedPhotosResult
+         */
+        fun requestUpdateDisplayedPhotos()
 
         /**
          * ライセンス表示を要求.
@@ -35,10 +43,16 @@ class MainContract {
 
     interface PresenterCallback : ViperContract.PresenterCallback {
         /**
-         * 写真更新に必要な一連処理の結果.
-         * @see Presenter.requestUpdatePhotos
+         * 写真をロードした結果.
+         * @see Presenter.requestLoadDisplayedPhotos
          */
-        fun requestUpdatePhotosResult(request: UpdatePhotosRequest)
+        fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
+
+        /**
+         * 写真更新に必要な一連処理の結果.
+         * @see Presenter.requestUpdateDisplayedPhotos
+         */
+        fun requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest)
 
         /**
          * サインアウトの要求結果.
@@ -49,26 +63,22 @@ class MainContract {
     interface Interactor : ViperContract.Interactor {
         /**
          * ユーザー情報の取得要求.
-         * @see InteractorCallback.requestLoadFromDatabaseResult
+         * @see InteractorCallback.requestLoadDisplayedPhotosResult
          */
-        fun requestLoadFromDatabase()
-
-        /**
-         * アルバム一覧の要求.
-         */
-        fun requestAlbums()
-
-        /**
-         * 選択したアルバムの更新要求.
-         * @see InteractorCallback.requestUpdateSelectedAlbumsResult
-         */
-        fun requestUpdateSelectedAlbums(albums: List<Album>)
+        fun requestLoadDisplayedPhotos()
 
         /**
          * 写真リストのダウンロード要求.
          * @see InteractorCallback.requestDownloadPhotosResult
          */
         fun requestDownloadPhotos()
+        fun requestDownloadPhotos(albums: List<Album>)
+
+        /**
+         * データベース更新要求.
+         * @see InteractorCallback.requestUpdateDatabaseResult
+         */
+        fun requestUpdateDatabase(photosInfo: List<PhotoInfo>)
 
         /**
          * サインアウト要求.
@@ -90,26 +100,21 @@ class MainContract {
     interface InteractorCallback : ViperContract.InteractorCallback {
         /**
          * ユーザー情報の取得要求の結果.
-         * @see Interactor.requestLoadFromDatabase
+         * @see Interactor.requestLoadDisplayedPhotos
          */
-        fun requestLoadFromDatabaseResult(isSucceeded: Boolean)
-
-        /**
-         * アルバム一覧の要求.
-         */
-        fun requestAlbumsResult(albums: List<Album>?)
-
-        /**
-         * 選択したアルバムの更新要求の結果.
-         * @see Interactor.requestUpdateSelectedAlbums
-         */
-        fun requestUpdateSelectedAlbumsResult(isSucceeded: Boolean)
+        fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
 
         /**
          * 写真リストのダウンロード要求の結果.
          * @see Interactor.requestDownloadPhotos
          */
-        fun requestDownloadPhotosResult(isSucceeded: Boolean)
+        fun requestDownloadPhotosResult(photosInfo: List<PhotoInfo>)
+
+        /**
+         * データベース更新要求の結果.
+         * @see Interactor.requestUpdateDatabase
+         */
+        fun requestUpdateDatabaseResult(isSucceeded: Boolean)
 
         /**
          * サインアウト結果.
@@ -127,7 +132,7 @@ class MainContract {
         /**
          * SelectActivityの表示.
          */
-        fun startSelectActivity(activity: Activity, albums: List<Album>, requestCode: Int)
+        fun startSelectActivity(activity: Activity, requestCode: Int)
 
         /**
          * OssLicensesMenuActivityの表示.

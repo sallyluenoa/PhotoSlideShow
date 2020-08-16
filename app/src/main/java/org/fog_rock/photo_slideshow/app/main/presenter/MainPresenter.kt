@@ -1,117 +1,111 @@
 package org.fog_rock.photo_slideshow.app.main.presenter
 
-import android.app.Activity.RESULT_OK
+import android.app.Activity
 import android.content.Intent
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
-import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
-import org.fog_rock.photo_slideshow.app.main.router.MainRouter
-import org.fog_rock.photo_slideshow.app.select.view.SelectActivity
+import org.fog_rock.photo_slideshow.app.module.entity.PhotoInfo
+import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 class MainPresenter(
-    private val callback: MainContract.PresenterCallback
+    private var interactor: MainContract.Interactor?,
+    private var router: MainContract.Router?
 ) : MainContract.Presenter, MainContract.InteractorCallback {
 
-    private val interactor: MainContract.Interactor =
-        MainInteractor(activity().applicationContext, this)
+    private var callback: MainContract.PresenterCallback? = null
 
-    private val router: MainContract.Router = MainRouter()
-
-    override fun destroy() {
-        interactor.destroy()
+    override fun create(callback: ViperContract.PresenterCallback) {
+        if (callback is MainContract.PresenterCallback) {
+            this.callback = callback
+            interactor?.create(this)
+        } else {
+            IllegalArgumentException("MainContract.PresenterCallback should be set.")
+        }
     }
 
-    override fun requestUpdatePhotos() {
-        presentSequence(UpdatePhotosRequest.LOAD_USER_INFO)
+    override fun destroy() {
+        interactor?.destroy()
+        interactor = null
+        router = null
+        callback = null
+    }
+
+    override fun requestLoadDisplayedPhotos() {
+        interactor?.requestLoadDisplayedPhotos()
+    }
+
+    override fun requestUpdateDisplayedPhotos() {
+        if (!(interactor?.isNeededUpdatePhotos() ?: return)) {
+            callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.CONFIG_UPDATE)
+            return
+        }
+        if (!(interactor?.hasSelectedAlbums() ?: return)) {
+            router?.startSelectActivity((activity() ?: return), UpdatePhotosRequest.SELECT_ALBUMS.code)
+            return
+        }
+        interactor?.requestDownloadPhotos()
     }
 
     override fun requestShowLicenses() {
-        router.startOssLicensesMenuActivity(activity(), R.string.license)
+        router?.startOssLicensesMenuActivity((activity() ?: return), R.string.license)
     }
 
     override fun requestSignOut() {
-        interactor.requestSignOut()
+        interactor?.requestSignOut()
     }
 
     override fun evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        logI("evaluateActivityResult() " +
+                "requestCode: $requestCode, resultCode: $resultCode")
+
         when (requestCode) {
-             UpdatePhotosRequest.SELECT_ALBUMS.code -> {
-                if (resultCode == RESULT_OK && data != null) {
-                    logI("Succeeded to select album.")
-                    val album = data.getSerializableExtra(SelectActivity.RESULT_DECIDE_ALBUM) as Album
-                    interactor.requestUpdateSelectedAlbums(listOf(album))
-                } else {
-                    logI("Canceled to select album.")
+            UpdatePhotosRequest.SELECT_ALBUMS.code -> {
+                if (resultCode != Activity.RESULT_OK) {
+                    callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.SELECT_ALBUMS)
+                    return
                 }
+                val albums = data?.getSerializableExtra("albums") as List<Album>? ?: run {
+                    callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.SELECT_ALBUMS)
+                    return
+                }
+                interactor?.requestDownloadPhotos(albums)
             }
             else -> {
                 logE("Unknown requestCode: $requestCode")
-                callback.requestUpdatePhotosResult(UpdatePhotosRequest.UNKNOWN)
+                callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.UNKNOWN)
             }
         }
     }
 
-    override fun requestLoadFromDatabaseResult(isSucceeded: Boolean) {
-        if (isSucceeded && interactor.isNeededUpdatePhotos()) {
-            presentSequence(UpdatePhotosRequest.SELECT_ALBUMS)
+    override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
+        callback?.requestLoadDisplayedPhotosResult(displayedPhotos)
+    }
+
+    override fun requestDownloadPhotosResult(photosInfo: List<PhotoInfo>) {
+        if (photosInfo.isNotEmpty()) {
+            interactor?.requestUpdateDatabase(photosInfo)
         } else {
-            callback.requestUpdatePhotosResult(UpdatePhotosRequest.LOAD_USER_INFO)
+            callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.DOWNLOAD_PHOTOS)
         }
     }
 
-    override fun requestAlbumsResult(albums: List<Album>?) {
-        if (albums != null && albums.isNotEmpty()) {
-            router.startSelectActivity(activity(), albums, UpdatePhotosRequest.SELECT_ALBUMS.code)
-        } else {
-            callback.requestUpdatePhotosResult(UpdatePhotosRequest.SELECT_ALBUMS)
-        }
-    }
-
-    override fun requestUpdateSelectedAlbumsResult(isSucceeded: Boolean) {
+    override fun requestUpdateDatabaseResult(isSucceeded: Boolean) {
         if (isSucceeded) {
-            presentSequence(UpdatePhotosRequest.DOWNLOAD_PHOTOS)
+            callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.COMPLETED)
         } else {
-            callback.requestUpdatePhotosResult(UpdatePhotosRequest.SELECT_ALBUMS)
-        }
-    }
-
-    override fun requestDownloadPhotosResult(isSucceeded: Boolean) {
-        if (isSucceeded) {
-            presentSequence(UpdatePhotosRequest.COMPLETED)
-        } else {
-            callback.requestUpdatePhotosResult(UpdatePhotosRequest.DOWNLOAD_PHOTOS)
+            callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.UPDATE_DATABASE)
         }
     }
 
     override fun requestSignOutResult(result: ApiResult) {
-        callback.requestSignOutResult(result);
+        callback?.requestSignOutResult(result)
     }
 
-    private fun activity() = callback.getActivity()
-
-    private fun presentSequence(request: UpdatePhotosRequest) {
-        when (request) {
-            UpdatePhotosRequest.SELECT_ALBUMS -> presentSelectAlbum()
-            UpdatePhotosRequest.DOWNLOAD_PHOTOS -> presentDownloadPhotos()
-            UpdatePhotosRequest.COMPLETED -> callback.requestUpdatePhotosResult(UpdatePhotosRequest.COMPLETED)
-            else -> callback.requestUpdatePhotosResult(UpdatePhotosRequest.UNKNOWN)
-        }
-    }
-
-    private fun presentSelectAlbum() {
-        if (interactor.hasSelectedAlbums()) {
-            presentSequence(UpdatePhotosRequest.DOWNLOAD_PHOTOS)
-        } else {
-            interactor.requestAlbums()
-        }
-    }
-
-    private fun presentDownloadPhotos() {
-        interactor.requestDownloadPhotos()
-    }
+    private fun activity(): Activity? = callback?.getActivity()
 }

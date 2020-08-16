@@ -2,15 +2,13 @@ package org.fog_rock.photo_slideshow.app.main.entity
 
 enum class UpdatePhotosRequest(val code: Int) {
 
-    CONFIG_SKIPPED(0),
+    CONFIG_UPDATE(1000),
 
-    LOAD_USER_INFO(1000),
+    SELECT_ALBUMS(1001),
 
-//    UPDATE_REFRESH_TOKEN(1001),
+    DOWNLOAD_PHOTOS(1010),
 
-    SELECT_ALBUMS(1010),
-
-    DOWNLOAD_PHOTOS(1100),
+    UPDATE_DATABASE(1100),
 
     COMPLETED(1111),
 

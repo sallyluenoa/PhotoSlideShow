@@ -14,11 +14,8 @@ class MainRouter : MainContract.Router {
         activity.startActivity(Intent(activity, SplashActivity::class.java))
     }
 
-    override fun startSelectActivity(activity: Activity, albums: List<Album>, requestCode: Int) {
-        val intent = Intent(activity, SelectActivity::class.java).apply {
-            putExtra(SelectActivity.REQUEST_ALBUMS, albums.toTypedArray())
-        }
-        activity.startActivityForResult(intent, requestCode)
+    override fun startSelectActivity(activity: Activity, requestCode: Int) {
+        activity.startActivityForResult(Intent(activity, SelectActivity::class.java), requestCode)
     }
 
     override fun startOssLicensesMenuActivity(activity: Activity, titleResId: Int) {

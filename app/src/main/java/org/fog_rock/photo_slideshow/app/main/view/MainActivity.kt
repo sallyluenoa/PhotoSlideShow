@@ -12,23 +12,36 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
+import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
 import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
+import org.fog_rock.photo_slideshow.app.main.router.MainRouter
+import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
+import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
+import org.fog_rock.photo_slideshow.core.file.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
+import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
+import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 
 class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     companion object {
         private const val PRESENT_TIME_MILLISECS = 5000L
+
+        private const val ASPECT_WIDTH = 500L
+        private const val ASPECT_HEIGHT = 1000L
     }
 
     private val fragmentManager = supportFragmentManager
 
     private val handler = Handler()
 
-    private lateinit var presenter: MainContract.Presenter
+    private var presenter: MainContract.Presenter? = null
+
+    private var displayedPhotos: List<DisplayedPhoto> = emptyList()
 
     private var slideShowFiles = listOf<String>()
     private var index = 0
@@ -40,12 +53,20 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         setSupportActionBar(toolbar)
         replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
 
-        presenter = MainPresenter(this)
-//        presenter.requestAlbums()
+        presenter = MainPresenter(
+            MainInteractor(this, AppDatabase(),
+                GoogleSignInApiImpl(this), PhotosLibraryApiImpl(),
+                PhotosDownloaderImpl(FileDownloaderImpl(), ASPECT_WIDTH, ASPECT_HEIGHT)),
+            MainRouter()
+        )
+        presenter?.create(this)
+
+        presenter?.requestLoadDisplayedPhotos()
     }
 
     override fun onDestroy() {
-        presenter.destroy()
+        presenter?.destroy()
+        presenter = null
 
         super.onDestroy()
     }
@@ -75,12 +96,12 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
             }
             R.id.action_license -> {
                 logI("License action is selected.")
-                presenter.requestShowLicenses()
+                presenter?.requestShowLicenses()
                 true
             }
             R.id.action_sign_out -> {
                 logI("Sign out action is selected.")
-                presenter.requestSignOut()
+                presenter?.requestSignOut()
                 true
             }
             else -> {
@@ -92,26 +113,19 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        presenter.evaluateActivityResult(requestCode, resultCode, data)
+        presenter?.evaluateActivityResult(requestCode, resultCode, data)
     }
 
     override fun getActivity(): Activity = this
 
-    override fun requestUpdatePhotosResult(request: UpdatePhotosRequest) {
-        slideShowFiles = files
-        handler.removeCallbacksAndMessages(null)
+    override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
+        this.displayedPhotos = displayedPhotos
 
-        if (slideShowFiles.isEmpty()) {
-            logE("Files for slide show is empty.")
-            return
-        }
-        if (slideShowFiles.size == 1) {
-            logE("Present one image.")
-            presentImage(slideShowFiles[0])
-            return
-        }
-        index = 0
-        presentSlideShow()
+
+        presenter?.requestUpdateDisplayedPhotos()
+    }
+
+    override fun requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest) {
     }
 
     override fun requestSignOutResult(result: ApiResult) {
