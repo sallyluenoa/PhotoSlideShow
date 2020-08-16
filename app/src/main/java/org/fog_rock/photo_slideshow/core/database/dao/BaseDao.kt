@@ -7,10 +7,10 @@ import org.fog_rock.photo_slideshow.core.database.entity.BaseEntity
 interface BaseDao<EntityT: BaseEntity> {
 
     @Insert
-    fun insert(entity: EntityT)
+    fun insert(entity: EntityT): Long
 
     @Insert
-    fun insert(entities: List<EntityT>)
+    fun insert(entities: List<EntityT>): List<Long>
 
     @Update
     fun update(entity: EntityT)

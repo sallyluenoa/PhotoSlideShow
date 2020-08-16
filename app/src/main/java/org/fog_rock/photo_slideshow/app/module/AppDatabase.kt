@@ -1,8 +1,9 @@
 package org.fog_rock.photo_slideshow.app.module
 
-import com.google.photos.types.proto.Album
-import com.google.photos.types.proto.MediaItem
-import org.fog_rock.photo_slideshow.core.database.entity.*
+import org.fog_rock.photo_slideshow.app.module.entity.PhotoInfo
+import org.fog_rock.photo_slideshow.core.database.entity.SelectedAlbum
+import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
+import org.fog_rock.photo_slideshow.core.database.entity.UserInfoData
 import org.fog_rock.photo_slideshow.core.database.room.SingletonRoomObject
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
@@ -17,40 +18,47 @@ class AppDatabase {
         }
     }
 
-    fun updateSelectedAlbum(userInfoId: Long, album: Album) {
-        val selectedAlbum = selectedAlbumDao().findByUniqueKeys(userInfoId, album.id)
-        if (selectedAlbum != null) {
-            selectedAlbumDao().update(selectedAlbum.copy(album))
-        } else {
-            selectedAlbumDao().insert(SelectedAlbum(userInfoId, album))
+    fun deleteUserInfo(id: Long) {
+        userInfoDao().delete(userInfoDao().findById(id) ?: return)
+    }
+
+    fun replaceUserInfoData(userInfoData: UserInfoData, photosInfo: List<PhotoInfo>) {
+        userInfoData.dataList.forEach { selectedData ->
+            val photoInfo = photosInfo.find { it.album.id == selectedData.selectedAlbum.albumId }
+            if (photoInfo != null) {
+                // DB更新
+                // selectedAlbumを更新.
+                selectedAlbumDao().update(selectedData.selectedAlbum.copy(photoInfo.album))
+                // 古いdisplayedPhotosを削除.
+                displayedPhotoDao().delete(selectedData.displayedPhotos)
+                // 新しいdisplayedPhotosを追加.
+                displayedPhotoDao().insert(photoInfo.displayedPhotos(selectedData.selectedAlbum.id))
+            } else {
+                // DB削除
+                // selectedAlbumを消せばdisplayedPhotosも削除される.
+                selectedAlbumDao().delete(selectedData.selectedAlbum)
+            }
         }
-    }
 
-    fun updateDisplayedPhoto(selectedAlbumId: Long, mediaItem: MediaItem) {
-        val displayedPhoto = displayedPhotoDao().findByUniqueKeys(selectedAlbumId, mediaItem.id)
-        if (displayedPhoto != null) {
-            displayedPhotoDao().update(displayedPhoto.copy(mediaItem))
-        } else {
-            displayedPhotoDao().insert(DisplayedPhoto(selectedAlbumId, mediaItem))
+        photosInfo.forEach { photoInfo->
+            if (userInfoData.dataList.find { it.selectedAlbum.albumId == photoInfo.album.id } == null) {
+                // DB追加
+                // selectedAlbumを追加.
+                val id = selectedAlbumDao().insert(SelectedAlbum(userInfoData.userInfo.id, photoInfo.album))
+                // displayedPhotosを追加.
+                displayedPhotoDao().insert(photoInfo.displayedPhotos(id))
+            }
         }
-    }
-
-    fun updateSelectedAlbums(userInfoId: Long, albums: List<Album>) {
-        albums.forEach { updateSelectedAlbum(userInfoId, it) }
-    }
-
-    fun updateDisplayedPhotos(selectedAlbumId: Long, mediaItems: List<MediaItem>) {
-        mediaItems.forEach { updateDisplayedPhoto(selectedAlbumId, it) }
     }
 
     fun findUserInfoByEmailAddress(emailAddress: String): UserInfo? =
         userInfoDao().findByEmailAddress(emailAddress)
 
     fun findUserInfoWithAllById(id: Long): UserInfoData? =
-        userInfoDao().findWithAllById(id)
+        userInfoDao().findUserInfoDataById(id)
 
     fun findUserInfoWithAllByEmailAddress(emailAddress: String): UserInfoData? =
-        userInfoDao().findWithAllByEmailAddress(emailAddress)
+        userInfoDao().findUserInfoDataByEmailAddress(emailAddress)
 
     private fun userInfoDao() = SingletonRoomObject.userInfoDao()
 

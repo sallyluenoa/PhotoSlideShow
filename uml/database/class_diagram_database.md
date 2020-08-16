@@ -48,8 +48,8 @@ namespace core.database #FFEEFF {
 
   namespace dao {
     interface BaseDao<EntityT> {
-      + insert(entity: EntityT)
-      + insert(entities: List<EntityT>)
+      + insert(entity: EntityT): Long
+      + insert(entities: List<EntityT>): List<Long>
       + update(entity: EntityT)
       + update(entities: List<EntityT>)
       + delete(entity: EntityT)
@@ -100,6 +100,7 @@ namespace app.module #FFFFEE {
   namespace entity {
     class PhotoInfo << (D, sandybrown) >> {
       + album: Album
+      + displayedPhotos(selectedAlbumId: Long): List<DisplayedPhoto>
     }
     class MediaDetail << (D, sandybrown) >> {
       + mediaItem: MediaItem
@@ -124,5 +125,4 @@ core.database.room.SingletonRoomDatabase o-right- core.database.dao.SelectedAlbu
 core.database.room.SingletonRoomDatabase o-right- core.database.dao.DisplayedPhotoDao
 
 app.module.AppDatabase -- core.database.room.SingletonRoomObject
-
 @enduml
