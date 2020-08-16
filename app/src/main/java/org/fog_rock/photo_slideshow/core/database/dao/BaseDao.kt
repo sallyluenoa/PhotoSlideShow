@@ -7,24 +7,24 @@ import org.fog_rock.photo_slideshow.core.database.entity.BaseEntity
 interface BaseDao<EntityT: BaseEntity> {
 
     @Insert
-    fun insert(entity: EntityT): Long
+    suspend fun insert(entity: EntityT): Long
 
     @Insert
-    fun insert(entities: List<EntityT>): List<Long>
+    suspend fun insert(entities: List<EntityT>): List<Long>
 
     @Update
-    fun update(entity: EntityT)
+    suspend fun update(entity: EntityT)
 
     @Update
-    fun update(entities: List<EntityT>)
+    suspend fun update(entities: List<EntityT>)
 
     @Delete
-    fun delete(entity: EntityT)
+    suspend fun delete(entity: EntityT)
 
     @Delete
-    fun delete(entities: List<EntityT>)
+    suspend fun delete(entities: List<EntityT>)
 
-    fun getAll(): List<EntityT>
+    suspend fun getAll(): List<EntityT>
 
-    fun findById(id: Long): EntityT?
+    suspend fun findById(id: Long): EntityT?
 }
