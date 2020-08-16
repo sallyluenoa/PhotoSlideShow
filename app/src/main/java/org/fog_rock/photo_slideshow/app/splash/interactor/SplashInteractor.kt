@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
@@ -26,8 +27,12 @@ class SplashInteractor(
 
     private var callback: SplashContract.InteractorCallback? = null
 
-    override fun create(callback: SplashContract.InteractorCallback) {
-        this.callback = callback
+    override fun create(callback: ViperContract.InteractorCallback) {
+        if (callback is SplashContract.InteractorCallback) {
+            this.callback = callback
+        } else {
+            IllegalArgumentException("SplashContract.InteractorCallback should be set.")
+        }
     }
 
     override fun destroy() {

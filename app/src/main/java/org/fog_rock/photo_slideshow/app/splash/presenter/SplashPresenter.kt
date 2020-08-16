@@ -7,6 +7,7 @@ import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.viper.ViperContract
 
 class SplashPresenter(
     private var interactor: SplashContract.Interactor?,
@@ -22,17 +23,25 @@ class SplashPresenter(
 
     private var callback: SplashContract.PresenterCallback? = null
 
-    override fun create(callback: SplashContract.PresenterCallback) {
-        this.callback = callback
-        interactor?.create(this)
+    override fun create(callback: ViperContract.PresenterCallback) {
+        if (callback is SplashContract.PresenterCallback) {
+            this.callback = callback
+            interactor?.create(this)
+        } else {
+            IllegalArgumentException("SplashContract.PresenterCallback should be set.")
+        }
     }
 
     override fun destroy() {
         interactor?.destroy()
+        interactor = null
+        router = null
         callback = null
     }
 
-    override fun requestSignIn() = presentSequence(SignInRequest.RUNTIME_PERMISSIONS)
+    override fun requestSignIn() {
+        presentSequence(SignInRequest.RUNTIME_PERMISSIONS)
+    }
 
     override fun evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         logI("evaluateActivityResult() " +
@@ -65,11 +74,13 @@ class SplashPresenter(
         }
     }
 
-    override fun requestGoogleSilentSignInResult(isSucceeded: Boolean) =
+    override fun requestGoogleSilentSignInResult(isSucceeded: Boolean) {
         presentSequenceResult(SignInRequest.GOOGLE_SIGN_IN, isSucceeded)
+    }
 
-    override fun requestUpdateUserInfoResult(isSucceeded: Boolean) =
+    override fun requestUpdateUserInfoResult(isSucceeded: Boolean) {
         presentSequenceResult(SignInRequest.UPDATE_USER_INFO, isSucceeded)
+    }
 
     private fun activity(): Activity? = callback?.getActivity()
 

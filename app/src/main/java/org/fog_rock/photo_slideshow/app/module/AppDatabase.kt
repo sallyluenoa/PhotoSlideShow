@@ -9,7 +9,7 @@ import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 class AppDatabase {
 
-    fun updateUserInfo(emailAddress: String, tokenInfo: TokenInfo) {
+    suspend fun updateUserInfo(emailAddress: String, tokenInfo: TokenInfo) {
         val userInfo = userInfoDao().findByEmailAddress(emailAddress)
         if (userInfo != null) {
             userInfoDao().update(userInfo.copy(tokenInfo))
@@ -18,11 +18,11 @@ class AppDatabase {
         }
     }
 
-    fun deleteUserInfo(id: Long) {
-        userInfoDao().delete(userInfoDao().findById(id) ?: return)
+    suspend fun deleteUserInfo(userInfo: UserInfo) {
+        userInfoDao().delete(userInfo)
     }
 
-    fun replaceUserInfoData(userInfoData: UserInfoData, photosInfo: List<PhotoInfo>) {
+    suspend fun replaceUserInfoData(userInfoData: UserInfoData, photosInfo: List<PhotoInfo>) {
         userInfoData.dataList.forEach { selectedData ->
             val photoInfo = photosInfo.find { it.album.id == selectedData.selectedAlbum.albumId }
             if (photoInfo != null) {
@@ -51,13 +51,13 @@ class AppDatabase {
         }
     }
 
-    fun findUserInfoByEmailAddress(emailAddress: String): UserInfo? =
+    suspend fun findUserInfoByEmailAddress(emailAddress: String): UserInfo? =
         userInfoDao().findByEmailAddress(emailAddress)
 
-    fun findUserInfoWithAllById(id: Long): UserInfoData? =
+    suspend fun findUserInfoDataById(id: Long): UserInfoData? =
         userInfoDao().findUserInfoDataById(id)
 
-    fun findUserInfoWithAllByEmailAddress(emailAddress: String): UserInfoData? =
+    suspend fun findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData? =
         userInfoDao().findUserInfoDataByEmailAddress(emailAddress)
 
     private fun userInfoDao() = SingletonRoomObject.userInfoDao()

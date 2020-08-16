@@ -66,7 +66,7 @@ object SingletonWebHolder {
             }.build()
             GoogleSignIn.getClient(context, options)
         } catch (e: NullPointerException) {
-            throw NullPointerException("Failed to get GoogleSignInClient.")
+            throw NullPointerException("Failed to setup GoogleSignInClient.")
         }
     }
 
@@ -78,7 +78,10 @@ object SingletonWebHolder {
             }.build()
             PhotosLibraryClient.initialize(settings)
         } catch (e : IOException) {
-            throw IOException("Failed to initialize PhotosLibraryClient.")
+            throw IOException("Failed to update PhotosLibraryClient.")
         }
     }
+
+    fun photosLibraryClient(): PhotosLibraryClient =
+        photosLibraryClient ?: throw NullPointerException("PhotosLibraryClient is null.")
 }
