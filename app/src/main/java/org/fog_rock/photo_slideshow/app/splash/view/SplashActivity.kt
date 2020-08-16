@@ -3,9 +3,12 @@ package org.fog_rock.photo_slideshow.app.splash.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
@@ -41,10 +44,11 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         )
         presenter?.create(this)
 
-        Handler().postDelayed({
+        lifecycleScope.launch(Dispatchers.Main) {
+            delay(SHOW_LOGO_TIME_MILLIS)
             replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.EMPTY))
             requestSignIn()
-        }, SHOW_LOGO_TIME_MILLIS)
+        }
     }
 
     override fun onDestroy() {

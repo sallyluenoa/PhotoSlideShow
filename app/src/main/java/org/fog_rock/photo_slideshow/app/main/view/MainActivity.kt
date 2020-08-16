@@ -3,12 +3,13 @@ package org.fog_rock.photo_slideshow.app.main.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
@@ -37,14 +38,14 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     private val fragmentManager = supportFragmentManager
 
-    private val handler = Handler()
-
     private var presenter: MainContract.Presenter? = null
 
-    private var displayedPhotos: List<DisplayedPhoto> = emptyList()
+    private var displayedPhotos = emptyList<DisplayedPhoto>()
+    private var displayedIndex = 0
 
-    private var slideShowFiles = listOf<String>()
-    private var index = 0
+    private var isForeground = false
+    private var isUpdateRequested = false
+    private var isRunningSlideShow = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,16 +72,18 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         super.onDestroy()
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
 
-        if (slideShowFiles.size > 1) presentSlideShow()
+        isForeground = true
+        if (displayedPhotos.isNotEmpty()) presentSlideShow()
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        isForeground = false
+        lifecycleScope.cancel(CancellationException("MainActivity will be background."))
 
-        handler.removeCallbacksAndMessages(null)
+        super.onPause()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -119,18 +122,29 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     override fun getActivity(): Activity = this
 
     override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
-        this.displayedPhotos = displayedPhotos
-
-
-        presenter?.requestUpdateDisplayedPhotos()
+        isUpdateRequested = false
+        if (displayedPhotos.isEmpty()) {
+            presenter?.requestUpdateDisplayedPhotos()
+        } else {
+            this.displayedPhotos = displayedPhotos
+            this.displayedIndex = 0
+            presentSlideShow()
+        }
     }
 
     override fun requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest) {
+        if (request == UpdatePhotosRequest.COMPLETED) {
+            if (isRunningSlideShow) {
+                isUpdateRequested = true
+            } else {
+                presenter?.requestLoadDisplayedPhotos()
+            }
+        }
     }
 
     override fun requestSignOutResult(result: ApiResult) {
         if (result == ApiResult.SUCCEEDED) {
-            finish();
+            finish()
         }
     }
 
@@ -163,12 +177,26 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
      * ファイルリストからインデックスに該当するファイルをスライドショーに表示する.
      */
     private fun presentSlideShow() {
-        logI("Present image. Index: $index")
-        presentImage(slideShowFiles[index])
+        if (!isForeground) {
+            logI("MainActivity is background now. Skipped to present SlideShow.")
+            return
+        }
 
-        handler.postDelayed({
-            index = if (index + 1 < slideShowFiles.size) index + 1 else 0
-            presentSlideShow()
-        }, PRESENT_TIME_MILLISECS)
+        lifecycleScope.launch(Dispatchers.Main) {
+            try {
+                isRunningSlideShow = true
+                while (!isUpdateRequested) {
+                    presentImage(displayedPhotos[displayedIndex].outputPath)
+                    delay(PRESENT_TIME_MILLISECS)
+                    displayedIndex =
+                        if (displayedIndex + 1 < displayedPhotos.size) displayedIndex + 1 else 0
+                    if (displayedIndex == 0) presenter?.requestUpdateDisplayedPhotos()
+                }
+                isRunningSlideShow = false
+                presenter?.requestLoadDisplayedPhotos()
+            } catch (e: CancellationException) {
+                logI("SlideShow loop was canceled. Reason: $e")
+            }
+        }
     }
 }
