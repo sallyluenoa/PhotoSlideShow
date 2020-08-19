@@ -1,19 +1,21 @@
 package org.fog_rock.photo_slideshow.core.webapi.impl
 
 import com.google.android.gms.common.api.ApiException
+import com.google.photos.library.v1.PhotosLibraryClient
 import com.google.photos.library.v1.proto.SearchMediaItemsRequest
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryApi
+import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 
 class PhotosLibraryApiImpl(): PhotosLibraryApi {
 
     override suspend fun requestAlbum(albumId: String): Album =
         try {
-            SingletonWebHolder.photosLibraryClient!!.getAlbum(albumId)
+            photosLibraryClient().getAlbum(albumId)
         } catch (e: ApiException) {
             logE("Failed to get album.")
             e.printStackTrace()
@@ -22,7 +24,7 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
 
     override suspend fun requestMediaItem(mediaItemId: String): MediaItem =
         try {
-            SingletonWebHolder.photosLibraryClient!!.getMediaItem(mediaItemId)
+            photosLibraryClient().getMediaItem(mediaItemId)
         } catch (e: ApiException) {
             logE("Failed to get mediaItem.")
             e.printStackTrace()
@@ -47,7 +49,7 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
 
     override suspend fun requestSharedAlbums(): List<Album> =
         try {
-            val response = SingletonWebHolder.photosLibraryClient!!.listSharedAlbums()
+            val response = photosLibraryClient().listSharedAlbums()
             val albums = emptyList<Album>()
             for (page in response.iteratePages()) {
                 logI("Load ListSharedAlbumsPage. PageCount: ${page.pageElementCount}");
@@ -66,7 +68,7 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
                 albumId = album.id
                 pageSize = 100
             }.build()
-            val response = SingletonWebHolder.photosLibraryClient!!.searchMediaItems(request)
+            val response = photosLibraryClient().searchMediaItems(request)
             val mediaItems = emptyList<MediaItem>()
             logI("Total mediaItem count: ${album.mediaItemsCount}")
             for (page in response.iteratePages()) {
@@ -79,4 +81,14 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
             e.printStackTrace()
             emptyList()
         }
+
+    override fun updatePhotosLibraryClient(tokenInfo: TokenInfo?) =
+        SingletonWebHolder.updatePhotosLibraryClient(tokenInfo)
+
+
+    override fun currentTokenInfo(): TokenInfo = SingletonWebHolder.tokenInfo
+
+    private fun photosLibraryClient(): PhotosLibraryClient =
+        SingletonWebHolder.photosLibraryClient ?:
+        throw NullPointerException("PhotosLibraryClient is null.")
 }

@@ -16,6 +16,7 @@ import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.core.file.AssetsFileReader
 import org.fog_rock.photo_slideshow.core.webapi.entity.ClientSecret
 import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
+import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -28,6 +29,8 @@ object SingletonWebHolder {
     lateinit var googleSignInClient: GoogleSignInClient
 
     var photosLibraryClient: PhotosLibraryClient? = null
+
+    var tokenInfo = TokenInfo()
 
     fun loadClientSecret(assetsFileReader: AssetsFileReader, jsonFileName: String) {
         val jsonString = assetsFileReader.read(jsonFileName)
@@ -70,18 +73,21 @@ object SingletonWebHolder {
         }
     }
 
-    fun updatePhotosLibraryClient(accessToken: String) {
-        photosLibraryClient = try {
-            val credentials = OAuth2Credentials.create(AccessToken(accessToken, null))
-            val settings = PhotosLibrarySettings.newBuilder().apply {
-                credentialsProvider = FixedCredentialsProvider.create(credentials)
-            }.build()
-            PhotosLibraryClient.initialize(settings)
-        } catch (e : IOException) {
-            throw IOException("Failed to update PhotosLibraryClient.")
+    fun updatePhotosLibraryClient(tokenInfo: TokenInfo?) {
+        if (tokenInfo != null) {
+            try {
+                val credentials = OAuth2Credentials.create(AccessToken(tokenInfo.accessToken, null))
+                val settings = PhotosLibrarySettings.newBuilder().apply {
+                    credentialsProvider = FixedCredentialsProvider.create(credentials)
+                }.build()
+                this.photosLibraryClient = PhotosLibraryClient.initialize(settings)
+                this.tokenInfo = tokenInfo
+            } catch (e: IOException) {
+                throw IOException("Failed to update PhotosLibraryClient.")
+            }
+        } else {
+            this.photosLibraryClient = null
+            this.tokenInfo = TokenInfo()
         }
     }
-
-    fun photosLibraryClient(): PhotosLibraryClient =
-        photosLibraryClient ?: throw NullPointerException("PhotosLibraryClient is null.")
 }

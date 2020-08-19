@@ -1,6 +1,8 @@
 package org.fog_rock.photo_slideshow.app.module
 
-import org.fog_rock.photo_slideshow.app.module.entity.PhotoInfo
+import com.google.photos.types.proto.Album
+import com.google.photos.types.proto.MediaItem
+import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.database.entity.SelectedAlbum
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfoData
@@ -8,6 +10,25 @@ import org.fog_rock.photo_slideshow.core.database.room.SingletonRoomObject
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 class AppDatabase {
+
+    data class PhotoInfo(
+        val album: Album,
+        val mediaDetails: List<MediaDetail>
+    ) {
+
+        data class MediaDetail(
+            val mediaItem: MediaItem,
+            val outputPath: String
+        )
+
+        fun displayedPhotos(selectedAlbumId: Long): List<DisplayedPhoto> {
+            val displayedPhotos = mutableListOf<DisplayedPhoto>()
+            mediaDetails.forEach {
+                displayedPhotos.add(DisplayedPhoto(selectedAlbumId, it.mediaItem, it.outputPath))
+            }
+            return displayedPhotos.toList()
+        }
+    }
 
     suspend fun updateUserInfo(emailAddress: String, tokenInfo: TokenInfo) {
         val userInfo = userInfoDao().findByEmailAddress(emailAddress)

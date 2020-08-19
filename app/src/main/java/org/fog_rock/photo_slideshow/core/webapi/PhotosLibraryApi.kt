@@ -2,6 +2,7 @@ package org.fog_rock.photo_slideshow.core.webapi
 
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
+import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 /**
  * Google Photos に関連するAPI
@@ -47,4 +48,14 @@ interface PhotosLibraryApi {
      * コルーチン内で呼び出すこと.
      */
     suspend fun requestMediaItems(album: Album): List<MediaItem>
+
+    /**
+     * 指定されたトークン情報でクライアントを更新する.
+     */
+    fun updatePhotosLibraryClient(tokenInfo: TokenInfo?)
+
+    /**
+     * 現在のトークン情報を取得する.
+     */
+    fun currentTokenInfo(): TokenInfo
 }

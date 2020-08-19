@@ -11,8 +11,16 @@ import com.google.api.client.auth.oauth2.TokenResponse
 data class TokenInfo(
     val accessToken: String,
     val refreshToken: String,
-    val expiredAccessTokenTimeMillis: Long
+    private val expiredAccessTokenTimeMillis: Long
 ) {
+
+    companion object {
+        // 有効期限までのバッファー時間
+        private const val INTERVAL_EXPIRED_MILLISECS = 60 * 1000L
+
+        private fun convertExpiredAccessTokenTimeMillis(expiresInSeconds: Long?): Long =
+            if (expiresInSeconds != null) System.currentTimeMillis() + expiresInSeconds * 1000L else 0
+    }
 
     constructor(): this("", "", 0)
 
@@ -33,8 +41,17 @@ data class TokenInfo(
         convertExpiredAccessTokenTimeMillis(response.expiresInSeconds)
     )
 
-    companion object {
-        private fun convertExpiredAccessTokenTimeMillis(expiresInSeconds: Long?): Long =
-            if (expiresInSeconds != null) System.currentTimeMillis() + expiresInSeconds * 1000L else 0
-    }
+    /**
+     * アクセストークンが有効か.
+     * @return 現在の時間が「アクセストークン有効期限 - バッファー時間」を過ぎていなければ true
+     */
+    fun isAvailableAccessToken(): Boolean =
+        System.currentTimeMillis() < expiredAccessTokenTimeMillis - INTERVAL_EXPIRED_MILLISECS
+
+    /**
+     * 指定されたトークン情報よりも後で更新されたか.
+     * @return アクセストークンの有効期限が、指定のトークン情報より後ならば true
+     */
+    fun afterUpdated(tokenInfo: TokenInfo): Boolean =
+        expiredAccessTokenTimeMillis > tokenInfo.expiredAccessTokenTimeMillis
 }

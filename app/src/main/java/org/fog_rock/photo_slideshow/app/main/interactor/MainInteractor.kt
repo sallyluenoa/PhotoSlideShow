@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
-import org.fog_rock.photo_slideshow.app.module.entity.PhotoInfo
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfoData
@@ -29,7 +28,6 @@ class MainInteractor(
 ): MainContract.Interactor {
 
     companion object {
-        private const val INTERVAL_EXPIRED_MILLISECS = 60 * 1000L
         private const val INTERVAL_UPDATE_MILLISECS = 24 * 60 * 60 * 1000L
         private const val MEDIA_ITEMS_PICKUP_SIZE = 10
     }
@@ -91,7 +89,7 @@ class MainInteractor(
 
     override fun requestDownloadPhotos(albums: List<Album>) {
         GlobalScope.launch(Dispatchers.Main) {
-            val photosInfo = mutableListOf<PhotoInfo>()
+            val photosInfo = mutableListOf<AppDatabase.PhotoInfo>()
             albums.forEach { album ->
                 // MediaItemリストをサーバーから取得する.
                 var mediaItems = withContext(Dispatchers.Default) {
@@ -107,21 +105,21 @@ class MainInteractor(
                     photosDownloader.requestDownloads(mediaItems, context.filesDir)
                 }
                 // MediaDetailリストを作成.
-                val mediaDetails = mutableListOf<PhotoInfo.MediaDetail>()
+                val mediaDetails = mutableListOf<AppDatabase.PhotoInfo.MediaDetail>()
                 outputPaths.forEach { outputPath ->
                     val mediaItem = mediaItems.find { outputPath.endsWith(it.filename) }
                     if (mediaItem != null) {
-                        mediaDetails.add(PhotoInfo.MediaDetail(mediaItem, outputPath))
+                        mediaDetails.add(AppDatabase.PhotoInfo.MediaDetail(mediaItem, outputPath))
                     }
                 }
                 // PhotoInfoを生成して追加.
-                photosInfo.add(PhotoInfo(album, mediaDetails.toList()))
+                photosInfo.add(AppDatabase.PhotoInfo(album, mediaDetails.toList()))
             }
             callback?.requestDownloadPhotosResult(photosInfo.toList())
         }
     }
 
-    override fun requestUpdateDatabase(photosInfo: List<PhotoInfo>) {
+    override fun requestUpdateDatabase(photosInfo: List<AppDatabase.PhotoInfo>) {
         GlobalScope.launch(Dispatchers.Main) {
             userInfoData = withContext(Dispatchers.Default) {
                 appDatabase.replaceUserInfoData(userInfoData, photosInfo)
