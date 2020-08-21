@@ -18,12 +18,14 @@ import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
 import org.fog_rock.photo_slideshow.app.main.router.MainRouter
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
+import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
 import org.fog_rock.photo_slideshow.core.file.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
+import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 
@@ -56,8 +58,8 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
         presenter = MainPresenter(
             MainInteractor(this, AppDatabase(),
-                GoogleSignInApiImpl(this), PhotosLibraryApiImpl(),
-                PhotosDownloaderImpl(FileDownloaderImpl(), ASPECT_WIDTH, ASPECT_HEIGHT)),
+                PhotosDownloaderImpl(FileDownloaderImpl(), ASPECT_WIDTH, ASPECT_HEIGHT),
+                GoogleWebApis(GoogleSignInApiImpl(this), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())),
             MainRouter()
         )
         presenter?.create(this)

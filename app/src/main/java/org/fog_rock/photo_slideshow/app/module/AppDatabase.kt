@@ -2,6 +2,9 @@ package org.fog_rock.photo_slideshow.app.module
 
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
+import org.fog_rock.photo_slideshow.core.database.dao.DisplayedPhotoDao
+import org.fog_rock.photo_slideshow.core.database.dao.SelectedAlbumDao
+import org.fog_rock.photo_slideshow.core.database.dao.UserInfoDao
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.database.entity.SelectedAlbum
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
@@ -81,9 +84,9 @@ class AppDatabase {
     suspend fun findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData? =
         userInfoDao().findUserInfoDataByEmailAddress(emailAddress)
 
-    private fun userInfoDao() = SingletonRoomObject.userInfoDao()
+    private fun userInfoDao(): UserInfoDao = SingletonRoomObject.userInfoDao()
 
-    private fun selectedAlbumDao() = SingletonRoomObject.selectedAlbumDao()
+    private fun selectedAlbumDao(): SelectedAlbumDao = SingletonRoomObject.selectedAlbumDao()
 
-    private fun displayedPhotoDao() = SingletonRoomObject.displayedPhotoDao()
+    private fun displayedPhotoDao(): DisplayedPhotoDao = SingletonRoomObject.displayedPhotoDao()
 }

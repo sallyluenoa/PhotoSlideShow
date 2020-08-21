@@ -1,5 +1,7 @@
 package org.fog_rock.photo_slideshow.app.module
 
+import android.content.Intent
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
@@ -16,19 +18,19 @@ class GoogleWebApis(
 ) {
 
     data class PhotosApiResult<ResultT : Serializable> (
-        val tokenInfo: TokenInfo?,
+        val tokenInfo: TokenInfo,
         val photosResults: List<ResultT>
     )
 
     suspend fun requestSilentSignIn(): ApiResult =
-        if (googleSignInApi.isSignedInAccount()) {
+        if (isSignedInAccount()) {
             googleSignInApi.requestSilentSignIn()
         } else {
             ApiResult.INVALID
         }
 
     suspend fun requestSignOut(withRevokeAccess: Boolean): ApiResult =
-        if (googleSignInApi.isSignedInAccount()) {
+        if (isSignedInAccount()) {
             if (withRevokeAccess) {
                 googleSignInApi.requestRevokeAccess()
             } else {
@@ -54,11 +56,12 @@ class GoogleWebApis(
             }
         }
         // サーバー認証コードからトークン情報を更新.
-        val serverAuthCode = googleSignInApi.getSignedInAccount().serverAuthCode
+        val serverAuthCode = getSignedInAccount().serverAuthCode
         val tokenInfo = if (serverAuthCode != null) {
             googleOAuth2Api.requestTokenInfoWithAuthCode(serverAuthCode)
         } else null
 
+        // フォトライブラリのクライアントを更新.
         photosLibraryApi.updatePhotosLibraryClient(tokenInfo)
         return tokenInfo
     }
@@ -68,7 +71,7 @@ class GoogleWebApis(
         return if (tokenInfo != null) {
             PhotosApiResult(tokenInfo, photosLibraryApi.requestSharedAlbums())
         } else {
-            PhotosApiResult(null, emptyList())
+            PhotosApiResult(TokenInfo(), emptyList())
         }
     }
 
@@ -77,9 +80,23 @@ class GoogleWebApis(
         return if (tokenInfo != null) {
             PhotosApiResult(tokenInfo, photosLibraryApi.requestMediaItems(album))
         } else {
-            PhotosApiResult(null, emptyList())
+            PhotosApiResult(TokenInfo(), emptyList())
         }
     }
+
+    fun getSignedInAccount(): GoogleSignInAccount =
+        googleSignInApi.getSignedInAccount() ?:
+        throw NullPointerException("There are no sign in account.")
+
+    fun getSignedInEmailAddress(): String =
+        googleSignInApi.getSignedInAccount()?.email ?:
+        throw NullPointerException("There are no sign in account.")
+
+    fun isSignedInAccount(): Boolean =
+        googleSignInApi.getSignedInAccount() != null
+
+    fun isSucceededUserSignIn(data: Intent?): Boolean =
+        googleSignInApi.isSucceededUserSignIn(data)
 
     private suspend fun updateTokenInfo(): TokenInfo? {
         val currentTokenInfo = photosLibraryApi.currentTokenInfo()
@@ -92,7 +109,7 @@ class GoogleWebApis(
             // トークン更新に失敗.
             return null
         }
-        // クライアントを更新する.
+        // フォトライブラリのクライアントを更新.
         photosLibraryApi.updatePhotosLibraryClient(tokenInfo)
         return tokenInfo
     }

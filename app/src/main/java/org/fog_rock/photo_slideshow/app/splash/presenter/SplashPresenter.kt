@@ -8,6 +8,7 @@ import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 class SplashPresenter(
     private var interactor: SplashContract.Interactor?,
@@ -74,8 +75,22 @@ class SplashPresenter(
         }
     }
 
-    override fun requestGoogleSilentSignInResult(isSucceeded: Boolean) {
-        presentSequenceResult(SignInRequest.GOOGLE_SIGN_IN, isSucceeded)
+    override fun requestGoogleSilentSignInResult(result: ApiResult) {
+        val request = SignInRequest.GOOGLE_SIGN_IN
+        when (result) {
+            ApiResult.SUCCEEDED -> {
+                logI("Succeeded to request: $request")
+                presentSequence(request.next())
+            }
+            ApiResult.INVALID -> {
+                logI("Request google user sign in.")
+                router?.startGoogleSignInActivity((activity() ?: return), request.code)
+            }
+            else -> {
+                logI( "Failed to request: $request")
+                callback?.requestSignInResult(request)
+            }
+        }
     }
 
     override fun requestUpdateUserInfoResult(isSucceeded: Boolean) {
@@ -125,13 +140,8 @@ class SplashPresenter(
     }
 
     private fun presentGoogleSignIn() {
-        if (interactor?.isGoogleSignedIn() ?: return) {
-            logI("Request google silent sign in.")
-            interactor?.requestGoogleSilentSignIn()
-        } else {
-            logI("Request google user sign in.")
-            router?.startGoogleSignInActivity((activity() ?: return), SignInRequest.GOOGLE_SIGN_IN.code)
-        }
+        logI("Request google silent sign in.")
+        interactor?.requestGoogleSilentSignIn()
     }
 
     private fun presentUpdateUserInfo() {
@@ -141,7 +151,7 @@ class SplashPresenter(
 
     private fun presentMainActivity() {
         logI("Start MainActivity.")
-        router?.startMainActivity((activity() ?: return))
+        router?.startMainActivity(activity() ?: return)
         callback?.requestSignInResult(SignInRequest.COMPLETED)
     }
 }

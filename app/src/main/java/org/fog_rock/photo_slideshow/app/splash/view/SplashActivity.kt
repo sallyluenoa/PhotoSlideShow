@@ -13,6 +13,7 @@ import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
+import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
@@ -21,6 +22,7 @@ import org.fog_rock.photo_slideshow.app.splash.router.SplashRouter
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
+import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 
 class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, AppDialogFragment.Callback {
 
@@ -39,7 +41,8 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.LOGO))
 
         presenter = SplashPresenter(
-            SplashInteractor(this, AppDatabase(), GoogleSignInApiImpl(this), GoogleOAuth2ApiImpl()),
+            SplashInteractor(this, AppDatabase(),
+                GoogleWebApis(GoogleSignInApiImpl(this), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())),
             SplashRouter()
         )
         presenter?.create(this)

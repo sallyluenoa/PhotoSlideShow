@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 class SplashContract {
 
@@ -54,11 +55,6 @@ class SplashContract {
         fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean
 
         /**
-         * Googleアカウントでサインインしているか.
-         */
-        fun isGoogleSignedIn(): Boolean
-
-        /**
          * Googleアカウントでのユーザーサインインに成功したか.
          */
         fun isSucceededGoogleUserSignIn(data: Intent?): Boolean
@@ -69,7 +65,7 @@ class SplashContract {
          * Googleアカウントでのサイレントサインイン要求の結果.
          * @see Interactor.requestGoogleSilentSignIn
          */
-        fun requestGoogleSilentSignInResult(isSucceeded: Boolean)
+        fun requestGoogleSilentSignInResult(result: ApiResult)
 
         /**
          * ユーザー情報の更新要求の結果.

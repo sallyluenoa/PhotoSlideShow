@@ -10,21 +10,19 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
+import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfoData
 import org.fog_rock.photo_slideshow.core.file.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
-import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
-import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryApi
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 class MainInteractor(
     private val context: Context,
     private val appDatabase: AppDatabase,
-    private val googleSignInApi: GoogleSignInApi,
-    private val photosLibraryApi: PhotosLibraryApi,
-    private val photosDownloader: PhotosDownloader
+    private val photosDownloader: PhotosDownloader,
+    private val googleWebApis: GoogleWebApis
 ): MainContract.Interactor {
 
     companion object {
@@ -35,7 +33,7 @@ class MainInteractor(
     private var callback: MainContract.InteractorCallback? = null
 
     private var userInfoData = UserInfoData(
-        UserInfo(googleSignInApi.getSignedInEmailAddress(), TokenInfo()),
+        UserInfo(googleWebApis.getSignedInEmailAddress(), TokenInfo()),
         emptyList()
     )
 
@@ -52,13 +50,11 @@ class MainInteractor(
     }
 
     override fun requestLoadDisplayedPhotos() {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.Default) {
             if (userInfoData.userInfo.id == 0L) {
                 // 初回のみ(userInfo.id が 0 のとき)、DBからのデータ取得を行う.
-                userInfoData = withContext(Dispatchers.Default) {
-                    appDatabase.findUserInfoDataByEmailAddress(userInfoData.userInfo.emailAddress)
-                } ?: run {
-                    callback?.requestLoadDisplayedPhotosResult(emptyList())
+                userInfoData = appDatabase.findUserInfoDataByEmailAddress(userInfoData.userInfo.emailAddress) ?: run {
+                    requestLoadDisplayedPhotosResult(emptyList())
                     return@launch
                 }
             }
@@ -68,67 +64,35 @@ class MainInteractor(
                 displayedPhotos.addAll(it.displayedPhotos)
             }
             displayedPhotos.shuffle()
-            callback?.requestLoadDisplayedPhotosResult(displayedPhotos.toList())
+            requestLoadDisplayedPhotosResult(displayedPhotos.toList())
         }
     }
 
     override fun requestDownloadPhotos() {
-        GlobalScope.launch(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.Default) {
             // 登録されているSelectedAlbumsから、Albumを抽出する.
             val albums = mutableListOf<Album>()
             userInfoData.dataList.forEach {
-                // Album はサーバー更新しておく.
-                val album = withContext(Dispatchers.Default) {
-                    photosLibraryApi.requestAlbum(it.selectedAlbum.albumId)
-                }
-                albums.add(album)
+                albums.add(it.selectedAlbum.album())
             }
-            requestDownloadPhotos(albums.toList())
+            requestDownloadPhotosInner(albums.toList())
         }
     }
 
     override fun requestDownloadPhotos(albums: List<Album>) {
-        GlobalScope.launch(Dispatchers.Main) {
-            val photosInfo = mutableListOf<AppDatabase.PhotoInfo>()
-            albums.forEach { album ->
-                // MediaItemリストをサーバーから取得する.
-                var mediaItems = withContext(Dispatchers.Default) {
-                    photosLibraryApi.requestMediaItems(album)
-                }
-                if (mediaItems.isEmpty()) {
-                    // サーバーからのデータ取得に失敗した場合はスキップする.
-                    return@forEach
-                }
-                // ランダムピックアップしたMediaItemリストを元に、画像ファイルをダウンロードする.
-                mediaItems = convertMediaItems(mediaItems, MEDIA_ITEMS_PICKUP_SIZE)
-                val outputPaths = withContext(Dispatchers.Default) {
-                    photosDownloader.requestDownloads(mediaItems, context.filesDir)
-                }
-                // MediaDetailリストを作成.
-                val mediaDetails = mutableListOf<AppDatabase.PhotoInfo.MediaDetail>()
-                outputPaths.forEach { outputPath ->
-                    val mediaItem = mediaItems.find { outputPath.endsWith(it.filename) }
-                    if (mediaItem != null) {
-                        mediaDetails.add(AppDatabase.PhotoInfo.MediaDetail(mediaItem, outputPath))
-                    }
-                }
-                // PhotoInfoを生成して追加.
-                photosInfo.add(AppDatabase.PhotoInfo(album, mediaDetails.toList()))
-            }
-            callback?.requestDownloadPhotosResult(photosInfo.toList())
+        GlobalScope.launch(Dispatchers.Default) {
+            requestDownloadPhotosInner(albums)
         }
     }
 
     override fun requestUpdateDatabase(photosInfo: List<AppDatabase.PhotoInfo>) {
-        GlobalScope.launch(Dispatchers.Main) {
-            userInfoData = withContext(Dispatchers.Default) {
-                appDatabase.replaceUserInfoData(userInfoData, photosInfo)
-                appDatabase.findUserInfoDataById(userInfoData.userInfo.id)
-            } ?: run {
-                callback?.requestUpdateDatabaseResult(false)
+        GlobalScope.launch(Dispatchers.Default) {
+            appDatabase.replaceUserInfoData(userInfoData, photosInfo)
+            userInfoData = appDatabase.findUserInfoDataById(userInfoData.userInfo.id) ?: run {
+                requestUpdateDatabaseResult(false)
                 return@launch
             }
-            callback?.requestUpdateDatabaseResult(true)
+            requestUpdateDatabaseResult(true)
         }
     }
 
@@ -140,6 +104,59 @@ class MainInteractor(
         userInfoData.userInfo.isNeededUpdatePhotos(INTERVAL_UPDATE_MILLISECS)
 
     override fun hasSelectedAlbums(): Boolean = userInfoData.dataList.isNotEmpty()
+
+    private suspend fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
+        withContext(Dispatchers.Main) {
+            callback?.requestLoadDisplayedPhotosResult(displayedPhotos)
+        }
+    }
+
+    private suspend fun requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo>) {
+        withContext(Dispatchers.Main) {
+            callback?.requestDownloadPhotosResult(photosInfo)
+        }
+    }
+
+    private suspend fun requestUpdateDatabaseResult(isSucceeded: Boolean) {
+        withContext(Dispatchers.Main) {
+            callback?.requestUpdateDatabaseResult(isSucceeded)
+        }
+    }
+
+    private suspend fun requestDownloadPhotosInner(albums: List<Album>) {
+        val photosInfo = mutableListOf<AppDatabase.PhotoInfo>()
+
+        albums.forEach { album ->
+            // MediaItemリストをサーバーから取得する.
+            val result = googleWebApis.requestMediaItems(album)
+
+            if (result.tokenInfo.afterUpdated(userInfoData.userInfo.tokenInfo())) {
+                // トークン情報が更新されていたらDB側も更新する.
+                appDatabase.updateUserInfo(userInfoData.userInfo.emailAddress, result.tokenInfo)
+            }
+            if (result.photosResults.isEmpty()) {
+                // サーバーからのデータ取得に失敗した場合はスキップする.
+                return@forEach
+            }
+
+            // ランダムピックアップしたMediaItemリストを元に、画像ファイルをダウンロードする.
+            val mediaItems = convertMediaItems(result.photosResults, MEDIA_ITEMS_PICKUP_SIZE)
+            val outputPaths = photosDownloader.requestDownloads(mediaItems, context.filesDir)
+
+            // MediaDetailリストを作成.
+            val mediaDetails = mutableListOf<AppDatabase.PhotoInfo.MediaDetail>()
+            outputPaths.forEach { outputPath ->
+                val mediaItem = mediaItems.find { outputPath.endsWith(it.filename) }
+                if (mediaItem != null) {
+                    mediaDetails.add(AppDatabase.PhotoInfo.MediaDetail(mediaItem, outputPath))
+                }
+            }
+            // PhotoInfoを生成して追加.
+            photosInfo.add(AppDatabase.PhotoInfo(album, mediaDetails.toList()))
+        }
+
+        requestDownloadPhotosResult(photosInfo.toList())
+    }
 
     /**
      * MediaItemリストをランダムピックアップする.

@@ -10,19 +10,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
+import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
-import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
-import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
-import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 class SplashInteractor(
     private val context: Context,
     private val appDatabase: AppDatabase,
-    private val googleSignInApi: GoogleSignInApi,
-    private val googleOAuth2Api: GoogleOAuth2Api
+    private val googleWebApis: GoogleWebApis
 ): SplashContract.Interactor {
 
     private var callback: SplashContract.InteractorCallback? = null
@@ -40,31 +37,25 @@ class SplashInteractor(
     }
 
     override fun requestGoogleSilentSignIn() {
-        GlobalScope.launch(Dispatchers.Main) {
-            val result = withContext(Dispatchers.Default) {
-                googleSignInApi.requestSilentSignIn()
-            }
-            callback?.requestGoogleSilentSignInResult(result == ApiResult.SUCCEEDED)
+        GlobalScope.launch(Dispatchers.Default) {
+            val result = googleWebApis.requestSilentSignIn()
+            requestGoogleSilentSignInResult(result)
         }
     }
 
     override fun requestUpdateUserInfo() {
-        GlobalScope.launch(Dispatchers.Main) {
-            val email = googleSignInApi.getSignedInEmailAddress()
-            val serverAuthCode = googleSignInApi.getSignedInAccount().serverAuthCode
-            val tokenInfo = requestTokenInfo(email, serverAuthCode)
+        GlobalScope.launch(Dispatchers.Default) {
+            val emailAddress = googleWebApis.getSignedInEmailAddress()
+            val userInfo = appDatabase.findUserInfoByEmailAddress(emailAddress)
+            val tokenInfo = googleWebApis.requestUpdateTokenInfo(userInfo?.tokenInfo())
 
             if (tokenInfo != null) {
-                withContext(Dispatchers.Default) {
-                    appDatabase.updateUserInfo(email, tokenInfo)
-                }
-                callback?.requestUpdateUserInfoResult(true)
+                appDatabase.updateUserInfo(emailAddress, tokenInfo)
+                requestUpdateUserInfoResult(true)
             } else {
                 // 失敗した場合はGoogleアカウントアクセス破棄をする.
-                withContext(Dispatchers.Default) {
-                    googleSignInApi.requestRevokeAccess()
-                }
-                callback?.requestUpdateUserInfoResult(false)
+                googleWebApis.requestSignOut(true)
+                requestUpdateUserInfoResult(false)
             }
         }
     }
@@ -84,27 +75,18 @@ class SplashInteractor(
         return true
     }
 
-    override fun isGoogleSignedIn(): Boolean = googleSignInApi.isSignedInAccount()
+    override fun isSucceededGoogleUserSignIn(data: Intent?): Boolean =
+        googleWebApis.isSucceededUserSignIn(data)
 
-    override fun isSucceededGoogleUserSignIn(data: Intent?): Boolean = googleSignInApi.isSucceededUserSignIn(data)
-
-    private suspend fun requestTokenInfo(emailAddress: String, serverAuthCode: String?): TokenInfo? {
-        val tokenInfo = withContext(Dispatchers.Default) {
-            val userInfo = appDatabase.findUserInfoByEmailAddress(emailAddress)
-            if (userInfo != null) {
-                googleOAuth2Api.requestTokenInfoWithRefreshToken(userInfo.tokenInfo().refreshToken)
-            } else {
-                null
-            }
+    private suspend fun requestGoogleSilentSignInResult(result: ApiResult) {
+        withContext(Dispatchers.Main) {
+            callback?.requestGoogleSilentSignInResult(result)
         }
-        if (tokenInfo != null) return tokenInfo
+    }
 
-        return withContext(Dispatchers.Default) {
-            if (serverAuthCode != null) {
-                googleOAuth2Api.requestTokenInfoWithAuthCode(serverAuthCode)
-            } else {
-                null
-            }
+    private suspend fun requestUpdateUserInfoResult(isSucceeded: Boolean) {
+        withContext(Dispatchers.Main) {
+            callback?.requestUpdateUserInfoResult(isSucceeded)
         }
     }
 }

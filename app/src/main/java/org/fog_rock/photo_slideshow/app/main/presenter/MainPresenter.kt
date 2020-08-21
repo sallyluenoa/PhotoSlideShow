@@ -6,7 +6,7 @@ import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
-import org.fog_rock.photo_slideshow.app.module.entity.PhotoInfo
+import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
@@ -87,7 +87,7 @@ class MainPresenter(
         callback?.requestLoadDisplayedPhotosResult(displayedPhotos)
     }
 
-    override fun requestDownloadPhotosResult(photosInfo: List<PhotoInfo>) {
+    override fun requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo>) {
         if (photosInfo.isNotEmpty()) {
             interactor?.requestUpdateDatabase(photosInfo)
         } else {

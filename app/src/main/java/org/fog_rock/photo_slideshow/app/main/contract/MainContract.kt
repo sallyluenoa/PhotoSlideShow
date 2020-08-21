@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
-import org.fog_rock.photo_slideshow.app.module.entity.PhotoInfo
+import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
@@ -78,7 +78,7 @@ class MainContract {
          * データベース更新要求.
          * @see InteractorCallback.requestUpdateDatabaseResult
          */
-        fun requestUpdateDatabase(photosInfo: List<PhotoInfo>)
+        fun requestUpdateDatabase(photosInfo: List<AppDatabase.PhotoInfo>)
 
         /**
          * サインアウト要求.
@@ -108,7 +108,7 @@ class MainContract {
          * 写真リストのダウンロード要求の結果.
          * @see Interactor.requestDownloadPhotos
          */
-        fun requestDownloadPhotosResult(photosInfo: List<PhotoInfo>)
+        fun requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo>)
 
         /**
          * データベース更新要求の結果.

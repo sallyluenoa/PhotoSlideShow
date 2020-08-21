@@ -32,20 +32,8 @@ interface GoogleSignInApi {
 
     /**
      * 現在サインインしているGoogleアカウント取得.
-     * @throws NullPointerException
      */
-    fun getSignedInAccount(): GoogleSignInAccount
-
-    /**
-     * 現在サインインしているE-mailアドレス取得.
-     * @throws NullPointerException
-     */
-    fun getSignedInEmailAddress(): String
-
-    /**
-     * 現在Googleアカウントでサインインしているか確認.
-     */
-    fun isSignedInAccount(): Boolean
+    fun getSignedInAccount(): GoogleSignInAccount?
 
     /**
      * Googleアカウントでのユーザーサインインに成功したか.
