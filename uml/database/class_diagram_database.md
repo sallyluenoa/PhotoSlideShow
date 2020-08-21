@@ -40,34 +40,34 @@ namespace core.database #FFEEFF {
     SelectedAlbum ..|> BaseEntity
     DisplayedPhoto ..|> BaseEntity
 
-    UserInfoData "1" *-- "1" UserInfo: userInfo
-    UserInfoData "1" *-- "*" SelectedData: dataList 
-    SelectedData "1" *-- "1" SelectedAlbum: selectedAlbum
-    SelectedData "1" *-- "*" DisplayedPhoto: displayedPhotos
+    UserInfoData "1" *-- "1" UserInfo: + userInfo
+    UserInfoData "1" *-- "*" SelectedData: + dataList 
+    SelectedData "1" *-- "1" SelectedAlbum: + selectedAlbum
+    SelectedData "1" *-- "*" DisplayedPhoto: + displayedPhotos
   }
 
   namespace dao {
     interface BaseDao<EntityT> {
-      + insert(entity: EntityT): Long
-      + insert(entities: List<EntityT>): List<Long>
-      + update(entity: EntityT)
-      + update(entities: List<EntityT>)
-      + delete(entity: EntityT)
-      + delete(entities: List<EntityT>)
-      + findById(id: long): EntityT?
+      + <B>[suspend]</B> insert(entity: EntityT): Long
+      + <B>[suspend]</B> insert(entities: List<EntityT>): List<Long>
+      + <B>[suspend]</B> update(entity: EntityT)
+      + <B>[suspend]</B> update(entities: List<EntityT>)
+      + <B>[suspend]</B> delete(entity: EntityT)
+      + <B>[suspend]</B> delete(entities: List<EntityT>)
+      + <B>[suspend]</B> findById(id: long): EntityT?
     }
     interface UserInfoDao {
-      + findByEmailAddress(emailAddress: String): UserInfo?
-      + findUserInfoDataById(id: Long): UserInfoData?
-      + findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData?
+      + <B>[suspend]</B> findByEmailAddress(emailAddress: String): UserInfo?
+      + <B>[suspend]</B> findUserInfoDataById(id: Long): UserInfoData?
+      + <B>[suspend]</B> findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData?
     }
     interface SelectedAlbumDao {
-      + findByUniqueKeys(userInfoId: Long, albumId: String): SelectedAlbum?
-      + findSelectedDataById(id: Long): SelectedData?
-      + findSelectedDataByUniqueKeys(userInfoId: Long, albumId: String): SelectedData?
+      + <B>[suspend]</B> findByUniqueKeys(userInfoId: Long, albumId: String): SelectedAlbum?
+      + <B>[suspend]</B> findSelectedDataById(id: Long): SelectedData?
+      + <B>[suspend]</B> findSelectedDataByUniqueKeys(userInfoId: Long, albumId: String): SelectedData?
     }
     interface DisplayedPhotoDao {
-      + findByUniqueKeys(selectedAlbumId: Long, mediaItemId: String): DisplayedPhoto?
+      + <B>[suspend]</B> findByUniqueKeys(selectedAlbumId: Long, mediaItemId: String): DisplayedPhoto?
     }
 
     UserInfoDao ..|> BaseDao
@@ -91,7 +91,7 @@ namespace core.database #FFEEFF {
       + {abstract} displayedPhotoDao(): DisplayedPhotoDao
     }
 
-    SingletonRoomObject "1" *-down- "1" SingletonRoomDatabase
+    SingletonRoomObject "1" *-down- "1" SingletonRoomDatabase: - database
   }
 }
 
@@ -100,24 +100,26 @@ namespace app.module #FFFFEE {
   namespace entity {
     class PhotoInfo << (D, sandybrown) >> {
       + album: Album
-      + displayedPhotos(selectedAlbumId: Long): List<DisplayedPhoto>
     }
     class MediaDetail << (D, sandybrown) >> {
       + mediaItem: MediaItem
       + outputPath: String
     }
 
-    PhotoInfo "1" *-right- "*" MediaDetail: mediaDetails
+    PhotoInfo "1" *-right- "*" MediaDetail: + mediaDetails
   } 
 
   class AppDatabase {
-    + updateUserInfo(emailAddress: String, tokenInfo: TokenInfo)
-    + deleteUserInfo(id: Long)
-    + replaceUserInfoData(userInfo: UserInfo, photosInfo: List<PhotoInfo>)
-    + findUserInfoByEmailAddress(emailAddress: String): UserInfo?
-    + findUserInfoDataById(id: Long): UserInfoData?
-    + findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData?
-   }
+    + <B>[suspend]</B> updateUserInfo(emailAddress: String, tokenInfo: TokenInfo)
+    + <B>[suspend]</B> deleteUserInfo(id: Long)
+    + <B>[suspend]</B> replaceUserInfoData(userInfo: UserInfo, photosInfo: List<PhotoInfo>)
+    + <B>[suspend]</B> findUserInfoByEmailAddress(emailAddress: String): UserInfo?
+    + <B>[suspend]</B> findUserInfoDataById(id: Long): UserInfoData?
+    + <B>[suspend]</B> findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData?
+    - userInfoDao(): UserInfoDao
+    - selectedAlbumDao(): SelectedAlbumDao
+    - displayedPhotoDao(): DisplayedPhotoDao
+  }
 }
 
 core.database.room.SingletonRoomDatabase o-right- core.database.dao.UserInfoDao

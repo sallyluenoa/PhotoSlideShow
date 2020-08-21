@@ -27,24 +27,24 @@ namespace app.splash #FFFFEE {
   class SplashInteractor {
     - context: Context
     - appDatabase: AppDatabase
-    - googleSignInApi: GoogleSignInApi
-    - googleOAuth2Api: GoogleOAuth2Api
-    - requestTokenInfo(emailAddress: String, serverAuthCode: String?): TokenInfo?
+    - googleWebApis: GoogleWebApis
+    - <b>[suspend]</b> requestGoogleSilentSignInResult(result: ApiResult)
+    - <b>[suspend]</b> requestUpdateUserInfoResult(isSucceeded: Boolean)
   }
   class SplashRouter
 
-  SplashActivity o-- SplashPresenter: -presenter
-  SplashPresenter o--- SplashInteractor: -interactor
-  SplashPresenter o---- SplashRouter: -router
+  SplashActivity o-- SplashPresenter: - presenter
+  SplashPresenter o--- SplashInteractor: - interactor
+  SplashPresenter o---- SplashRouter: - router
 
   SplashPresenter .|> app.splash.contract.SplashContract.Presenter
   SplashInteractor .|> app.splash.contract.SplashContract.Interactor
   SplashRouter .|> app.splash.contract.SplashContract.Router
 
   SplashActivity ..|> app.splash.contract.SplashContract.PresenterCallback
-  SplashPresenter o-- app.splash.contract.SplashContract.PresenterCallback: -callback
+  SplashPresenter o-- app.splash.contract.SplashContract.PresenterCallback: - callback
   SplashPresenter ..|> app.splash.contract.SplashContract.InteractorCallback
-  SplashInteractor o-- app.splash.contract.SplashContract.InteractorCallback: -callback
+  SplashInteractor o-- app.splash.contract.SplashContract.InteractorCallback: - callback
 
   app.splash.contract.SplashContract.Presenter -[hidden]> SplashPresenter
   app.splash.contract.SplashContract.Interactor -[hidden]> SplashInteractor
@@ -65,7 +65,6 @@ namespace app.splash.contract.SplashContract #EEEEEE {
     + requestGoogleSilentSignIn()
     + requestUpdateUserInfo()
     + isGrantedRuntimePermissions(permissions: Array<String>): Boolean
-    + isGoogleSignedIn()
     + isSucceededGoogleUserSignIn(data: Intent?): Boolean
   }
   interface InteractorCallback {
@@ -74,7 +73,7 @@ namespace app.splash.contract.SplashContract #EEEEEE {
   }
   interface Router {
     + startRuntimePermissions(activity: Activity, permissions: Array<String>, requestCode: Int)
-    + startGoogleSignInActivity(activity: Activity, clientHolder: GoogleSignInClientHolder, requestCode: Int)
+    + startGoogleSignInActivity(activity: Activity, requestCode: Int)
     + startMainActivity(activity: Activity)
   }
 

@@ -15,7 +15,7 @@ box "File" #E6FFE9
 end box
 
 box "Web API" #EEFFFF
-  participant PhotosLibraryApi
+  participant GoogleWebApis
 end box
 
 View++
@@ -27,6 +27,7 @@ View -> Presenter++: requestLoadDisplayedPhotos
     return UserInfoData?
   end
 
+  Interactor -> Interactor: Get DisplayedPhotos from UserInfoData.dataList and shuffle.
   return Callback#requestLoadDisplayedPhotos
 return Callback#requestLoadDisplayedPhotos
 
@@ -66,13 +67,19 @@ end
 Presenter -> Interactor++: requestDownloadPhotos
 
   loop albums.foreach
-    Interactor -> PhotosLibraryApi++: requestMediaItems
-    return List<MediaItem>
+    Interactor -> GoogleWebApis++: requestMediaItems
+    return PhotosApiResult<MediaItem>
 
-    Interactor -> Interactor: Make random photo MediaItems
+    opt Is result.tokenInfo updated?
+      Interactor -> AppDatabase: updateUserInfo
+    end
+
+    Interactor -> Interactor: Make random photo MediaItems.
 
     Interactor -> PhotosDownloader++: requestDownloads
     return List<String>
+
+    Interactor -> Interactor: Geneate PhotoInfo and add to list.
   end
 
 return Callback#requestDownloadPhotosResult

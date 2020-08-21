@@ -39,5 +39,6 @@
 | update_date | Long | - | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
 | selected_album_id | Long | - | o | b | SelectedAlbum#id | 1 |
 | media_item_id | String | - | o | - | MediaItem#id | - |
-| media_item | String | - | - | - | MediaItem | - |
+| media_item | String | - | - | - | MediaItem (JSON) | - |
+| output_path | String | - | - | - | Output file path | xxx/yyy/zzz.png |
 | is_my_favorite | Boolean | - | - | - | User favorite | true |

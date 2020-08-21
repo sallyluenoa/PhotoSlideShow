@@ -1,59 +1,89 @@
 @startuml
 namespace app.splash #FFFFEE {
-  SplashActivity o-- SplashPresenter: -presenter
-  SplashPresenter o--- SplashInteractor: -interactor
-  SplashPresenter o---- SplashRouter: -router
-
-  SplashPresenter .|> app.splash.contract.SplashContract.Presenter
-  SplashInteractor .|> app.splash.contract.SplashContract.Interactor
-  SplashRouter .|> app.splash.contract.SplashContract.Router
-
-  SplashActivity ..|> app.splash.contract.SplashContract.PresenterCallback
-  SplashPresenter o-- app.splash.contract.SplashContract.PresenterCallback: -callback
-  SplashPresenter ..|> app.splash.contract.SplashContract.InteractorCallback
-  SplashInteractor o-- app.splash.contract.SplashContract.InteractorCallback: -callback
-
-  app.splash.contract.SplashContract.Presenter -[hidden]> SplashPresenter
-  app.splash.contract.SplashContract.Interactor -[hidden]> SplashInteractor
-  app.splash.contract.SplashContract.Router -[hidden]> SplashRouter
-
   namespace entity {
     enum UpdatePhotoRequest {
       SKIPPED
       SELECT_ALBUM
       DOWNLOAD_PHOTOS
+      UPDATE_DATABASE
       COMPLETED
       UNKOWN
+      ==
+      + code: Int
+      __
     }
 
-    UpdatePhotoRequest -[hidden]-> app.splash.SplashActivity
+    UpdatePhotoRequest -[hidden]-> app.splash.MainActivity
   }
+
+  class MainActivity {
+    - fragmentManager: FragmentManager
+    - displayedPhotos: List<DisplayedPhoto>
+    - displayedIndex: Integer
+    - isForeground: Boolean
+    - isUpdateRequested: Boolean
+    - isRunningSlideShow: Boolean
+    - replaceFragment(fragment: Fragment)
+    - presentImage(filePath: String)
+    - presentSlideShow()
+  }
+  class MainPresenter
+  class MainInteractor {
+    - context: Context
+    - appDatabase: AppDatabase
+    - photosDownloader: PhotosDownloader
+    - googleWebApis: GoogleWebApis
+    - <b>[suspend]</b> requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
+    - <b>[suspend]</b> requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo>)
+    - <b>[suspend]</b> requestUpdateDatabaseResult(isSucceeded: Boolean)
+    - <b>[suspend]</b> requestDownloadPhotosInner(albums: List<Album>)
+    - convertMediaItems(mediaItems: List<MediaItem>, size: Int): List<MediaItem>
+  }
+  class MainRouter
+
+  MainActivity o-- MainPresenter: - presenter
+  MainPresenter o--- MainInteractor: - interactor
+  MainPresenter o---- MainRouter: - router
+
+  MainPresenter .|> app.splash.contract.MainContract.Presenter
+  MainInteractor .|> app.splash.contract.MainContract.Interactor
+  MainRouter .|> app.splash.contract.MainContract.Router
+
+  MainActivity ..|> app.splash.contract.MainContract.PresenterCallback
+  MainPresenter o-- app.splash.contract.MainContract.PresenterCallback: - callback
+  MainPresenter ..|> app.splash.contract.MainContract.InteractorCallback
+  MainInteractor o-- app.splash.contract.MainContract.InteractorCallback: - callback
+
+  app.splash.contract.MainContract.Presenter -[hidden]> MainPresenter
+  app.splash.contract.MainContract.Interactor -[hidden]> MainInteractor
+  app.splash.contract.MainContract.Router -[hidden]> MainRouter
 }
 
-namespace app.splash.contract.SplashContract #EEEEEE {
+namespace app.splash.contract.MainContract #EEEEEE {
   interface Presenter {
     + requestLoadDisplayedPhotos()
     + requestUpdateDisplayedPhotos()
     + evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
   }
   interface PresenterCallback {
-    + requestLoadDisplayedPhotosResult()
-    + requestUpdateDisplayedPhotosResult()
+    + requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
+    + requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest)
   }
   interface Interactor {
     + requestLoadDisplayedPhotos()
-    + requestUpdateSelectedAlbums()
     + requestDownloadPhotos()
+    + requestDownloadPhotos(albums: List<Album>)
+    + requestUpdateDatabase(photosInfo: List<PhotoInfo>)
     + isNeededUpdatePhotos(): Boolean
     + hasSelectedAlbum(): Boolean
   }
   interface InteractorCallback {
-    + requestLoadDisplayedPhotosResult(isSucceeded: Boolean)
-    + requestUpdateSelectedAlbumsResult(isSucceeded: Boolean)
-    + requestDownloadPhotosResult(isSucceeded: Boolean)
+    + requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
+    + requestDownloadPhotosResult(photosInfo: List<PhotoInfo>)
+    + requestUpdateDatabaseResult(isSucceeded: Boolean)
   }
   interface Router {
-    + startSelectActivity(activity: Activity)
+    + startSelectActivity(activity: Activity, requestCode: Int)
   }
 
   PresenterCallback -[hidden]-> Presenter
@@ -68,7 +98,7 @@ namespace app.splash.contract.SplashContract #EEEEEE {
   Router .|> core.viper.ViperContract.Router
 }
 
-app.splash +-- app.splash.contract.SplashContract
+app.splash +-- app.splash.contract.MainContract
 
 namespace core.viper.ViperContract #DDDDDD {
   interface Presenter {

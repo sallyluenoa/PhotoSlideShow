@@ -11,8 +11,7 @@ box "Database" #FFEEFF
 end box
 
 box "Web API" #EEFFFF
-  participant GoogleSignInApi
-  participant GoogleOAuth2Api
+  participant GoogleWebApis
 end box
 
 
@@ -45,30 +44,21 @@ end
 
 == Google Sign In ==
 
-Presenter -> Interactor++: isGoogleSignedIn
-  Interactor -> GoogleSignInApi++: isSignedInAccount
-  return Boolean
-return Boolean
+Presenter -> Interactor++: requestGoogleSilentSignIn
+  Interactor -> GoogleWebApis++: requestSilentSignIn
+  return ApiResult
+return Callback#requestGoogleSilentSignInResult
 
-alt isGoogleSignedIn
-  Presenter -> Interactor++: requestGoogleSilentSignIn
-    Interactor -> GoogleSignInApi++: requestSilentSignIn
-    return ApiResult
-  return Callback#requestGoogleSilentSignInResult
+alt ApiResult==SUCCEEDED
 
-  opt ApiResult!=Succeeded
-    View <-- Presenter: Callback#requestSignInResult
-    View -> View++: Show error dialog
-    destroy View
-  end
+else ApiResult==INVALID
 
-else
   Presenter -> Router: startGoogleSignInActivity
   [--> View
   View --> Presenter: evaluateActivityResult
 
   Presenter -> Interactor++: isSucceededGoogleUserSignIn
-    Interactor -> GoogleSignInApi++: isSucceededUserSignIn
+    Interactor -> GoogleWebApis++: isSucceededUserSignIn
     return Boolean  
   return Boolean
 
@@ -77,32 +67,30 @@ else
     View -> View++: Show error dialog
     destroy View
   end
+
+else
+    View <-- Presenter: Callback#requestSignInResult
+    View -> View++: Show error dialog
+    destroy View
 end
 
 == Update UserInfo ==
 
 Presenter -> Interactor++: requestUpdateUserInfo
 
-Interactor -> GoogleSignInApi++: getSignedInAccount
-return GoogleSignInAccount
+Interactor -> GoogleWebApis++: getSignedInEmailAddress
+return String
 
 Interactor -> AppDatabase++: findUserInfoByEmailAddress
 return UserInfo?
 
-opt UserInfo!=null
-  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithRefreshToken
-  return TokenInfo?
-end
-
-opt TokenInfo==null
-  Interactor -> GoogleOAuth2Api++: requestTokenInfoWithAuthCode
-  return TokenInfo?
-end
+Interactor -> GoogleWebApis++: requestUpdateTokenInfo
+return TokenInfo?
 
 alt TokenInfo!=null
   Interactor -> AppDatabase: updateUserInfo
 else
-  Interactor -> GoogleSignInApi++: revokeAccess
+  Interactor -> GoogleWebApis++: requestSignOut
   return ApiResult
   Presenter <-- Interactor: Callback#requestUpdateUserInfoResult
   View <-- Presenter: Callback#requestSignInResult
@@ -121,5 +109,4 @@ View -> Presenter++: destroy
 Presenter -> Interactor!!: destroy
 destroy Presenter
 destroy View
-
 @enduml
