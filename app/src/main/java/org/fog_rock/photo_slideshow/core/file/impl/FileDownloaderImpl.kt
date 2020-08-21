@@ -1,5 +1,7 @@
 package org.fog_rock.photo_slideshow.core.file.impl
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody
@@ -19,7 +21,9 @@ class FileDownloaderImpl(): FileDownloader {
         }
 
         logI("Do download. DownloadURL: $downloadUrl, OutputFile: $outputFile")
-        return doDownload(downloadUrl, outputFile)
+        return withContext(Dispatchers.IO) {
+            doDownload(downloadUrl, outputFile)
+        }
     }
 
     /**

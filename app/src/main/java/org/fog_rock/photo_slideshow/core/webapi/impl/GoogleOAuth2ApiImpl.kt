@@ -5,6 +5,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
@@ -14,7 +16,7 @@ import java.io.IOException
 class GoogleOAuth2ApiImpl(): GoogleOAuth2Api {
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    override suspend fun requestTokenInfoWithAuthCode(serverAuthCode: String): TokenInfo? {
+    override suspend fun requestTokenInfoWithAuthCode(serverAuthCode: String): TokenInfo? = withContext(Dispatchers.IO) {
         try {
             val clientSecret = SingletonWebHolder.clientSecret
             val response = GoogleAuthorizationCodeTokenRequest(
@@ -22,38 +24,41 @@ class GoogleOAuth2ApiImpl(): GoogleOAuth2Api {
                 clientSecret.web.clientId, clientSecret.web.clientSecret,
                 serverAuthCode, ""
             ).execute()
-            return TokenInfo(response)
+            TokenInfo(response)
         } catch (e: TokenResponseException) {
             logE("Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
             e.printStackTrace()
+            null
         } catch (e: IOException) {
             logE("Failed to execute request.")
             e.printStackTrace()
+            null
         } catch (e: IllegalArgumentException) {
             logE("Failed to get TokenInfo.")
             e.printStackTrace()
+            null
         }
-        return null
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    override suspend fun requestTokenInfoWithRefreshToken(refreshToken: String): TokenInfo? {
+    override suspend fun requestTokenInfoWithRefreshToken(refreshToken: String): TokenInfo? = withContext(Dispatchers.IO) {
         try {
             val clientSecret = SingletonWebHolder.clientSecret
             val response = GoogleRefreshTokenRequest(
                 NetHttpTransport(), JacksonFactory(),
                 refreshToken, clientSecret.web.clientId, clientSecret.web.clientSecret
             ).execute()
-            return TokenInfo(response, refreshToken)
+            TokenInfo(response, refreshToken)
         } catch (e: TokenResponseException) {
             logE("Failed to get token response. " +
                     "Error: ${e.details.error}, Description: ${e.details.errorDescription}")
             e.printStackTrace()
+            null
         } catch (e: IOException) {
             logE("Failed to execute request.")
             e.printStackTrace()
+            null
         }
-        return null
     }
 }

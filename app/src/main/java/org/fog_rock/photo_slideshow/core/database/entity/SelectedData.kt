@@ -6,11 +6,11 @@ import androidx.room.Relation
 data class SelectedData(
 
     @Embedded
-    var selectedAlbum: SelectedAlbum,
+    val selectedAlbum: SelectedAlbum,
 
     @Relation(
         parentColumn = "id",
         entityColumn = "selected_album_id"
     )
-    var displayedPhotos: List<DisplayedPhoto>
+    val displayedPhotos: List<DisplayedPhoto>
 )

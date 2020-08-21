@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
@@ -14,8 +16,8 @@ import kotlin.coroutines.suspendCoroutine
 
 class GoogleSignInApiImpl(private val context: Context): GoogleSignInApi {
 
-    override suspend fun requestSilentSignIn(): ApiResult =
-        suspendCoroutine { continuation ->
+    override suspend fun requestSilentSignIn(): ApiResult = withContext(Dispatchers.IO) {
+        suspendCoroutine<ApiResult> { continuation ->
             var result = ApiResult.FAILED
             SingletonWebHolder.googleSignInClient.silentSignIn().apply {
                 addOnSuccessListener {
@@ -38,9 +40,10 @@ class GoogleSignInApiImpl(private val context: Context): GoogleSignInApi {
             }
             return@suspendCoroutine
         }
+    }
 
-    override suspend fun requestSignOut(): ApiResult =
-        suspendCoroutine { continuation ->
+    override suspend fun requestSignOut(): ApiResult = withContext(Dispatchers.IO) {
+        suspendCoroutine<ApiResult> { continuation ->
             var result = ApiResult.FAILED
             SingletonWebHolder.googleSignInClient.signOut().apply {
                 addOnSuccessListener {
@@ -63,9 +66,10 @@ class GoogleSignInApiImpl(private val context: Context): GoogleSignInApi {
             }
             return@suspendCoroutine
         }
+    }
 
-    override suspend fun requestRevokeAccess(): ApiResult =
-        suspendCoroutine { continuation ->
+    override suspend fun requestRevokeAccess(): ApiResult = withContext(Dispatchers.IO) {
+        suspendCoroutine<ApiResult> { continuation ->
             var result = ApiResult.FAILED
             SingletonWebHolder.googleSignInClient.revokeAccess().apply {
                 addOnSuccessListener {
@@ -88,6 +92,7 @@ class GoogleSignInApiImpl(private val context: Context): GoogleSignInApi {
             }
             return@suspendCoroutine
         }
+    }
 
     override fun getSignedInAccount(): GoogleSignInAccount? =
         GoogleSignIn.getLastSignedInAccount(context)

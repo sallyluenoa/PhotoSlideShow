@@ -5,6 +5,8 @@ import com.google.photos.library.v1.PhotosLibraryClient
 import com.google.photos.library.v1.proto.SearchMediaItemsRequest
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryApi
@@ -13,7 +15,7 @@ import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 
 class PhotosLibraryApiImpl(): PhotosLibraryApi {
 
-    override suspend fun requestAlbum(albumId: String): Album =
+    override suspend fun requestAlbum(albumId: String): Album = withContext(Dispatchers.IO) {
         try {
             photosLibraryClient().getAlbum(albumId)
         } catch (e: ApiException) {
@@ -21,8 +23,9 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
             e.printStackTrace()
             Album.newBuilder().apply { id = albumId }.build()
         }
+    }
 
-    override suspend fun requestMediaItem(mediaItemId: String): MediaItem =
+    override suspend fun requestMediaItem(mediaItemId: String): MediaItem = withContext(Dispatchers.IO) {
         try {
             photosLibraryClient().getMediaItem(mediaItemId)
         } catch (e: ApiException) {
@@ -30,6 +33,7 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
             e.printStackTrace()
             MediaItem.newBuilder().apply { id = mediaItemId }.build()
         }
+    }
 
     override suspend fun requestUpdateAlbums(albums: List<Album>): List<Album> {
         val newAlbums = emptyList<Album>().toMutableList()
@@ -47,7 +51,7 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
         return newMediaItems.toList()
     }
 
-    override suspend fun requestSharedAlbums(): List<Album> =
+    override suspend fun requestSharedAlbums(): List<Album> = withContext(Dispatchers.IO) {
         try {
             val response = photosLibraryClient().listSharedAlbums()
             val albums = emptyList<Album>()
@@ -59,10 +63,11 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
         } catch (e: ApiException) {
             logE("Failed to get listSharedAlbums.")
             e.printStackTrace()
-            emptyList()
+            emptyList<Album>()
         }
+    }
 
-    override suspend fun requestMediaItems(album: Album): List<MediaItem> =
+    override suspend fun requestMediaItems(album: Album): List<MediaItem> = withContext(Dispatchers.IO) {
         try {
             val request = SearchMediaItemsRequest.newBuilder().apply {
                 albumId = album.id
@@ -79,12 +84,12 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
         } catch (e: ApiException) {
             logE("Failed to get searchMediaItems.")
             e.printStackTrace()
-            emptyList()
+            emptyList<MediaItem>()
         }
+    }
 
     override fun updatePhotosLibraryClient(tokenInfo: TokenInfo?) =
         SingletonWebHolder.updatePhotosLibraryClient(tokenInfo)
-
 
     override fun currentTokenInfo(): TokenInfo = SingletonWebHolder.tokenInfo
 
