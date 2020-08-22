@@ -1,5 +1,60 @@
 @startuml
-namespace app.splash #FFFFEE {
+namespace core.viper.ViperContract #DDDDDD {
+  interface Presenter {
+    + create(callback: PresenterCallback)
+    + destroy()
+  }
+  interface PresenterCallback {
+    + getActivity(): Activity
+  }
+  interface Interactor {
+    + create(callback: InteractorCallback)
+    + destroy()
+  }
+  interface InteractorCallback
+  interface Router
+
+  PresenterCallback -[hidden]-> Presenter
+  Presenter -[hidden]-> InteractorCallback
+  InteractorCallback -[hidden]-> Interactor
+  Interactor -[hidden]-> Router
+}
+
+namespace app.select #FFFFEE {
+
+  namespace app.select.MainContract #EEEEEE {
+    interface Presenter {
+      + requestLoadDisplayedPhotos()
+      + requestUpdateDisplayedPhotos()
+      + evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    }
+    interface PresenterCallback {
+      + requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
+      + requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest)
+    }
+    interface Interactor {
+      + requestLoadDisplayedPhotos()
+      + requestDownloadPhotos()
+      + requestDownloadPhotos(albums: List<Album>)
+      + requestUpdateDatabase(photosInfo: List<PhotoInfo>)
+      + isNeededUpdatePhotos(): Boolean
+      + hasSelectedAlbum(): Boolean
+    }
+    interface InteractorCallback {
+      + requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
+      + requestDownloadPhotosResult(photosInfo: List<PhotoInfo>)
+      + requestUpdateDatabaseResult(isSucceeded: Boolean)
+    }
+    interface Router {
+      + startSelectActivity(activity: Activity, requestCode: Int)
+    }
+
+    PresenterCallback -[hidden]-> Presenter
+    Presenter -[hidden]-> InteractorCallback
+    InteractorCallback -[hidden]-> Interactor
+    Interactor -[hidden]-> Router
+  }
+
   namespace entity {
     enum UpdatePhotoRequest {
       SKIPPED
@@ -12,8 +67,6 @@ namespace app.splash #FFFFEE {
       + code: Int
       __
     }
-
-    UpdatePhotoRequest -[hidden]-> app.splash.MainActivity
   }
 
   class MainActivity {
@@ -41,83 +94,24 @@ namespace app.splash #FFFFEE {
   }
   class MainRouter
 
-  MainActivity o-- MainPresenter: - presenter
-  MainPresenter o--- MainInteractor: - interactor
-  MainPresenter o---- MainRouter: - router
+  MainActivity o-down-- MainPresenter: - presenter
+  MainPresenter o-down-- MainInteractor: - interactor
+  MainPresenter o-down--- MainRouter: - router
 
-  MainPresenter .|> app.splash.contract.MainContract.Presenter
-  MainInteractor .|> app.splash.contract.MainContract.Interactor
-  MainRouter .|> app.splash.contract.MainContract.Router
+  MainPresenter .right.|> app.select.MainContract.Presenter
+  MainInteractor .right.|> app.select.MainContract.Interactor
+  MainRouter .right.|> app.select.MainContract.Router
 
-  MainActivity ..|> app.splash.contract.MainContract.PresenterCallback
-  MainPresenter o-- app.splash.contract.MainContract.PresenterCallback: - callback
-  MainPresenter ..|> app.splash.contract.MainContract.InteractorCallback
-  MainInteractor o-- app.splash.contract.MainContract.InteractorCallback: - callback
+  MainPresenter o-up- app.select.MainContract.PresenterCallback: - callback
+  MainInteractor o-up- app.select.MainContract.InteractorCallback: - callback
 
-  app.splash.contract.MainContract.Presenter -[hidden]> MainPresenter
-  app.splash.contract.MainContract.Interactor -[hidden]> MainInteractor
-  app.splash.contract.MainContract.Router -[hidden]> MainRouter
+  MainActivity .down.|> app.select.MainContract.PresenterCallback
+  MainPresenter .down.|> app.select.MainContract.InteractorCallback
 }
 
-namespace app.splash.contract.MainContract #EEEEEE {
-  interface Presenter {
-    + requestLoadDisplayedPhotos()
-    + requestUpdateDisplayedPhotos()
-    + evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
-  }
-  interface PresenterCallback {
-    + requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
-    + requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest)
-  }
-  interface Interactor {
-    + requestLoadDisplayedPhotos()
-    + requestDownloadPhotos()
-    + requestDownloadPhotos(albums: List<Album>)
-    + requestUpdateDatabase(photosInfo: List<PhotoInfo>)
-    + isNeededUpdatePhotos(): Boolean
-    + hasSelectedAlbum(): Boolean
-  }
-  interface InteractorCallback {
-    + requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
-    + requestDownloadPhotosResult(photosInfo: List<PhotoInfo>)
-    + requestUpdateDatabaseResult(isSucceeded: Boolean)
-  }
-  interface Router {
-    + startSelectActivity(activity: Activity, requestCode: Int)
-  }
-
-  PresenterCallback -[hidden]-> Presenter
-  Presenter -[hidden]-> InteractorCallback
-  InteractorCallback -[hidden]-> Interactor
-  Interactor -[hidden]-> Router
-
-  Presenter .|> core.viper.ViperContract.Presenter
-  PresenterCallback .|> core.viper.ViperContract.PresenterCallback
-  Interactor .|> core.viper.ViperContract.Interactor
-  InteractorCallback .|> core.viper.ViperContract.InteractorCallback
-  Router .|> core.viper.ViperContract.Router
-}
-
-app.splash +-- app.splash.contract.MainContract
-
-namespace core.viper.ViperContract #DDDDDD {
-  interface Presenter {
-    + create(callback: PresenterCallback)
-    + destroy()
-  }
-  interface PresenterCallback {
-    + getActivity(): Activity
-  }
-  interface Interactor {
-    + create(callback: InteractorCallback)
-    + destroy()
-  }
-  interface InteractorCallback
-  interface Router
-
-  PresenterCallback -[hidden]-> Presenter
-  Presenter -[hidden]-> InteractorCallback
-  InteractorCallback -[hidden]-> Interactor
-  Interactor -[hidden]-> Router
-}
+app.select.MainContract.PresenterCallback .right.|> core.viper.ViperContract.PresenterCallback
+app.select.MainContract.Presenter .right.|> core.viper.ViperContract.Presenter
+app.select.MainContract.InteractorCallback .right.|> core.viper.ViperContract.InteractorCallback
+app.select.MainContract.Interactor .right.|> core.viper.ViperContract.Interactor
+app.select.MainContract.Router .right.|> core.viper.ViperContract.Router
 @enduml
