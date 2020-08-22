@@ -32,7 +32,7 @@ class AlbumsAdapter(
         holder.titleView?.text = album.title
         holder.itemCountView?.text = album.mediaItemsCount.toString()
         holder.itemView.setOnClickListener {
-            it.setSelected(true)
+            it.isSelected = true
             listener.onItemClick(it, position, album)
         }
     }

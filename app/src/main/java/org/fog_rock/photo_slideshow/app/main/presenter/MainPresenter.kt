@@ -7,6 +7,7 @@ import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
+import org.fog_rock.photo_slideshow.app.select.entity.SelectAlbumsResult
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
@@ -70,7 +71,8 @@ class MainPresenter(
                     callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.SELECT_ALBUMS)
                     return
                 }
-                val albums = data?.getSerializableExtra("albums") as List<Album>? ?: run {
+                val serializable = data?.getSerializableExtra(SelectAlbumsResult.DECIDED_ALBUMS.key())
+                val albums = serializable as? List<Album> ?: run {
                     callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.SELECT_ALBUMS)
                     return
                 }
