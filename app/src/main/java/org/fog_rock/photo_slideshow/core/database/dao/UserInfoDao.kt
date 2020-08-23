@@ -14,10 +14,10 @@ import org.fog_rock.photo_slideshow.core.database.entity.UserInfoData
 interface UserInfoDao: BaseDao<UserInfo> {
 
     @Query("select * from users_info")
-    override suspend fun getAll(): List<UserInfo>
+    suspend fun getAll(): List<UserInfo>
 
     @Query("select * from users_info where id = :id")
-    override suspend fun findById(id: Long): UserInfo?
+    suspend fun findById(id: Long): UserInfo?
 
     @Query("select * from users_info where email_address = :emailAddress")
     suspend fun findByEmailAddress(emailAddress: String): UserInfo?

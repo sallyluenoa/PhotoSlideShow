@@ -8,10 +8,10 @@ import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 interface DisplayedPhotoDao: BaseDao<DisplayedPhoto> {
 
     @Query("select * from displayed_photo")
-    override suspend fun getAll(): List<DisplayedPhoto>
+    suspend fun getAll(): List<DisplayedPhoto>
 
     @Query("select * from displayed_photo where id = :id")
-    override suspend fun findById(id: Long): DisplayedPhoto?
+    suspend fun findById(id: Long): DisplayedPhoto?
 
     @Query("select * from displayed_photo where selected_album_id = :selectedAlbumId and media_item_id = :mediaItemId")
     suspend fun findByUniqueKeys(selectedAlbumId: Long, mediaItemId: String): DisplayedPhoto?

@@ -35,7 +35,7 @@ data class SelectedAlbum(
     val albumId: String,
 
     @ColumnInfo(name = "album")
-    private val album: String
+    val album: String
 
 ): BaseEntity {
 

@@ -34,7 +34,7 @@ data class UserInfo(
     val emailAddress: String,
 
     @ColumnInfo(name = "token_info")
-    private val tokenInfo: String,
+    val tokenInfo: String,
 
     @ColumnInfo(name = "update_photos_date")
     val updatePhotosTimeMillis: Long

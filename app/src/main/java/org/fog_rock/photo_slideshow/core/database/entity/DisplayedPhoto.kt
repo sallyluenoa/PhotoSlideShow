@@ -35,7 +35,7 @@ data class DisplayedPhoto(
     val mediaItemId: String,
 
     @ColumnInfo(name = "media_item")
-    private val mediaItem: String,
+    val mediaItem: String,
 
     @ColumnInfo(name = "output_path")
     val outputPath: String,

@@ -23,8 +23,4 @@ interface BaseDao<EntityT: BaseEntity> {
 
     @Delete
     suspend fun delete(entities: List<EntityT>)
-
-    suspend fun getAll(): List<EntityT>
-
-    suspend fun findById(id: Long): EntityT?
 }
