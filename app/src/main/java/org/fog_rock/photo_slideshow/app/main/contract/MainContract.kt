@@ -71,8 +71,7 @@ class MainContract {
          * 写真リストのダウンロード要求.
          * @see InteractorCallback.requestDownloadPhotosResult
          */
-        fun requestDownloadPhotos()
-        fun requestDownloadPhotos(albums: List<Album>)
+        fun requestDownloadPhotos(albums: List<Album>?)
 
         /**
          * データベース更新要求.

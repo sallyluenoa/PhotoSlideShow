@@ -48,10 +48,16 @@ class SplashPresenter(
         logI("evaluateActivityResult() " +
                 "requestCode: $requestCode, resultCode: $resultCode")
 
-        when (requestCode) {
-            SignInRequest.GOOGLE_SIGN_IN.code -> {
-                val isSucceeded = interactor?.isSucceededGoogleUserSignIn(data) ?: return
-                presentSequenceResult(SignInRequest.GOOGLE_SIGN_IN, isSucceeded)
+        val request = SignInRequest.convertFromCode(requestCode)
+        when (request) {
+            SignInRequest.GOOGLE_SIGN_IN -> {
+                if (interactor?.isSucceededGoogleUserSignIn(data) ?: return) {
+                    logI("Succeeded google user sign in.")
+                    presentSequence(request.next())
+                } else {
+                    logI( "Failed google user sign in.")
+                    callback?.requestSignInResult(request)
+                }
             }
             else -> {
                 logE("Unknown requestCode: $requestCode")
@@ -63,10 +69,16 @@ class SplashPresenter(
     override fun evaluateRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         logI("evaluateRequestPermissionsResult() requestCode: $requestCode")
 
-        when (requestCode) {
-            SignInRequest.RUNTIME_PERMISSIONS.code -> {
-                val isSucceeded = interactor?.isGrantedRuntimePermissions(permissions) ?: return
-                presentSequenceResult(SignInRequest.RUNTIME_PERMISSIONS, isSucceeded)
+        val request = SignInRequest.convertFromCode(requestCode)
+        when (request) {
+            SignInRequest.RUNTIME_PERMISSIONS -> {
+                if (interactor?.isGrantedRuntimePermissions(permissions) ?: return) {
+                    logI("All runtime permissions are granted by user.")
+                    presentSequence(request.next())
+                } else {
+                    logI("Runtime permissions are denied.")
+                    callback?.requestSignInResult(request)
+                }
             }
             else -> {
                 logE("Unknown requestCode: $requestCode")
@@ -79,7 +91,7 @@ class SplashPresenter(
         val request = SignInRequest.GOOGLE_SIGN_IN
         when (result) {
             ApiResult.SUCCEEDED -> {
-                logI("Succeeded to request: $request")
+                logI("Succeeded google silent sign in.")
                 presentSequence(request.next())
             }
             ApiResult.INVALID -> {
@@ -87,14 +99,21 @@ class SplashPresenter(
                 router?.startGoogleSignInActivity((activity() ?: return), request.code)
             }
             else -> {
-                logI( "Failed to request: $request")
+                logI( "Failed google silent sign in.")
                 callback?.requestSignInResult(request)
             }
         }
     }
 
     override fun requestUpdateUserInfoResult(isSucceeded: Boolean) {
-        presentSequenceResult(SignInRequest.UPDATE_USER_INFO, isSucceeded)
+        val request = SignInRequest.UPDATE_USER_INFO
+        if (isSucceeded) {
+            logI("Succeeded update user info.")
+            presentSequence(request.next())
+        } else {
+            logI("Failed update user info.")
+            callback?.requestSignInResult(request)
+        }
     }
 
     private fun activity(): Activity? = callback?.getActivity()
@@ -105,53 +124,32 @@ class SplashPresenter(
      */
     private fun presentSequence(request: SignInRequest) {
         when (request) {
-            SignInRequest.RUNTIME_PERMISSIONS -> presentRuntimePermissions()
-            SignInRequest.GOOGLE_SIGN_IN -> presentGoogleSignIn()
-            SignInRequest.UPDATE_USER_INFO -> presentUpdateUserInfo()
-            SignInRequest.COMPLETED -> presentMainActivity()
-            else -> callback?.requestSignInResult(SignInRequest.UNKNOWN)
+            SignInRequest.RUNTIME_PERMISSIONS -> {
+                if (interactor?.isGrantedRuntimePermissions(RUNTIME_PERMISSIONS) ?: return) {
+                    logI("All runtime permissions are granted.")
+                    presentSequence(SignInRequest.GOOGLE_SIGN_IN)
+                } else {
+                    logI("Request runtime permissions.")
+                    router?.startRuntimePermissions((activity() ?: return), RUNTIME_PERMISSIONS, request.code)
+                }
+            }
+            SignInRequest.GOOGLE_SIGN_IN -> {
+                logI("Request google silent sign in.")
+                interactor?.requestGoogleSilentSignIn()
+            }
+            SignInRequest.UPDATE_USER_INFO -> {
+                logI("Request update user info.")
+                interactor?.requestUpdateUserInfo()
+            }
+            SignInRequest.COMPLETED -> {
+                logI("All requests are completed. Start MainActivity.")
+                router?.startMainActivity(activity() ?: return)
+                callback?.requestSignInResult(request)
+            }
+            else -> {
+                logE("Unknown request: $request")
+                callback?.requestSignInResult(SignInRequest.UNKNOWN)
+            }
         }
-    }
-
-    /**
-     * リクエストに応じたサインインシーケンスの結果を処理する.
-     * @param request サインインリクエスト
-     * @param isSucceeded リクエストの処理に成功したか
-     */
-    private fun presentSequenceResult(request: SignInRequest, isSucceeded: Boolean) {
-        if (isSucceeded) {
-            logI("Succeeded to request: $request")
-            presentSequence(request.next())
-        } else {
-            logI( "Failed to request: $request")
-            callback?.requestSignInResult(request)
-        }
-    }
-
-    private fun presentRuntimePermissions() {
-        if (interactor?.isGrantedRuntimePermissions(RUNTIME_PERMISSIONS) ?: return) {
-            logI("All permissions are granted.")
-            presentSequence(SignInRequest.GOOGLE_SIGN_IN)
-        } else {
-            logI("Request runtime permissions.")
-            router?.startRuntimePermissions(
-                (activity() ?: return), RUNTIME_PERMISSIONS, SignInRequest.RUNTIME_PERMISSIONS.code)
-        }
-    }
-
-    private fun presentGoogleSignIn() {
-        logI("Request google silent sign in.")
-        interactor?.requestGoogleSilentSignIn()
-    }
-
-    private fun presentUpdateUserInfo() {
-        logI("Request update user info.")
-        interactor?.requestUpdateUserInfo()
-    }
-
-    private fun presentMainActivity() {
-        logI("Start MainActivity.")
-        router?.startMainActivity(activity() ?: return)
-        callback?.requestSignInResult(SignInRequest.COMPLETED)
     }
 }

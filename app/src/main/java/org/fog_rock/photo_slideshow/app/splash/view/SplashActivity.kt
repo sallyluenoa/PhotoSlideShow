@@ -27,7 +27,7 @@ import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, AppDialogFragment.Callback {
 
     companion object {
-        private const val SHOW_LOGO_TIME_MILLIS = 2000L
+        private const val DISPLAY_LOGO_TIME_MILLIS = 2000L
     }
 
     private val fragmentManager = supportFragmentManager
@@ -48,7 +48,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         presenter?.create(this)
 
         lifecycleScope.launch(Dispatchers.Main) {
-            delay(SHOW_LOGO_TIME_MILLIS)
+            delay(DISPLAY_LOGO_TIME_MILLIS)
             replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.EMPTY))
             requestSignIn()
         }

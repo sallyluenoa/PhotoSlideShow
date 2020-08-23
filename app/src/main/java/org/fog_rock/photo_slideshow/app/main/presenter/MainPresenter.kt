@@ -43,15 +43,7 @@ class MainPresenter(
     }
 
     override fun requestUpdateDisplayedPhotos() {
-        if (!(interactor?.isNeededUpdatePhotos() ?: return)) {
-            callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.CONFIG_UPDATE)
-            return
-        }
-        if (!(interactor?.hasSelectedAlbums() ?: return)) {
-            router?.startSelectActivity((activity() ?: return), UpdatePhotosRequest.SELECT_ALBUMS.code)
-            return
-        }
-        interactor?.requestDownloadPhotos()
+        presentSequence(UpdatePhotosRequest.CONFIG_UPDATE)
     }
 
     override fun requestShowLicenses() {
@@ -66,17 +58,18 @@ class MainPresenter(
         logI("evaluateActivityResult() " +
                 "requestCode: $requestCode, resultCode: $resultCode")
 
-        when (requestCode) {
-            UpdatePhotosRequest.SELECT_ALBUMS.code -> {
+        val request = UpdatePhotosRequest.convertFromCode(requestCode)
+        when (request) {
+            UpdatePhotosRequest.SELECT_ALBUMS -> {
                 if (resultCode != Activity.RESULT_OK) {
-                    callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.SELECT_ALBUMS)
+                    callback?.requestUpdateDisplayedPhotosResult(request)
                     return
                 }
                 val albums = data?.getArrayListExtra<Album>(SelectAlbumsResult.DECIDED_ALBUMS.key()) ?: run {
-                    callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.SELECT_ALBUMS)
+                    callback?.requestUpdateDisplayedPhotosResult(request)
                     return
                 }
-                interactor?.requestDownloadPhotos(albums)
+                presentSequence(request.next(), albums)
             }
             else -> {
                 logE("Unknown requestCode: $requestCode")
@@ -90,18 +83,20 @@ class MainPresenter(
     }
 
     override fun requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo>) {
+        val request = UpdatePhotosRequest.DOWNLOAD_PHOTOS
         if (photosInfo.isNotEmpty()) {
-            interactor?.requestUpdateDatabase(photosInfo)
+            presentSequence(request.next(), photosInfo)
         } else {
-            callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.DOWNLOAD_PHOTOS)
+            callback?.requestUpdateDisplayedPhotosResult(request)
         }
     }
 
     override fun requestUpdateDatabaseResult(isSucceeded: Boolean) {
+        val request = UpdatePhotosRequest.UPDATE_DATABASE
         if (isSucceeded) {
-            callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.COMPLETED)
+            presentSequence(request.next())
         } else {
-            callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.UPDATE_DATABASE)
+            callback?.requestUpdateDisplayedPhotosResult(request)
         }
     }
 
@@ -110,4 +105,41 @@ class MainPresenter(
     }
 
     private fun activity(): Activity? = callback?.getActivity()
+
+    private fun presentSequence(request: UpdatePhotosRequest, value: Any? = null) {
+        when (request) {
+            UpdatePhotosRequest.CONFIG_UPDATE -> {
+                if (interactor?.isNeededUpdatePhotos() ?: return) {
+                    presentSequence(request.next())
+                } else {
+                    callback?.requestUpdateDisplayedPhotosResult(request)
+                }
+            }
+            UpdatePhotosRequest.SELECT_ALBUMS -> {
+                if (interactor?.hasSelectedAlbums() ?: return) {
+                    presentSequence(request.next())
+                } else {
+                    router?.startSelectActivity((activity() ?: return), request.code)
+                }
+            }
+            UpdatePhotosRequest.DOWNLOAD_PHOTOS -> {
+                val albums = value as? List<Album>
+                interactor?.requestDownloadPhotos(albums)
+            }
+            UpdatePhotosRequest.UPDATE_DATABASE -> {
+                val photosInfo = value as? List<AppDatabase.PhotoInfo>
+                if (photosInfo != null) {
+                    interactor?.requestUpdateDatabase(photosInfo)
+                } else {
+                    callback?.requestUpdateDisplayedPhotosResult(request)
+                }
+            }
+            UpdatePhotosRequest.COMPLETED -> {
+                callback?.requestUpdateDisplayedPhotosResult(request)
+            }
+            else -> {
+                callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.UNKNOWN)
+            }
+        }
+    }
 }

@@ -58,6 +58,14 @@ enum class SignInRequest(
     ),
     ;
 
+    companion object {
+        /**
+         * コードナンバーからリクエストへコンバートする.
+         */
+        fun convertFromCode(code: Int): SignInRequest =
+            values().find { it.code == code } ?: UNKNOWN
+    }
+
     /**
      * 次のシーケンスリクエストを取得する.
      */
@@ -65,6 +73,6 @@ enum class SignInRequest(
         RUNTIME_PERMISSIONS -> GOOGLE_SIGN_IN
         GOOGLE_SIGN_IN -> UPDATE_USER_INFO
         UPDATE_USER_INFO -> COMPLETED
-        else -> COMPLETED
+        else -> UNKNOWN
     }
 }

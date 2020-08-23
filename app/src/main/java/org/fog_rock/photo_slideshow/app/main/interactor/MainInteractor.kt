@@ -68,20 +68,46 @@ class MainInteractor(
         }
     }
 
-    override fun requestDownloadPhotos() {
+    override fun requestDownloadPhotos(albums: List<Album>?) {
         GlobalScope.launch(Dispatchers.Default) {
-            // 登録されているSelectedAlbumsから、Albumを抽出する.
-            val albums = mutableListOf<Album>()
-            userInfoData.dataList.forEach {
-                albums.add(it.selectedAlbum.album())
-            }
-            requestDownloadPhotosInner(albums.toList())
-        }
-    }
+            val searchAlbums = if (albums.isNullOrEmpty()) {
+                val tmp = mutableListOf<Album>()
+                userInfoData.dataList.forEach { tmp.add(it.selectedAlbum.album()) }
+                tmp.toList()
+            } else albums
 
-    override fun requestDownloadPhotos(albums: List<Album>) {
-        GlobalScope.launch(Dispatchers.Default) {
-            requestDownloadPhotosInner(albums)
+            val photosInfo = mutableListOf<AppDatabase.PhotoInfo>()
+
+            searchAlbums.forEach { album ->
+                // MediaItemリストをサーバーから取得する.
+                val result = googleWebApis.requestMediaItems(album)
+
+                if (result.tokenInfo.afterUpdated(userInfoData.userInfo.tokenInfo())) {
+                    // トークン情報が更新されていたらDB側も更新する.
+                    appDatabase.updateUserInfo(userInfoData.userInfo.emailAddress, result.tokenInfo)
+                }
+                if (result.photosResults.isEmpty()) {
+                    // サーバーからのデータ取得に失敗した場合はスキップする.
+                    return@forEach
+                }
+
+                // ランダムピックアップしたMediaItemリストを元に、画像ファイルをダウンロードする.
+                val mediaItems = convertMediaItems(result.photosResults, MEDIA_ITEMS_PICKUP_SIZE)
+                val outputPaths = photosDownloader.requestDownloads(mediaItems, context.filesDir)
+
+                // MediaDetailリストを作成.
+                val mediaDetails = mutableListOf<AppDatabase.PhotoInfo.MediaDetail>()
+                outputPaths.forEach { outputPath ->
+                    val mediaItem = mediaItems.find { outputPath.endsWith(it.filename) }
+                    if (mediaItem != null) {
+                        mediaDetails.add(AppDatabase.PhotoInfo.MediaDetail(mediaItem, outputPath))
+                    }
+                }
+                // PhotoInfoを生成して追加.
+                photosInfo.add(AppDatabase.PhotoInfo(album, mediaDetails.toList()))
+            }
+
+            requestDownloadPhotosResult(photosInfo.toList())
         }
     }
 
@@ -121,41 +147,6 @@ class MainInteractor(
         withContext(Dispatchers.Main) {
             callback?.requestUpdateDatabaseResult(isSucceeded)
         }
-    }
-
-    private suspend fun requestDownloadPhotosInner(albums: List<Album>) {
-        val photosInfo = mutableListOf<AppDatabase.PhotoInfo>()
-
-        albums.forEach { album ->
-            // MediaItemリストをサーバーから取得する.
-            val result = googleWebApis.requestMediaItems(album)
-
-            if (result.tokenInfo.afterUpdated(userInfoData.userInfo.tokenInfo())) {
-                // トークン情報が更新されていたらDB側も更新する.
-                appDatabase.updateUserInfo(userInfoData.userInfo.emailAddress, result.tokenInfo)
-            }
-            if (result.photosResults.isEmpty()) {
-                // サーバーからのデータ取得に失敗した場合はスキップする.
-                return@forEach
-            }
-
-            // ランダムピックアップしたMediaItemリストを元に、画像ファイルをダウンロードする.
-            val mediaItems = convertMediaItems(result.photosResults, MEDIA_ITEMS_PICKUP_SIZE)
-            val outputPaths = photosDownloader.requestDownloads(mediaItems, context.filesDir)
-
-            // MediaDetailリストを作成.
-            val mediaDetails = mutableListOf<AppDatabase.PhotoInfo.MediaDetail>()
-            outputPaths.forEach { outputPath ->
-                val mediaItem = mediaItems.find { outputPath.endsWith(it.filename) }
-                if (mediaItem != null) {
-                    mediaDetails.add(AppDatabase.PhotoInfo.MediaDetail(mediaItem, outputPath))
-                }
-            }
-            // PhotoInfoを生成して追加.
-            photosInfo.add(AppDatabase.PhotoInfo(album, mediaDetails.toList()))
-        }
-
-        requestDownloadPhotosResult(photosInfo.toList())
     }
 
     /**

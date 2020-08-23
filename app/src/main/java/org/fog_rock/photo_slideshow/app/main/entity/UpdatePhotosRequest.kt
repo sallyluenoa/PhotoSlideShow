@@ -12,5 +12,26 @@ enum class UpdatePhotosRequest(val code: Int) {
 
     COMPLETED(1111),
 
-    UNKNOWN(9999);
+    UNKNOWN(9999),
+    ;
+
+    companion object {
+        /**
+         * コードナンバーからリクエストへコンバートする.
+         */
+        fun convertFromCode(code: Int): UpdatePhotosRequest =
+            values().find { it.code == code } ?: UNKNOWN
+    }
+
+    /**
+     * 次のシーケンスリクエストを取得する.
+     */
+    fun next(): UpdatePhotosRequest = when (this) {
+        CONFIG_UPDATE -> SELECT_ALBUMS
+        SELECT_ALBUMS -> DOWNLOAD_PHOTOS
+        DOWNLOAD_PHOTOS -> UPDATE_DATABASE
+        UPDATE_DATABASE -> COMPLETED
+        else -> UNKNOWN
+    }
+
 }
