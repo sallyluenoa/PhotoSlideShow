@@ -7,6 +7,7 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.fog_rock.photo_slideshow.core.extension.logD
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.webapi.GoogleOAuth2Api
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
@@ -24,6 +25,8 @@ class GoogleOAuth2ApiImpl(): GoogleOAuth2Api {
                 clientSecret.web.clientId, clientSecret.web.clientSecret,
                 serverAuthCode, ""
             ).execute()
+            logD("[GoogleTokenResponse]\n" +
+                    "access_token: ${response.accessToken}\nrefresh_token: ${response.refreshToken}")
             TokenInfo(response)
         } catch (e: TokenResponseException) {
             logE("Failed to get token response. " +
@@ -49,6 +52,8 @@ class GoogleOAuth2ApiImpl(): GoogleOAuth2Api {
                 NetHttpTransport(), JacksonFactory(),
                 refreshToken, clientSecret.web.clientId, clientSecret.web.clientSecret
             ).execute()
+            logD("[GoogleTokenResponse]\n" +
+                    "access_token: ${response.accessToken}\nrefresh_token: ${response.refreshToken}")
             TokenInfo(response, refreshToken)
         } catch (e: TokenResponseException) {
             logE("Failed to get token response. " +

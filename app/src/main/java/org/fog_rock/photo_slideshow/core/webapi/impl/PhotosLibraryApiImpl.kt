@@ -54,12 +54,12 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
     override suspend fun requestSharedAlbums(): List<Album> = withContext(Dispatchers.IO) {
         try {
             val response = photosLibraryClient().listSharedAlbums()
-            val albums = emptyList<Album>()
+            val albums = mutableListOf<Album>()
             for (page in response.iteratePages()) {
-                logI("Load ListSharedAlbumsPage. PageCount: ${page.pageElementCount}");
-                albums.plus(page.response.sharedAlbumsList)
+                logI("Load ListSharedAlbumsPage. PageCount: ${page.pageElementCount}")
+                albums.addAll(page.response.sharedAlbumsList)
             }
-            albums
+            albums.toList()
         } catch (e: ApiException) {
             logE("Failed to get listSharedAlbums.")
             e.printStackTrace()
@@ -74,13 +74,13 @@ class PhotosLibraryApiImpl(): PhotosLibraryApi {
                 pageSize = 100
             }.build()
             val response = photosLibraryClient().searchMediaItems(request)
-            val mediaItems = emptyList<MediaItem>()
+            val mediaItems = mutableListOf<MediaItem>()
             logI("Total mediaItem count: ${album.mediaItemsCount}")
             for (page in response.iteratePages()) {
                 logI("Load SearchMediaItemsPage. PageCount: ${page.pageElementCount}")
-                mediaItems.plus(page.response.mediaItemsList)
+                mediaItems.addAll(page.response.mediaItemsList)
             }
-            mediaItems
+            mediaItems.toList()
         } catch (e: ApiException) {
             logE("Failed to get searchMediaItems.")
             e.printStackTrace()

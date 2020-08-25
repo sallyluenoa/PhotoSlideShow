@@ -1,6 +1,7 @@
 package org.fog_rock.photo_slideshow.app.main.interactor
 
 import android.content.Context
+import android.os.Environment
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import com.google.photos.types.proto.MediaMetadata
@@ -14,9 +15,14 @@ import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfoData
+import org.fog_rock.photo_slideshow.core.extension.logD
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.file.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
+import java.io.File
 
 class MainInteractor(
     private val context: Context,
@@ -54,7 +60,7 @@ class MainInteractor(
             if (userInfoData.userInfo.id == 0L) {
                 // 初回のみ(userInfo.id が 0 のとき)、DBからのデータ取得を行う.
                 userInfoData = appDatabase.findUserInfoDataByEmailAddress(userInfoData.userInfo.emailAddress) ?: run {
-                    requestLoadDisplayedPhotosResult(emptyList())
+                    requestLoadDisplayedPhotosResult()
                     return@launch
                 }
             }
@@ -71,29 +77,49 @@ class MainInteractor(
     override fun requestDownloadPhotos(albums: List<Album>?) {
         GlobalScope.launch(Dispatchers.Default) {
             val searchAlbums = if (albums.isNullOrEmpty()) {
+                if (userInfoData.dataList.isEmpty()) {
+                    logE("No albums found.")
+                    requestDownloadPhotosResult()
+                    return@launch
+                }
+                logI("Load albums from UserInfoData.")
                 val tmp = mutableListOf<Album>()
                 userInfoData.dataList.forEach { tmp.add(it.selectedAlbum.album()) }
                 tmp.toList()
-            } else albums
+            } else {
+                logI("Use request parameter of album.")
+                albums
+            }
+
+            val outputDir = getOutputDir() ?: run {
+                logE("Failed to get dir.")
+                requestDownloadPhotosResult()
+                return@launch
+            }
 
             val photosInfo = mutableListOf<AppDatabase.PhotoInfo>()
 
             searchAlbums.forEach { album ->
+                logI("Try to get mediaItem from album.")
+                logD("album#id: ${album.id}")
+
                 // MediaItemリストをサーバーから取得する.
                 val result = googleWebApis.requestMediaItems(album)
 
                 if (result.tokenInfo.afterUpdated(userInfoData.userInfo.tokenInfo())) {
                     // トークン情報が更新されていたらDB側も更新する.
+                    logI("Update tokenInfo to database.")
                     appDatabase.updateUserInfo(userInfoData.userInfo.emailAddress, result.tokenInfo)
                 }
                 if (result.photosResults.isEmpty()) {
                     // サーバーからのデータ取得に失敗した場合はスキップする.
+                    logW("Failed to get MediaItems.")
                     return@forEach
                 }
 
                 // ランダムピックアップしたMediaItemリストを元に、画像ファイルをダウンロードする.
                 val mediaItems = convertMediaItems(result.photosResults, MEDIA_ITEMS_PICKUP_SIZE)
-                val outputPaths = photosDownloader.requestDownloads(mediaItems, context.filesDir)
+                val outputPaths = photosDownloader.requestDownloads(mediaItems, outputDir)
 
                 // MediaDetailリストを作成.
                 val mediaDetails = mutableListOf<AppDatabase.PhotoInfo.MediaDetail>()
@@ -104,6 +130,7 @@ class MainInteractor(
                     }
                 }
                 // PhotoInfoを生成して追加.
+                logI("Succeeded to get MediaDetails. size: ${mediaDetails.size}")
                 photosInfo.add(AppDatabase.PhotoInfo(album, mediaDetails.toList()))
             }
 
@@ -131,13 +158,13 @@ class MainInteractor(
 
     override fun hasSelectedAlbums(): Boolean = userInfoData.dataList.isNotEmpty()
 
-    private suspend fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
+    private suspend fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto> = emptyList()) {
         withContext(Dispatchers.Main) {
             callback?.requestLoadDisplayedPhotosResult(displayedPhotos)
         }
     }
 
-    private suspend fun requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo>) {
+    private suspend fun requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo> = emptyList()) {
         withContext(Dispatchers.Main) {
             callback?.requestDownloadPhotosResult(photosInfo)
         }
@@ -146,6 +173,28 @@ class MainInteractor(
     private suspend fun requestUpdateDatabaseResult(isSucceeded: Boolean) {
         withContext(Dispatchers.Main) {
             callback?.requestUpdateDatabaseResult(isSucceeded)
+        }
+    }
+
+    private fun getOutputDir(): File? {
+        val outputDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: run {
+            logE("Failed to get context#getExternalFilesDir().")
+            return null
+        }
+        logD("Output dir: $outputDir")
+        return when {
+            outputDir.exists() -> {
+                logI("Output dir exists.")
+                outputDir
+            }
+            outputDir.mkdirs() -> {
+                logI("Succeeded to make dir.")
+                outputDir
+            }
+            else -> {
+                logE("Failed to make dir.")
+                null
+            }
         }
     }
 

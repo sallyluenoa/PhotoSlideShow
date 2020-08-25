@@ -73,6 +73,9 @@ class AppDatabase {
                 displayedPhotoDao().insert(photoInfo.displayedPhotos(id))
             }
         }
+
+        // 最後にUserInfoの最終更新時間を更新する.
+        userInfoDao().update(userInfoData.userInfo.updatePhotos())
     }
 
     suspend fun findUserInfoByEmailAddress(emailAddress: String): UserInfo? =

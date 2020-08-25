@@ -28,7 +28,7 @@ data class TokenInfo(
         response: TokenResponse
     ): this(
         response.accessToken,
-        (if (response.refreshToken.isNullOrEmpty()) response.refreshToken
+        (if (!response.refreshToken.isNullOrEmpty()) response.refreshToken
         else throw IllegalArgumentException("RefreshToken must not be null or empty.")),
          convertExpiredAccessTokenTimeMillis(response.expiresInSeconds)
     )
