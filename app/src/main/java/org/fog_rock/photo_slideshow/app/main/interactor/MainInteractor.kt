@@ -2,11 +2,12 @@ package org.fog_rock.photo_slideshow.app.main.interactor
 
 import android.content.Context
 import android.os.Environment
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import com.google.photos.types.proto.MediaMetadata
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
@@ -29,7 +30,7 @@ class MainInteractor(
     private val appDatabase: AppDatabase,
     private val photosDownloader: PhotosDownloader,
     private val googleWebApis: GoogleWebApis
-): MainContract.Interactor {
+): ViewModel(), MainContract.Interactor {
 
     companion object {
         private const val INTERVAL_UPDATE_MILLISECS = 24 * 60 * 60 * 1000L
@@ -56,7 +57,7 @@ class MainInteractor(
     }
 
     override fun requestLoadDisplayedPhotos() {
-        GlobalScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default) {
             if (userInfoData.userInfo.id == 0L) {
                 // 初回のみ(userInfo.id が 0 のとき)、DBからのデータ取得を行う.
                 userInfoData = appDatabase.findUserInfoDataByEmailAddress(userInfoData.userInfo.emailAddress) ?: run {
@@ -75,7 +76,7 @@ class MainInteractor(
     }
 
     override fun requestDownloadPhotos(albums: List<Album>?) {
-        GlobalScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default) {
             val searchAlbums = if (albums.isNullOrEmpty()) {
                 if (userInfoData.dataList.isEmpty()) {
                     logE("No albums found.")
@@ -139,7 +140,7 @@ class MainInteractor(
     }
 
     override fun requestUpdateDatabase(photosInfo: List<AppDatabase.PhotoInfo>) {
-        GlobalScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default) {
             appDatabase.replaceUserInfoData(userInfoData, photosInfo)
             userInfoData = appDatabase.findUserInfoDataById(userInfoData.userInfo.id) ?: run {
                 requestUpdateDatabaseResult(false)

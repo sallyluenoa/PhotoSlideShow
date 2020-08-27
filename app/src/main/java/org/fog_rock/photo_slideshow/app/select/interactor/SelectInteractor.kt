@@ -1,8 +1,9 @@
 package org.fog_rock.photo_slideshow.app.select.interactor
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.photos.types.proto.Album
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
@@ -13,7 +14,7 @@ import org.fog_rock.photo_slideshow.core.viper.ViperContract
 class SelectInteractor(
     private val appDatabase: AppDatabase,
     private val googleWebApis: GoogleWebApis
-) : SelectContract.Interactor {
+) : ViewModel(), SelectContract.Interactor {
 
     private var callback: SelectContract.InteractorCallback? = null
 
@@ -30,7 +31,7 @@ class SelectInteractor(
     }
 
     override fun requestLoadSharedAlbums() {
-        GlobalScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default) {
             val emailAddress = googleWebApis.getSignedInEmailAddress()
             val userInfo = appDatabase.findUserInfoByEmailAddress(emailAddress) ?: run {
                 requestLoadSharedAlbumsResult(emptyList())

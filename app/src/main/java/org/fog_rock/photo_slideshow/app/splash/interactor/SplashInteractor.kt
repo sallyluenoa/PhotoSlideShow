@@ -5,8 +5,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
@@ -20,7 +21,7 @@ class SplashInteractor(
     private val context: Context,
     private val appDatabase: AppDatabase,
     private val googleWebApis: GoogleWebApis
-): SplashContract.Interactor {
+): ViewModel(), SplashContract.Interactor {
 
     private var callback: SplashContract.InteractorCallback? = null
 
@@ -37,14 +38,14 @@ class SplashInteractor(
     }
 
     override fun requestGoogleSilentSignIn() {
-        GlobalScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default) {
             val result = googleWebApis.requestSilentSignIn()
             requestGoogleSilentSignInResult(result)
         }
     }
 
     override fun requestUpdateUserInfo() {
-        GlobalScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Default) {
             val emailAddress = googleWebApis.getSignedInEmailAddress()
             val userInfo = appDatabase.findUserInfoByEmailAddress(emailAddress)
             val tokenInfo = googleWebApis.requestUpdateTokenInfo(userInfo?.tokenInfo())
