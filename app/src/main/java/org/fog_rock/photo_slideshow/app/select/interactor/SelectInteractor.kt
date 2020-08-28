@@ -9,6 +9,8 @@ import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
 import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
 import org.fog_rock.photo_slideshow.app.select.contract.SelectContract
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 
 class SelectInteractor(
@@ -32,23 +34,27 @@ class SelectInteractor(
 
     override fun requestLoadSharedAlbums() {
         viewModelScope.launch(Dispatchers.Default) {
-            val emailAddress = googleWebApis.getSignedInEmailAddress()
-            val userInfo = appDatabase.findUserInfoByEmailAddress(emailAddress) ?: run {
-                requestLoadSharedAlbumsResult(emptyList())
-                return@launch
+            logI("requestLoadSharedAlbums: Start coroutine.")
+            val albums = loadSharedAlbumsResult()
+            withContext(Dispatchers.Main) {
+                callback?.requestLoadSharedAlbumsResult(albums)
             }
-            val result = googleWebApis.requestSharedAlbums()
-            if (result.tokenInfo.afterUpdated(userInfo.tokenInfo())) {
-                // トークン情報が更新されていたらDB側も更新する.
-                appDatabase.updateUserInfo(emailAddress, result.tokenInfo)
-            }
-            requestLoadSharedAlbumsResult(result.photosResults)
+            logI("requestLoadSharedAlbums: End coroutine.")
         }
     }
 
-    private suspend fun requestLoadSharedAlbumsResult(albums: List<Album>) {
-        withContext(Dispatchers.Main) {
-            callback?.requestLoadSharedAlbumsResult(albums)
+    private suspend fun loadSharedAlbumsResult(): List<Album> {
+        val emailAddress = googleWebApis.getSignedInEmailAddress()
+        val userInfo = appDatabase.findUserInfoByEmailAddress(emailAddress) ?: run {
+            logE("Not found UserInfo from database.")
+            return emptyList()
         }
+        val result = googleWebApis.requestSharedAlbums()
+        if (result.tokenInfo.afterUpdated(userInfo.tokenInfo())) {
+            // トークン情報が更新されていたらDB側も更新する.
+            logI("TokenInfo is updated. Also need to update database.")
+            appDatabase.updateUserInfo(emailAddress, result.tokenInfo)
+        }
+        return result.photosResults
     }
 }

@@ -15,7 +15,6 @@ import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
-import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 class SplashInteractor(
     private val context: Context,
@@ -39,25 +38,23 @@ class SplashInteractor(
 
     override fun requestGoogleSilentSignIn() {
         viewModelScope.launch(Dispatchers.Default) {
+            logI("requestGoogleSilentSignIn: Start coroutine.")
             val result = googleWebApis.requestSilentSignIn()
-            requestGoogleSilentSignInResult(result)
+            withContext(Dispatchers.Main) {
+                callback?.requestGoogleSilentSignInResult(result)
+            }
+            logI("requestGoogleSilentSignIn: End coroutine.")
         }
     }
 
     override fun requestUpdateUserInfo() {
         viewModelScope.launch(Dispatchers.Default) {
-            val emailAddress = googleWebApis.getSignedInEmailAddress()
-            val userInfo = appDatabase.findUserInfoByEmailAddress(emailAddress)
-            val tokenInfo = googleWebApis.requestUpdateTokenInfo(userInfo?.tokenInfo())
-
-            if (tokenInfo != null) {
-                appDatabase.updateUserInfo(emailAddress, tokenInfo)
-                requestUpdateUserInfoResult(true)
-            } else {
-                // 失敗した場合はGoogleアカウントアクセス破棄をする.
-                googleWebApis.requestSignOut(true)
-                requestUpdateUserInfoResult(false)
+            logI("requestUpdateUserInfo: Start coroutine.")
+            val result = updateUserInfo()
+            withContext(Dispatchers.Main) {
+                callback?.requestUpdateUserInfoResult(result)
             }
+            logI("requestUpdateUserInfo: End coroutine.")
         }
     }
 
@@ -79,15 +76,20 @@ class SplashInteractor(
     override fun isSucceededGoogleUserSignIn(data: Intent?): Boolean =
         googleWebApis.isSucceededUserSignIn(data)
 
-    private suspend fun requestGoogleSilentSignInResult(result: ApiResult) {
-        withContext(Dispatchers.Main) {
-            callback?.requestGoogleSilentSignInResult(result)
-        }
-    }
+    private suspend fun updateUserInfo(): Boolean {
+        val emailAddress = googleWebApis.getSignedInEmailAddress()
+        val userInfo = appDatabase.findUserInfoByEmailAddress(emailAddress)
+        val tokenInfo = googleWebApis.requestUpdateTokenInfo(userInfo?.tokenInfo())
 
-    private suspend fun requestUpdateUserInfoResult(isSucceeded: Boolean) {
-        withContext(Dispatchers.Main) {
-            callback?.requestUpdateUserInfoResult(isSucceeded)
+        return if (tokenInfo != null) {
+            logI("Succeeded to update TokenInfo. Update database.")
+            appDatabase.updateUserInfo(emailAddress, tokenInfo)
+            true
+        } else {
+            // 失敗した場合はGoogleアカウントアクセス破棄をする.
+            logI("Failed to update TokenInfo. Revoke access.")
+            googleWebApis.requestSignOut(true)
+            false
         }
     }
 }
