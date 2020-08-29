@@ -22,6 +22,7 @@ import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
 import org.fog_rock.photo_slideshow.core.file.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
@@ -44,10 +45,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     private var displayedPhotos = emptyList<DisplayedPhoto>()
     private var displayedIndex = 0
-
-    private var isForeground = false
-    private var isUpdateRequested = false
-    private var isRunningSlideShow = false
+    private var isRequestingUpdatePhotos = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +62,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         )
         presenter?.create(this)
 
-        presenter?.requestLoadDisplayedPhotos()
+        requestLoadDisplayedPhotos()
     }
 
     override fun onDestroy() {
@@ -77,13 +75,11 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     override fun onResume() {
         super.onResume()
 
-        isForeground = true
-        if (displayedPhotos.isNotEmpty()) presentSlideShow()
+        presentSlideShow()
     }
 
     override fun onPause() {
-        isForeground = false
-        lifecycleScope.cancel(CancellationException("MainActivity will be background."))
+        lifecycleScope.coroutineContext.cancelChildren(CancellationException("MainActivity will be background."))
 
         super.onPause()
     }
@@ -124,23 +120,14 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     override fun getActivity(): Activity = this
 
     override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
-        isUpdateRequested = false
-        if (displayedPhotos.isEmpty()) {
-            presenter?.requestUpdateDisplayedPhotos()
-        } else {
-            this.displayedPhotos = displayedPhotos
-            this.displayedIndex = 0
-            presentSlideShow()
-        }
+        updateDisplayedPhotos(displayedPhotos)
     }
 
     override fun requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest) {
+        logI("requestUpdateDisplayedPhotosResult: $request")
+        isRequestingUpdatePhotos = false
         if (request == UpdatePhotosRequest.COMPLETED) {
-            if (isRunningSlideShow) {
-                isUpdateRequested = true
-            } else {
-                presenter?.requestLoadDisplayedPhotos()
-            }
+            requestLoadDisplayedPhotos()
         }
     }
 
@@ -179,26 +166,70 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
      * ファイルリストからインデックスに該当するファイルをスライドショーに表示する.
      */
     private fun presentSlideShow() {
-        if (!isForeground) {
-            logI("MainActivity is background now. Skipped to present SlideShow.")
-            return
+        logI("presentSlideShow")
+
+        lifecycleScope.launch(Dispatchers.Default) {
+            logI("presentSlideShow: Start coroutine.")
+            try {
+                while (true) {
+                    val displayedPhoto = getDisplayedPhoto()
+                    if (displayedPhoto != null) {
+                        // 指定された時間分写真を表示する.
+                        logI("Display photo image.")
+                        withContext(Dispatchers.Main) {
+                            presentImage(displayedPhoto.outputPath)
+                        }
+                        delay(PRESENT_TIME_MILLISECS)
+                    } else {
+                        // 一秒間待つ.
+                        logI("Wait 1 sec...")
+                        delay(1000L)
+                    }
+                }
+            } catch (e: CancellationException) {
+                logW("SlideShow loop was canceled. Reason: $e")
+            } finally {
+                logI("SlideShow loop was ended.")
+            }
+        }
+    }
+
+    private fun requestLoadDisplayedPhotos() {
+        logI("Request load displayed photos.")
+        presenter?.requestLoadDisplayedPhotos()
+    }
+
+    private fun requestUpdateDisplayedPhotos() {
+        logI("Request update displayed photos.")
+        isRequestingUpdatePhotos = true
+        presenter?.requestUpdateDisplayedPhotos()
+    }
+
+    @Synchronized
+    private fun getDisplayedPhoto(): DisplayedPhoto? =
+        if (displayedPhotos.isNotEmpty()) {
+            logI("Get displayed photos. Index: $displayedIndex")
+            if (displayedIndex == 0 && !isRequestingUpdatePhotos) {
+                // index が 0 且つ更新処理中ではなかったら、更新チェックを行う.
+                requestUpdateDisplayedPhotos()
+            }
+            val displayedPhoto = displayedPhotos[displayedIndex]
+            displayedIndex = if (displayedIndex + 1 < displayedPhotos.size) displayedIndex + 1 else 0
+            displayedPhoto
+        } else {
+            logI("There are no displayed photos.")
+            null
         }
 
-        lifecycleScope.launch(Dispatchers.Main) {
-            try {
-                isRunningSlideShow = true
-                while (!isUpdateRequested) {
-                    presentImage(displayedPhotos[displayedIndex].outputPath)
-                    delay(PRESENT_TIME_MILLISECS)
-                    displayedIndex =
-                        if (displayedIndex + 1 < displayedPhotos.size) displayedIndex + 1 else 0
-                    if (displayedIndex == 0) presenter?.requestUpdateDisplayedPhotos()
-                }
-                isRunningSlideShow = false
-                presenter?.requestLoadDisplayedPhotos()
-            } catch (e: CancellationException) {
-                logI("SlideShow loop was canceled. Reason: $e")
-            }
+    @Synchronized
+    private fun updateDisplayedPhotos(displayedPhotos: List<DisplayedPhoto>) {
+        if (displayedPhotos.isNotEmpty()) {
+            logI("Update new displayed photos.")
+            this.displayedPhotos = displayedPhotos
+            this.displayedIndex = 0
+        } else {
+            logI("Displayed photos is empty.")
+            requestUpdateDisplayedPhotos()
         }
     }
 }
