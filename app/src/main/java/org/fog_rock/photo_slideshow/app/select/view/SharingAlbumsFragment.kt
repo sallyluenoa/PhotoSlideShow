@@ -11,8 +11,10 @@ import com.google.photos.types.proto.Album
 import kotlinx.android.synthetic.main.fragment_sharing_albums.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
+import org.fog_rock.photo_slideshow.core.extension.getArrayExtra
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.extension.putArrayExtra
 
 class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdapter.OnItemClickListener {
 
@@ -24,7 +26,7 @@ class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdap
 
         fun newInstance(albums: List<Album>): Fragment {
             val args = Bundle().apply {
-                putSerializable(ARGS_ALBUMS, albums.toTypedArray())
+                putArrayExtra(ARGS_ALBUMS, albums.toTypedArray())
             }
             return SharingAlbumsFragment().apply {
                 arguments = args
@@ -39,7 +41,7 @@ class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdap
         }
     }
     private val albums: Array<Album> by lazy {
-        args.getSerializable(ARGS_ALBUMS) as Array<Album>
+        args.getArrayExtra<Album>(ARGS_ALBUMS) ?: emptyArray()
     }
 
     private var selectedView: View? = null

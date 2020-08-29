@@ -9,6 +9,7 @@ import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
 import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
 import org.fog_rock.photo_slideshow.app.select.entity.SelectAlbumsResult
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.getArrayListExtra
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
@@ -123,11 +124,11 @@ class MainPresenter(
                 }
             }
             UpdatePhotosRequest.DOWNLOAD_PHOTOS -> {
-                val albums = value as? List<Album>
+                val albums = value.downCast<List<Album>>()
                 interactor?.requestDownloadPhotos((activity() ?: return), albums)
             }
             UpdatePhotosRequest.UPDATE_DATABASE -> {
-                val photosInfo = value as? List<AppDatabase.PhotoInfo>
+                val photosInfo = value.downCast<List<AppDatabase.PhotoInfo>>()
                 if (photosInfo != null) {
                     interactor?.requestUpdateDatabase(photosInfo)
                 } else {
