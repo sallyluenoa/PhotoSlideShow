@@ -112,8 +112,7 @@ class MainInteractor(
         userInfoData.dataList.forEach {
             displayedPhotos.addAll(it.displayedPhotos)
         }
-        displayedPhotos.shuffle()
-        return displayedPhotos.toList()
+        return displayedPhotos.shuffled()
     }
 
     private suspend fun downloadPhotos(albums: List<Album>?): List<AppDatabase.PhotoInfo> {
@@ -213,8 +212,7 @@ class MainInteractor(
     private fun convertMediaItems(mediaItems: List<MediaItem>, size: Int): List<MediaItem> {
         val tmpMediaItems = mediaItems.filter {
             it.hasMediaMetadata() && it.mediaMetadata.metadataCase == MediaMetadata.MetadataCase.PHOTO
-        }
-        tmpMediaItems.shuffled()
+        }.shuffled()
         return if (size < tmpMediaItems.size) tmpMediaItems.subList(0, size) else tmpMediaItems
     }
 }
