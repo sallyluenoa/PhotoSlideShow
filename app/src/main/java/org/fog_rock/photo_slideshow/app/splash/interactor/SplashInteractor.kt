@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
@@ -15,6 +16,7 @@ import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
+import java.util.concurrent.CancellationException
 
 class SplashInteractor(
     private val context: Context,
@@ -33,6 +35,7 @@ class SplashInteractor(
     }
 
     override fun destroy() {
+        viewModelScope.cancel(CancellationException("Destroy method is called."))
         callback = null
     }
 

@@ -8,6 +8,7 @@ import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
 import com.google.photos.types.proto.MediaMetadata
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
@@ -24,6 +25,7 @@ import org.fog_rock.photo_slideshow.core.file.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import java.io.File
+import java.util.concurrent.CancellationException
 
 class MainInteractor(
     private val context: Context,
@@ -53,6 +55,7 @@ class MainInteractor(
     }
 
     override fun destroy() {
+        viewModelScope.cancel(CancellationException("Destroy method is called."))
         callback = null
     }
 

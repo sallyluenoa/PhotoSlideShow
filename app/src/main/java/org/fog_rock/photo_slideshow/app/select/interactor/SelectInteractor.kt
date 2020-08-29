@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.photos.types.proto.Album
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.module.AppDatabase
@@ -12,6 +13,7 @@ import org.fog_rock.photo_slideshow.app.select.contract.SelectContract
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
+import java.util.concurrent.CancellationException
 
 class SelectInteractor(
     private val appDatabase: AppDatabase,
@@ -29,6 +31,7 @@ class SelectInteractor(
     }
 
     override fun destroy() {
+        viewModelScope.cancel(CancellationException("Destroy method is called."))
         callback = null
     }
 
