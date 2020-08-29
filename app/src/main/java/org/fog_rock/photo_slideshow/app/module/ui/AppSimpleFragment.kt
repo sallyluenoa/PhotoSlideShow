@@ -1,4 +1,4 @@
-package org.fog_rock.photo_slideshow.app.module
+package org.fog_rock.photo_slideshow.app.module.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,7 +25,8 @@ class AppSimpleFragment : Fragment() {
             val args = Bundle().apply {
                 putSerializable(ARGS_LAYOUT, layout)
             }
-            return AppSimpleFragment().apply {
+            return AppSimpleFragment()
+                .apply {
                 arguments = args
             }
         }

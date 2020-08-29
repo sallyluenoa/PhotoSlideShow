@@ -1,4 +1,4 @@
-package org.fog_rock.photo_slideshow.app.module
+package org.fog_rock.photo_slideshow.app.module.lib
 
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem

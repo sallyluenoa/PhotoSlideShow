@@ -1,4 +1,4 @@
-package org.fog_rock.photo_slideshow.app.module
+package org.fog_rock.photo_slideshow.app.module.lib
 
 import android.content.Intent
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -69,18 +69,30 @@ class GoogleWebApis(
     suspend fun requestSharedAlbums(): PhotosApiResult<Album> {
         val tokenInfo = updateTokenInfo()
         return if (tokenInfo != null) {
-            PhotosApiResult(tokenInfo, photosLibraryApi.requestSharedAlbums())
+            PhotosApiResult(
+                tokenInfo,
+                photosLibraryApi.requestSharedAlbums()
+            )
         } else {
-            PhotosApiResult(TokenInfo(), emptyList())
+            PhotosApiResult(
+                TokenInfo(),
+                emptyList()
+            )
         }
     }
 
     suspend fun requestMediaItems(album: Album): PhotosApiResult<MediaItem> {
         val tokenInfo = updateTokenInfo()
         return if (tokenInfo != null) {
-            PhotosApiResult(tokenInfo, photosLibraryApi.requestMediaItems(album))
+            PhotosApiResult(
+                tokenInfo,
+                photosLibraryApi.requestMediaItems(album)
+            )
         } else {
-            PhotosApiResult(TokenInfo(), emptyList())
+            PhotosApiResult(
+                TokenInfo(),
+                emptyList()
+            )
         }
     }
 

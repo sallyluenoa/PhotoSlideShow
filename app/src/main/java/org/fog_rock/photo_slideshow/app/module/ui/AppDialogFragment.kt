@@ -1,4 +1,4 @@
-package org.fog_rock.photo_slideshow.app.module
+package org.fog_rock.photo_slideshow.app.module.ui
 
 import android.app.Dialog
 import android.content.Context
@@ -103,7 +103,8 @@ class AppDialogFragment : DialogFragment() {
                 putString(ARGS_POSITIVE_LABEL, positiveLabel)
                 putString(ARGS_NEGATIVE_LABEL, negativeLabel)
             }
-            val fragment = AppDialogFragment().apply {
+            val fragment = AppDialogFragment()
+                .apply {
                 arguments = args
                 isCancelable = cancelable
             }

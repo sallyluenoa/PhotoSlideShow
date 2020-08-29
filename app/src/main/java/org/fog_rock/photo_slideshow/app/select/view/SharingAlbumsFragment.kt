@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.photos.types.proto.Album
 import kotlinx.android.synthetic.main.fragment_sharing_albums.*
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
+import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 

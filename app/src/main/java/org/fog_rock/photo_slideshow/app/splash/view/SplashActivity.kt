@@ -10,10 +10,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.app.module.AppDatabase
-import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
-import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
-import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
+import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
+import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
+import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
+import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
@@ -38,18 +38,28 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_splash)
-        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.LOGO))
+        replaceFragment(
+            AppSimpleFragment.newInstance(
+                AppSimpleFragment.Layout.LOGO))
 
         presenter = SplashPresenter(
-            SplashInteractor(this, AppDatabase(),
-                GoogleWebApis(GoogleSignInApiImpl(this), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())),
+            SplashInteractor(this,
+                AppDatabase(),
+                GoogleWebApis(
+                    GoogleSignInApiImpl(this),
+                    GoogleOAuth2ApiImpl(),
+                    PhotosLibraryApiImpl()
+                )
+            ),
             SplashRouter()
         )
         presenter?.create(this)
 
         lifecycleScope.launch(Dispatchers.Main) {
             delay(DISPLAY_LOGO_TIME_MILLIS)
-            replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.EMPTY))
+            replaceFragment(
+                AppSimpleFragment.newInstance(
+                    AppSimpleFragment.Layout.EMPTY))
             requestSignIn()
         }
     }

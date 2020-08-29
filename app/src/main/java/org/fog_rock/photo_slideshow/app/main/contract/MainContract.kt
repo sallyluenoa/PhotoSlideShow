@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
-import org.fog_rock.photo_slideshow.app.module.AppDatabase
+import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult

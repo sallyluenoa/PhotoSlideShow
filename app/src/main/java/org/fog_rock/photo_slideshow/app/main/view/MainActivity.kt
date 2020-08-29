@@ -16,9 +16,9 @@ import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
 import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
 import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
 import org.fog_rock.photo_slideshow.app.main.router.MainRouter
-import org.fog_rock.photo_slideshow.app.module.AppDatabase
-import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
-import org.fog_rock.photo_slideshow.app.module.GoogleWebApis
+import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
+import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
+import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
@@ -52,12 +52,20 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
+        replaceFragment(
+            AppSimpleFragment.newInstance(
+                AppSimpleFragment.Layout.PROGRESS))
 
         presenter = MainPresenter(
-            MainInteractor(this, AppDatabase(),
+            MainInteractor(this,
+                AppDatabase(),
                 PhotosDownloaderImpl(FileDownloaderImpl(), ASPECT_WIDTH, ASPECT_HEIGHT),
-                GoogleWebApis(GoogleSignInApiImpl(this), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())),
+                GoogleWebApis(
+                    GoogleSignInApiImpl(this),
+                    GoogleOAuth2ApiImpl(),
+                    PhotosLibraryApiImpl()
+                )
+            ),
             MainRouter()
         )
         presenter?.create(this)
