@@ -124,7 +124,7 @@ class MainPresenter(
             }
             UpdatePhotosRequest.DOWNLOAD_PHOTOS -> {
                 val albums = value as? List<Album>
-                interactor?.requestDownloadPhotos(albums)
+                interactor?.requestDownloadPhotos((activity() ?: return), albums)
             }
             UpdatePhotosRequest.UPDATE_DATABASE -> {
                 val photosInfo = value as? List<AppDatabase.PhotoInfo>

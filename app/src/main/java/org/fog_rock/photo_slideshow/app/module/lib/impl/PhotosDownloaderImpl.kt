@@ -1,11 +1,11 @@
-package org.fog_rock.photo_slideshow.core.file.impl
+package org.fog_rock.photo_slideshow.app.module.lib.impl
 
 import com.google.photos.types.proto.MediaItem
 import com.google.photos.types.proto.MediaMetadata
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.file.FileDownloader
-import org.fog_rock.photo_slideshow.core.file.PhotosDownloader
+import org.fog_rock.photo_slideshow.app.module.lib.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.math.SizeCalculator
 import java.io.File
 import java.net.MalformedURLException

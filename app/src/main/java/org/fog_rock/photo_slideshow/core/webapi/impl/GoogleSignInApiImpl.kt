@@ -14,7 +14,7 @@ import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class GoogleSignInApiImpl(private val context: Context): GoogleSignInApi {
+class GoogleSignInApiImpl : GoogleSignInApi {
 
     override suspend fun requestSilentSignIn(): ApiResult = withContext(Dispatchers.IO) {
         suspendCoroutine<ApiResult> { continuation ->
@@ -94,7 +94,7 @@ class GoogleSignInApiImpl(private val context: Context): GoogleSignInApi {
         }
     }
 
-    override fun getSignedInAccount(): GoogleSignInAccount? =
+    override fun getSignedInAccount(context: Context): GoogleSignInAccount? =
         GoogleSignIn.getLastSignedInAccount(context)
 
     override fun isSucceededUserSignIn(data: Intent?): Boolean =

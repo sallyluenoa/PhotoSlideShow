@@ -2,7 +2,8 @@ package org.fog_rock.photo_slideshow.core.file
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.fog_rock.photo_slideshow.core.file.impl.PhotosDownloaderImpl
+import org.fog_rock.photo_slideshow.app.module.lib.PhotosDownloader
+import org.fog_rock.photo_slideshow.app.module.lib.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.test.TestModuleGenerator
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -22,16 +23,17 @@ class PhotosDownloaderTest {
     @JvmField
     val tempFolder: TemporaryFolder = TemporaryFolder()
 
-    private val photosDownloader: PhotosDownloader = PhotosDownloaderImpl(
-        object : FileDownloader {
-            override suspend fun requestDownload(downloadUrl: URL, outputFile: File): Boolean {
-                // テストではダウンロード処理に 100 millisecs かかったと仮定する.
-                delay(100)
-                // テストでは PNG 拡張子だけダウンロード処理に成功したと仮定する.
-                return outputFile.extension.toLowerCase() == "png"
-            }
-        }, WIDTH, HEIGHT
-    )
+    private val photosDownloader: PhotosDownloader =
+        PhotosDownloaderImpl(
+            object : FileDownloader {
+                override suspend fun requestDownload(downloadUrl: URL, outputFile: File): Boolean {
+                    // テストではダウンロード処理に 100 millisecs かかったと仮定する.
+                    delay(100)
+                    // テストでは PNG 拡張子だけダウンロード処理に成功したと仮定する.
+                    return outputFile.extension.toLowerCase() == "png"
+                }
+            }, WIDTH, HEIGHT
+        )
 
     @Test
     fun requestDownloads() {

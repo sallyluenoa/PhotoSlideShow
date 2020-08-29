@@ -1,6 +1,7 @@
 package org.fog_rock.photo_slideshow.app.main.contract
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
@@ -71,7 +72,7 @@ class MainContract {
          * 写真リストのダウンロード要求.
          * @see InteractorCallback.requestDownloadPhotosResult
          */
-        fun requestDownloadPhotos(albums: List<Album>?)
+        fun requestDownloadPhotos(context: Context, albums: List<Album>?)
 
         /**
          * データベース更新要求.

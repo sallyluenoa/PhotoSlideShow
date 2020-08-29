@@ -16,15 +16,15 @@ import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
 import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
 import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
 import org.fog_rock.photo_slideshow.app.main.router.MainRouter
-import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
+import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
+import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
+import org.fog_rock.photo_slideshow.app.module.lib.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
-import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
-import org.fog_rock.photo_slideshow.core.file.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
@@ -57,14 +57,10 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
                 AppSimpleFragment.Layout.PROGRESS))
 
         presenter = MainPresenter(
-            MainInteractor(this,
-                AppDatabase(),
+            MainInteractor(
+                AppDatabaseImpl(),
                 PhotosDownloaderImpl(FileDownloaderImpl(), ASPECT_WIDTH, ASPECT_HEIGHT),
-                GoogleWebApis(
-                    GoogleSignInApiImpl(this),
-                    GoogleOAuth2ApiImpl(),
-                    PhotosLibraryApiImpl()
-                )
+                GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())
             ),
             MainRouter()
         )

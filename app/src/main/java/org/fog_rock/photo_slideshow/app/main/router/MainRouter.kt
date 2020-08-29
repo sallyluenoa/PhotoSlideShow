@@ -3,7 +3,6 @@ package org.fog_rock.photo_slideshow.app.main.router
 import android.app.Activity
 import android.content.Intent
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
-import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.select.view.SelectActivity
 import org.fog_rock.photo_slideshow.app.splash.view.SplashActivity

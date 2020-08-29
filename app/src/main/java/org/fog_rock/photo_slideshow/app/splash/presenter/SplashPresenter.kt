@@ -72,7 +72,7 @@ class SplashPresenter(
         val request = SignInRequest.convertFromCode(requestCode)
         when (request) {
             SignInRequest.RUNTIME_PERMISSIONS -> {
-                if (interactor?.isGrantedRuntimePermissions(permissions) ?: return) {
+                if (interactor?.isGrantedRuntimePermissions((activity() ?: return), permissions) ?: return) {
                     logI("All runtime permissions are granted by user.")
                     presentSequence(request.next())
                 } else {
@@ -125,7 +125,7 @@ class SplashPresenter(
     private fun presentSequence(request: SignInRequest) {
         when (request) {
             SignInRequest.RUNTIME_PERMISSIONS -> {
-                if (interactor?.isGrantedRuntimePermissions(RUNTIME_PERMISSIONS) ?: return) {
+                if (interactor?.isGrantedRuntimePermissions((activity() ?: return), RUNTIME_PERMISSIONS) ?: return) {
                     logI("All runtime permissions are granted.")
                     presentSequence(SignInRequest.GOOGLE_SIGN_IN)
                 } else {

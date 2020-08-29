@@ -13,7 +13,7 @@ import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryApi
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 
-class PhotosLibraryApiImpl(): PhotosLibraryApi {
+class PhotosLibraryApiImpl : PhotosLibraryApi {
 
     override suspend fun requestAlbum(albumId: String): Album = withContext(Dispatchers.IO) {
         try {

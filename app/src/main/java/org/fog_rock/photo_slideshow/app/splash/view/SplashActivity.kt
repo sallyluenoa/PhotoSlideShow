@@ -10,10 +10,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
+import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
-import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
+import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
@@ -43,13 +43,9 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
                 AppSimpleFragment.Layout.LOGO))
 
         presenter = SplashPresenter(
-            SplashInteractor(this,
-                AppDatabase(),
-                GoogleWebApis(
-                    GoogleSignInApiImpl(this),
-                    GoogleOAuth2ApiImpl(),
-                    PhotosLibraryApiImpl()
-                )
+            SplashInteractor(
+                AppDatabaseImpl(),
+                GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())
             ),
             SplashRouter()
         )

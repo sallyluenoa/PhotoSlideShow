@@ -19,7 +19,6 @@ import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import java.util.concurrent.CancellationException
 
 class SplashInteractor(
-    private val context: Context,
     private val appDatabase: AppDatabase,
     private val googleWebApis: GoogleWebApis
 ): ViewModel(), SplashContract.Interactor {
@@ -61,7 +60,7 @@ class SplashInteractor(
         }
     }
 
-    override fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean {
+    override fun isGrantedRuntimePermissions(context: Context, permissions: Array<String>): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             logI("OS version is less than M.")
             return true

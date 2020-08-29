@@ -1,6 +1,7 @@
 package org.fog_rock.photo_slideshow.app.splash.contract
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
@@ -52,7 +53,7 @@ class SplashContract {
         /**
          * ランタイムパーミッションが許可されているか.
          */
-        fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean
+        fun isGrantedRuntimePermissions(context: Context, permissions: Array<String>): Boolean
 
         /**
          * Googleアカウントでのユーザーサインインに成功したか.

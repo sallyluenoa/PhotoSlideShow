@@ -1,5 +1,6 @@
 package org.fog_rock.photo_slideshow.core.webapi
 
+import android.content.Context
 import android.content.Intent
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
@@ -33,7 +34,7 @@ interface GoogleSignInApi {
     /**
      * 現在サインインしているGoogleアカウント取得.
      */
-    fun getSignedInAccount(): GoogleSignInAccount?
+    fun getSignedInAccount(context: Context): GoogleSignInAccount?
 
     /**
      * Googleアカウントでのユーザーサインインに成功したか.

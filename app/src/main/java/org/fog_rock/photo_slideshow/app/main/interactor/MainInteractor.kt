@@ -14,6 +14,7 @@ import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
 import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
+import org.fog_rock.photo_slideshow.app.module.lib.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfoData
@@ -21,14 +22,12 @@ import org.fog_rock.photo_slideshow.core.extension.logD
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.logW
-import org.fog_rock.photo_slideshow.core.file.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import java.io.File
 import java.util.concurrent.CancellationException
 
 class MainInteractor(
-    private val context: Context,
     private val appDatabase: AppDatabase,
     private val photosDownloader: PhotosDownloader,
     private val googleWebApis: GoogleWebApis
@@ -70,10 +69,10 @@ class MainInteractor(
         }
     }
 
-    override fun requestDownloadPhotos(albums: List<Album>?) {
+    override fun requestDownloadPhotos(context: Context, albums: List<Album>?) {
         viewModelScope.launch(Dispatchers.Default) {
             logI("requestDownloadPhotos: Start coroutine.")
-            val photosInfo = downloadPhotos(albums)
+            val photosInfo = downloadPhotos(context, albums)
             withContext(Dispatchers.Main) {
                 callback?.requestDownloadPhotosResult(photosInfo)
             }
@@ -118,7 +117,7 @@ class MainInteractor(
         return displayedPhotos.shuffled()
     }
 
-    private suspend fun downloadPhotos(albums: List<Album>?): List<AppDatabase.PhotoInfo> {
+    private suspend fun downloadPhotos(context: Context, albums: List<Album>?): List<AppDatabase.PhotoInfo> {
         val searchAlbums = if (albums.isNullOrEmpty()) {
             if (userInfoData.dataList.isEmpty()) {
                 logE("No albums found.")
@@ -133,7 +132,7 @@ class MainInteractor(
             albums
         }
 
-        val outputDir = getOutputDir() ?: run {
+        val outputDir = getOutputDir(context) ?: run {
             logE("Failed to get dir.")
             return emptyList()
         }
@@ -187,7 +186,7 @@ class MainInteractor(
         return true
     }
 
-    private fun getOutputDir(): File? {
+    private fun getOutputDir(context: Context): File? {
         val outputDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: run {
             logE("Failed to get context#getExternalFilesDir().")
             return null

@@ -7,9 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
+import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
+import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
-import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
 import org.fog_rock.photo_slideshow.app.select.contract.SelectContract
 import org.fog_rock.photo_slideshow.app.select.entity.SelectAlbumsResult
 import org.fog_rock.photo_slideshow.app.select.interactor.SelectInteractor
@@ -34,13 +34,8 @@ class SelectActivity : AppCompatActivity(), SelectContract.PresenterCallback {
                 AppSimpleFragment.Layout.PROGRESS))
 
         presenter = SelectPresenter(SelectInteractor(
-            AppDatabase(),
-            GoogleWebApis(
-                GoogleSignInApiImpl(this),
-                GoogleOAuth2ApiImpl(),
-                PhotosLibraryApiImpl()
-            )
-        )
+            AppDatabaseImpl(),
+            GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl()))
         )
         presenter?.create(this)
 

@@ -14,7 +14,7 @@ import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 import java.io.IOException
 
-class GoogleOAuth2ApiImpl(): GoogleOAuth2Api {
+class GoogleOAuth2ApiImpl : GoogleOAuth2Api {
 
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun requestTokenInfoWithAuthCode(serverAuthCode: String): TokenInfo? = withContext(Dispatchers.IO) {
