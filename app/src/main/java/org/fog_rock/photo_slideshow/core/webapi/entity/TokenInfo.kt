@@ -1,6 +1,8 @@
 package org.fog_rock.photo_slideshow.core.webapi.entity
 
 import com.google.api.client.auth.oauth2.TokenResponse
+import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.extension.toDateString
 
 /**
  * トークン情報
@@ -45,13 +47,19 @@ data class TokenInfo(
      * アクセストークンが有効か.
      * @return 現在の時間が「アクセストークン有効期限 - バッファー時間」を過ぎていなければ true
      */
-    fun isAvailableAccessToken(): Boolean =
-        System.currentTimeMillis() < expiredAccessTokenTimeMillis - INTERVAL_EXPIRED_MILLISECS
+    fun isAvailableAccessToken(): Boolean {
+        val availableAccessTokenTimeMillis = expiredAccessTokenTimeMillis - INTERVAL_EXPIRED_MILLISECS
+        logI("Access token available date: ${availableAccessTokenTimeMillis.toDateString()}")
+        return System.currentTimeMillis() < availableAccessTokenTimeMillis
+    }
 
     /**
      * 指定されたトークン情報よりも後で更新されたか.
      * @return アクセストークンの有効期限が、指定のトークン情報より後ならば true
      */
-    fun afterUpdated(tokenInfo: TokenInfo): Boolean =
-        expiredAccessTokenTimeMillis > tokenInfo.expiredAccessTokenTimeMillis
+    fun afterUpdated(tokenInfo: TokenInfo): Boolean {
+        logI("Compare access token available date. " +
+                "Current: $expiredAccessTokenTimeMillis, NewOne: ${tokenInfo.expiredAccessTokenTimeMillis}")
+        return expiredAccessTokenTimeMillis > tokenInfo.expiredAccessTokenTimeMillis
+    }
 }

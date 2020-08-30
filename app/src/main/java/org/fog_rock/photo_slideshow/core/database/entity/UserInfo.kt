@@ -5,6 +5,9 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.google.gson.Gson
+import org.fog_rock.photo_slideshow.core.extension.logD
+import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.extension.toDateString
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 /**
@@ -36,8 +39,8 @@ data class UserInfo(
     @ColumnInfo(name = "token_info")
     val tokenInfo: String,
 
-    @ColumnInfo(name = "update_photos_date")
-    val updatePhotosTimeMillis: Long
+    @ColumnInfo(name = "last_updated_photos_date")
+    val lastUpdatedPhotosTimeMillis: Long
 
 ): BaseEntity {
 
@@ -59,9 +62,9 @@ data class UserInfo(
         tokenInfo = Gson().toJson(tokenInfo)
     )
 
-    fun updatePhotos(): UserInfo = this.copy(
+    fun updatePhotosDate(): UserInfo = this.copy(
         updateTimeMillis = System.currentTimeMillis(),
-        updatePhotosTimeMillis = System.currentTimeMillis()
+        lastUpdatedPhotosTimeMillis = System.currentTimeMillis()
     )
 
     /**
@@ -69,6 +72,9 @@ data class UserInfo(
      * @param intervalTimeMillis 写真更新をしなくてもよい間隔
      * @return 現在の時間が「最終更新時間 + 指定された間隔」より過ぎていれば true
      */
-    fun isNeededUpdatePhotos(intervalTimeMillis: Long): Boolean =
-        System.currentTimeMillis() > updatePhotosTimeMillis + intervalTimeMillis
+    fun isNeededUpdatePhotos(intervalTimeMillis: Long): Boolean {
+        val availablePhotosTimeMillis = lastUpdatedPhotosTimeMillis + intervalTimeMillis
+        logI("Photos available date: ${availablePhotosTimeMillis.toDateString()}")
+        return System.currentTimeMillis() > availablePhotosTimeMillis
+    }
 }

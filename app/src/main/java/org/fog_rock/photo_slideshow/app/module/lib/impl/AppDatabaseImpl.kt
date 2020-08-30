@@ -54,7 +54,7 @@ class AppDatabaseImpl(): AppDatabase {
         }
 
         // 最後にUserInfoの最終更新時間を更新する.
-        userInfoDao().update(userInfoData.userInfo.updatePhotos())
+        userInfoDao().update(userInfoData.userInfo.updatePhotosDate())
     }
 
     override suspend fun findUserInfoByEmailAddress(emailAddress: String): UserInfo? =
