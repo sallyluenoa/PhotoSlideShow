@@ -1,92 +1,102 @@
 package org.fog_rock.photo_slideshow.core.webapi.impl
 
-import android.util.Log
+import android.content.Context
+import android.content.Intent
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInApi
-import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
+import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class GoogleSignInApiImpl(
-    private val clientHolder: GoogleSignInClientHolder
-): GoogleSignInApi {
+class GoogleSignInApiImpl : GoogleSignInApi {
 
-    companion object {
-        private val TAG = GoogleSignInApiImpl::class.java.simpleName
+    override suspend fun requestSilentSignIn(): ApiResult = withContext(Dispatchers.IO) {
+        suspendCoroutine<ApiResult> { continuation ->
+            var result = ApiResult.FAILED
+            SingletonWebHolder.googleSignInClient.silentSignIn().apply {
+                addOnSuccessListener {
+                    logI("Succeeded to silent sign in.")
+                    result = ApiResult.SUCCEEDED
+                }
+                addOnFailureListener {
+                    logE("Failed to silent sign in.")
+                    it.printStackTrace()
+                    result = ApiResult.FAILED
+                }
+                addOnCanceledListener {
+                    logE("Canceled to silent sign in.")
+                    result = ApiResult.CANCELED
+                }
+                addOnCompleteListener {
+                    logI("Completed to silent sign in.")
+                    continuation.resume(result)
+                }
+            }
+            return@suspendCoroutine
+        }
     }
 
-    override suspend fun requestSilentSignIn(): ApiResult =
-        suspendCoroutine { continuation ->
+    override suspend fun requestSignOut(): ApiResult = withContext(Dispatchers.IO) {
+        suspendCoroutine<ApiResult> { continuation ->
             var result = ApiResult.FAILED
-            clientHolder.client.silentSignIn().apply {
+            SingletonWebHolder.googleSignInClient.signOut().apply {
                 addOnSuccessListener {
-                    Log.i(TAG, "Succeeded to silent sign in.")
+                    logI("Succeeded to sign out.")
                     result = ApiResult.SUCCEEDED
                 }
                 addOnFailureListener {
-                    Log.e(TAG, "Failed to silent sign in.")
+                    logE("Failed to sign out.")
                     it.printStackTrace()
                     result = ApiResult.FAILED
                 }
                 addOnCanceledListener {
-                    Log.e(TAG, "Canceled to silent sign in.")
+                    logE("Canceled to sign out.")
                     result = ApiResult.CANCELED
                 }
                 addOnCompleteListener {
-                    Log.i(TAG, "Completed to silent sign in.")
+                    logI("Completed to sign out.")
                     continuation.resume(result)
                 }
             }
             return@suspendCoroutine
         }
+    }
 
-    override suspend fun requestSignOut(): ApiResult =
-        suspendCoroutine { continuation ->
+    override suspend fun requestRevokeAccess(): ApiResult = withContext(Dispatchers.IO) {
+        suspendCoroutine<ApiResult> { continuation ->
             var result = ApiResult.FAILED
-            clientHolder.client.signOut().apply {
+            SingletonWebHolder.googleSignInClient.revokeAccess().apply {
                 addOnSuccessListener {
-                    Log.i(TAG, "Succeeded to sign out.")
+                    logI("Succeeded to revoke access.")
                     result = ApiResult.SUCCEEDED
                 }
                 addOnFailureListener {
-                    Log.e(TAG, "Failed to sign out.")
+                    logE("Failed to revoke access.")
                     it.printStackTrace()
                     result = ApiResult.FAILED
                 }
                 addOnCanceledListener {
-                    Log.e(TAG, "Canceled to sign out.")
+                    logE("Canceled to revoke access.")
                     result = ApiResult.CANCELED
                 }
                 addOnCompleteListener {
-                    Log.i(TAG, "Completed to sign out.")
+                    logI("Completed to revoke access.")
                     continuation.resume(result)
                 }
             }
             return@suspendCoroutine
         }
+    }
 
-    override suspend fun requestRevokeAccess(): ApiResult =
-        suspendCoroutine { continuation ->
-            var result = ApiResult.FAILED
-            clientHolder.client.revokeAccess().apply {
-                addOnSuccessListener {
-                    Log.i(TAG, "Succeeded to revoke access.")
-                    result = ApiResult.SUCCEEDED
-                }
-                addOnFailureListener {
-                    Log.e(TAG, "Failed to revoke access.")
-                    it.printStackTrace()
-                    result = ApiResult.FAILED
-                }
-                addOnCanceledListener {
-                    Log.e(TAG, "Canceled to revoke access.")
-                    result = ApiResult.CANCELED
-                }
-                addOnCompleteListener {
-                    Log.i(TAG, "Completed to revoke access.")
-                    continuation.resume(result)
-                }
-            }
-            return@suspendCoroutine
-        }
+    override fun getSignedInAccount(context: Context): GoogleSignInAccount? =
+        GoogleSignIn.getLastSignedInAccount(context)
+
+    override fun isSucceededUserSignIn(data: Intent?): Boolean =
+        GoogleSignIn.getSignedInAccountFromIntent(data).isSuccessful
 }

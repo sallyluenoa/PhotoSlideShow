@@ -2,7 +2,7 @@ package org.fog_rock.photo_slideshow.core.webapi
 
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
-import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 /**
  * Google Photos に関連するAPI
@@ -10,16 +10,6 @@ import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
  * https://google.github.io/java-photoslibrary/1.4.0/
  */
 interface PhotosLibraryApi {
-
-    /**
-     * ClientHolderの更新.
-     */
-    fun updateClientHolder(clientHolder: PhotosLibraryClientHolder)
-
-    /**
-     * ClientHolderの有効期限が切れていないか確認する.
-     */
-    fun isAvailableClientHolder(): Boolean
 
     /**
      * アルバム取得要求.
@@ -58,4 +48,14 @@ interface PhotosLibraryApi {
      * コルーチン内で呼び出すこと.
      */
     suspend fun requestMediaItems(album: Album): List<MediaItem>
+
+    /**
+     * 指定されたトークン情報でクライアントを更新する.
+     */
+    fun updatePhotosLibraryClient(tokenInfo: TokenInfo?)
+
+    /**
+     * 現在のトークン情報を取得する.
+     */
+    fun currentTokenInfo(): TokenInfo
 }

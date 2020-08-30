@@ -1,10 +1,11 @@
 package org.fog_rock.photo_slideshow.app.splash.contract
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
-import org.fog_rock.photo_slideshow.core.webapi.client.GoogleSignInClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 class SplashContract {
 
@@ -44,9 +45,15 @@ class SplashContract {
         fun requestGoogleSilentSignIn()
 
         /**
+         * ユーザー情報の更新要求.
+         * @see InteractorCallback.requestUpdateUserInfoResult
+         */
+        fun requestUpdateUserInfo()
+
+        /**
          * ランタイムパーミッションが許可されているか.
          */
-        fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean
+        fun isGrantedRuntimePermissions(context: Context, permissions: Array<String>): Boolean
 
         /**
          * Googleアカウントでのユーザーサインインに成功したか.
@@ -56,10 +63,16 @@ class SplashContract {
 
     interface InteractorCallback: ViperContract.InteractorCallback {
         /**
-         * Googleアカウントでのサイレントサインインを要求の結果.
+         * Googleアカウントでのサイレントサインイン要求の結果.
          * @see Interactor.requestGoogleSilentSignIn
          */
-        fun requestGoogleSilentSignInResult(isSucceeded: Boolean)
+        fun requestGoogleSilentSignInResult(result: ApiResult)
+
+        /**
+         * ユーザー情報の更新要求の結果.
+         * @see Interactor.requestUpdateUserInfo
+         */
+        fun requestUpdateUserInfoResult(isSucceeded: Boolean)
     }
 
     interface Router : ViperContract.Router {
@@ -71,7 +84,7 @@ class SplashContract {
         /**
          * Googleサインインの表示.
          */
-        fun startGoogleSignInActivity(activity: Activity, clientHolder: GoogleSignInClientHolder, requestCode: Int)
+        fun startGoogleSignInActivity(activity: Activity, requestCode: Int)
 
         /**
          * MainActivityの表示.

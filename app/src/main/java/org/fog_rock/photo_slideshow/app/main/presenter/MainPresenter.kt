@@ -1,92 +1,166 @@
 package org.fog_rock.photo_slideshow.app.main.presenter
 
-import android.app.Activity.RESULT_OK
+import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import com.google.photos.types.proto.Album
-import com.google.photos.types.proto.MediaItem
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
-import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
-import org.fog_rock.photo_slideshow.app.main.router.MainRouter
-import org.fog_rock.photo_slideshow.app.select.view.SelectActivity
+import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
+import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
+import org.fog_rock.photo_slideshow.app.select.entity.SelectAlbumsResult
+import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
+import org.fog_rock.photo_slideshow.core.extension.downCast
+import org.fog_rock.photo_slideshow.core.extension.getArrayListExtra
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.viper.ViperContract
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 class MainPresenter(
-    private val callback: MainContract.PresenterCallback
+    private var interactor: MainContract.Interactor?,
+    private var router: MainContract.Router?
 ) : MainContract.Presenter, MainContract.InteractorCallback {
 
-    private val TAG = MainPresenter::class.java.simpleName
+    private var callback: MainContract.PresenterCallback? = null
 
-    private val CODE_SELECT_ACTIVITY = 1000
-
-    private val interactor: MainContract.Interactor =
-        MainInteractor(activity().applicationContext, this)
-
-    private val router: MainContract.Router = MainRouter()
+    override fun create(callback: ViperContract.PresenterCallback) {
+        if (callback is MainContract.PresenterCallback) {
+            this.callback = callback
+            interactor?.create(this)
+        } else {
+            IllegalArgumentException("MainContract.PresenterCallback should be set.")
+        }
+    }
 
     override fun destroy() {
-        interactor.destroy()
+        interactor?.destroy()
+        interactor = null
+        router = null
+        callback = null
     }
 
-    override fun requestAlbums() {
-        interactor.requestSharedAlbums()
+    override fun requestLoadDisplayedPhotos() {
+        interactor?.requestLoadDisplayedPhotos()
     }
 
-    override fun requestLicense() {
-        router.startOssLicensesMenuActivity(activity(), R.string.license)
+    override fun requestUpdateDisplayedPhotos() {
+        presentSequence(UpdatePhotosRequest.CONFIG_UPDATE)
+    }
+
+    override fun requestShowLicenses() {
+        router?.startOssLicensesMenuActivity((activity() ?: return), R.string.license)
     }
 
     override fun requestSignOut() {
-        interactor.requestSignOut()
+        interactor?.requestSignOut()
     }
 
     override fun evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            CODE_SELECT_ACTIVITY -> {
-                if (resultCode == RESULT_OK && data != null) {
-                    Log.i(TAG, "Succeeded to select album.")
-                    val album = data.getSerializableExtra(SelectActivity.RESULT_DECIDE_ALBUM) as Album
-                    interactor.requestMediaItems(album)
-                } else {
-                    Log.i(TAG, "Canceled to select album.")
+        logI("evaluateActivityResult() " +
+                "requestCode: $requestCode, resultCode: $resultCode")
+
+        val request = UpdatePhotosRequest.convertFromCode(requestCode)
+        when (request) {
+            UpdatePhotosRequest.SELECT_ALBUMS -> {
+                if (resultCode != Activity.RESULT_OK) {
+                    logE("ResultCode is not OK.")
+                    callback?.requestUpdateDisplayedPhotosResult(request)
+                    return
                 }
+                val albums = data?.getArrayListExtra<Album>(SelectAlbumsResult.DECIDED_ALBUMS.key()) ?: run {
+                    logE("Failed to get albums from intent.")
+                    callback?.requestUpdateDisplayedPhotosResult(request)
+                    return
+                }
+                logI("Succeeded to get albums selected by user.")
+                presentSequence(request.next(), albums)
             }
             else -> {
-                Log.e(TAG, "Unknown requestCode: $requestCode")
+                logE("Unknown requestCode: $requestCode")
+                callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.UNKNOWN)
             }
         }
     }
 
-    override fun requestSharedAlbumsResult(albums: List<Album>?) {
-        if (!albums.isNullOrEmpty()) {
-            Log.i(TAG, "Succeeded to get albums. ${albums.count()}")
-            router.startSelectActivity(activity(), albums, CODE_SELECT_ACTIVITY)
+    override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
+        callback?.requestLoadDisplayedPhotosResult(displayedPhotos)
+    }
+
+    override fun requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo>) {
+        val request = UpdatePhotosRequest.DOWNLOAD_PHOTOS
+        if (photosInfo.isNotEmpty()) {
+            logI("Succeeded to download photos.")
+            presentSequence(request.next(), photosInfo)
         } else {
-            Log.i(TAG, "Failed to get albums.")
+            logE("Failed to download photos.")
+            callback?.requestUpdateDisplayedPhotosResult(request)
         }
     }
 
-    override fun requestMediaItemsResult(mediaItems: List<MediaItem>?) {
-        if (!mediaItems.isNullOrEmpty()) {
-            Log.i(TAG, "Succeeded to get mediaItems. ${mediaItems.count()}")
-            interactor.requestDownloadFiles(mediaItems)
-        } else {
-            Log.i(TAG, "Failed to get mediaItems.")
-        }
-    }
-
-    override fun completedDownloadFiles(files: List<String>) {
-        Log.i(TAG, "Completed to download files. Slide show will be started.")
-        callback.requestSlideShow(files)
-    }
-
-    override fun requestSignOutResult(isSucceeded: Boolean) {
+    override fun requestUpdateDatabaseResult(isSucceeded: Boolean) {
+        val request = UpdatePhotosRequest.UPDATE_DATABASE
         if (isSucceeded) {
-            router.startSplashActivity(activity())
-            callback.requestFinish()
+            logI("Succeeded to update database.")
+            presentSequence(request.next())
         } else {
+            logE("Failed to update database.")
+            callback?.requestUpdateDisplayedPhotosResult(request)
         }
     }
 
-    private fun activity() = callback.getActivity()
+    override fun requestSignOutResult(result: ApiResult) {
+        callback?.requestSignOutResult(result)
+    }
+
+    private fun activity(): Activity? = callback?.getActivity()
+
+    /**
+     * リクエストに応じた写真更新シーケンスを行う.
+     * @param request リクエスト
+     */
+    private fun presentSequence(request: UpdatePhotosRequest, value: Any? = null) {
+        when (request) {
+            UpdatePhotosRequest.CONFIG_UPDATE -> {
+                if (interactor?.isNeededUpdatePhotos() ?: return) {
+                    logI("Needed to update photos.")
+                    presentSequence(request.next())
+                } else {
+                    logI("No needed to update photos.")
+                    callback?.requestUpdateDisplayedPhotosResult(request)
+                }
+            }
+            UpdatePhotosRequest.SELECT_ALBUMS -> {
+                if (interactor?.hasSelectedAlbums() ?: return) {
+                    logI("Albums are already selected.")
+                    presentSequence(request.next())
+                } else {
+                    logI("Albums are not selected. Start SelectActivity.")
+                    router?.startSelectActivity((activity() ?: return), request.code)
+                }
+            }
+            UpdatePhotosRequest.DOWNLOAD_PHOTOS -> {
+                logI("Request download photos.")
+                val albums = value.downCast<List<Album>>()
+                interactor?.requestDownloadPhotos((activity() ?: return), albums)
+            }
+            UpdatePhotosRequest.UPDATE_DATABASE -> {
+                val photosInfo = value.downCast<List<AppDatabase.PhotoInfo>>()
+                if (photosInfo != null) {
+                    logI("Request update database.")
+                    interactor?.requestUpdateDatabase(photosInfo)
+                } else {
+                    logE("PhotosInfo is null.")
+                    callback?.requestUpdateDisplayedPhotosResult(request)
+                }
+            }
+            UpdatePhotosRequest.COMPLETED -> {
+                logI("All requests are completed.")
+                callback?.requestUpdateDisplayedPhotosResult(request)
+            }
+            else -> {
+                logE("Unknown request: $request")
+                callback?.requestUpdateDisplayedPhotosResult(UpdatePhotosRequest.UNKNOWN)
+            }
+        }
+    }
 }

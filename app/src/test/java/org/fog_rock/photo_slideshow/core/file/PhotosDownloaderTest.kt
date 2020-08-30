@@ -2,8 +2,9 @@ package org.fog_rock.photo_slideshow.core.file
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.fog_rock.photo_slideshow.core.file.impl.PhotosDownloaderImpl
-import org.fog_rock.photo_slideshow.core.webapi.PhotosGenerator
+import org.fog_rock.photo_slideshow.app.module.lib.PhotosDownloader
+import org.fog_rock.photo_slideshow.app.module.lib.impl.PhotosDownloaderImpl
+import org.fog_rock.photo_slideshow.test.TestModuleGenerator
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -22,35 +23,36 @@ class PhotosDownloaderTest {
     @JvmField
     val tempFolder: TemporaryFolder = TemporaryFolder()
 
-    private val photosDownloader: PhotosDownloader = PhotosDownloaderImpl(
-        object : FileDownloader {
-            override suspend fun requestDownload(downloadUrl: URL, outputFile: File): Boolean {
-                // テストではダウンロード処理に 100 millisecs かかったと仮定する.
-                delay(100)
-                // テストでは PNG 拡張子だけダウンロード処理に成功したと仮定する.
-                return outputFile.extension.toLowerCase() == "png"
-            }
-        }, WIDTH, HEIGHT
-    )
+    private val photosDownloader: PhotosDownloader =
+        PhotosDownloaderImpl(
+            object : FileDownloader {
+                override suspend fun requestDownload(downloadUrl: URL, outputFile: File): Boolean {
+                    // テストではダウンロード処理に 100 millisecs かかったと仮定する.
+                    delay(100)
+                    // テストでは PNG 拡張子だけダウンロード処理に成功したと仮定する.
+                    return outputFile.extension.toLowerCase() == "png"
+                }
+            }, WIDTH, HEIGHT
+        )
 
     @Test
     fun requestDownloads() {
 
         val mediaItems = listOf(
             // 正常系.
-            PhotosGenerator.generateMediaItem("sample1.png", "https://example.com/example", PhotosGenerator.Type.PHOTO, WIDTH, HEIGHT),
+            TestModuleGenerator.mediaItem("sample1.png", "https://example.com/example", TestModuleGenerator.Type.PHOTO, WIDTH, HEIGHT),
             // 正常系.
-            PhotosGenerator.generateMediaItem("sample2.jpg",  "https://example.com/example", PhotosGenerator.Type.PHOTO, WIDTH, HEIGHT),
+            TestModuleGenerator.mediaItem("sample2.jpg",  "https://example.com/example", TestModuleGenerator.Type.PHOTO, WIDTH, HEIGHT),
             // 正常系.
-            PhotosGenerator.generateMediaItem("sample3.PNG", "https://example.com/example", PhotosGenerator.Type.PHOTO, WIDTH, HEIGHT),
+            TestModuleGenerator.mediaItem("sample3.PNG", "https://example.com/example", TestModuleGenerator.Type.PHOTO, WIDTH, HEIGHT),
             // 正常系.
-            PhotosGenerator.generateMediaItem("sample4.jpeg",  "https://example.com/example", PhotosGenerator.Type.PHOTO, WIDTH, HEIGHT),
+            TestModuleGenerator.mediaItem("sample4.jpeg",  "https://example.com/example", TestModuleGenerator.Type.PHOTO, WIDTH, HEIGHT),
             // 異常系: メタデータをもたない.
-            PhotosGenerator.generateMediaItem("sample5.txt", "https://example.com/example", null),
+            TestModuleGenerator.mediaItem("sample5.txt", "https://example.com/example", null),
             // 異常系: データタイプがビデオ.
-            PhotosGenerator.generateMediaItem("sample6.mp4", "https://example.com/example", PhotosGenerator.Type.VIDEO, WIDTH, HEIGHT),
+            TestModuleGenerator.mediaItem("sample6.mp4", "https://example.com/example", TestModuleGenerator.Type.VIDEO, WIDTH, HEIGHT),
             // 異常系: URLフォーマットが不正.
-            PhotosGenerator.generateMediaItem("sample7.jpg", "example.com/example", PhotosGenerator.Type.PHOTO, WIDTH, HEIGHT)
+            TestModuleGenerator.mediaItem("sample7.jpg", "example.com/example", TestModuleGenerator.Type.PHOTO, WIDTH, HEIGHT)
         )
 
         // 正常系

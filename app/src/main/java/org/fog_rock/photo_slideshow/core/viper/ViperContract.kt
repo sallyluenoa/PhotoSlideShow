@@ -13,6 +13,11 @@ class ViperContract {
      */
     interface Presenter {
         /**
+         * オブジェクトの初期処理. 主にCallbackを指定する.
+         */
+        fun create(callback: PresenterCallback)
+
+        /**
          * オブジェクトの終了処理.
          * Activity#onDestroy() にて呼び出すこと.
          */
@@ -36,6 +41,11 @@ class ViperContract {
      * PresenterからInteractorへ処理を受け渡す.
      */
     interface Interactor {
+        /**
+         * オブジェクトの初期処理. 主にCallbackを指定する.
+         */
+        fun create(callback: InteractorCallback)
+
         /**
          * オブジェクトの終了処理.
          * Activity#onDestroy() にて呼び出すこと.

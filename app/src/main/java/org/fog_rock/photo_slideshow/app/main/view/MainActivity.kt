@@ -3,60 +3,90 @@ package org.fog_rock.photo_slideshow.app.main.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
+import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
+import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
 import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
-import org.fog_rock.photo_slideshow.app.module.AppSimpleFragment
+import org.fog_rock.photo_slideshow.app.main.router.MainRouter
+import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
+import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
+import org.fog_rock.photo_slideshow.app.module.lib.impl.PhotosDownloaderImpl
+import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
+import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.extension.logW
+import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
+import org.fog_rock.photo_slideshow.core.math.impl.SizeCalculatorImpl
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
+import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
+import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
+import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 
 class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
-    private val TAG = MainActivity::class.java.simpleName
+    companion object {
+        private const val PRESENT_TIME_MILLISECS = 5000L
 
-    private val PRESENT_TIME_MILLISECS = 5000L
+        private const val ASPECT_WIDTH = 500L
+        private const val ASPECT_HEIGHT = 1000L
+    }
 
     private val fragmentManager = supportFragmentManager
 
-    private val handler = Handler()
+    private var presenter: MainContract.Presenter? = null
 
-    private lateinit var presenter: MainContract.Presenter
-
-    private var slideShowFiles = listOf<String>()
-    private var index = 0
+    private var displayedPhotos = emptyList<DisplayedPhoto>()
+    private var displayedIndex = 0
+    private var isRequestingUpdatePhotos = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
+        replaceFragment(
+            AppSimpleFragment.newInstance(
+                AppSimpleFragment.Layout.PROGRESS))
 
-        presenter = MainPresenter(this)
-//        presenter.requestAlbums()
+        presenter = MainPresenter(
+            MainInteractor(
+                AppDatabaseImpl(),
+                PhotosDownloaderImpl(FileDownloaderImpl(), SizeCalculatorImpl(), ASPECT_WIDTH, ASPECT_HEIGHT),
+                GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())
+            ),
+            MainRouter()
+        )
+        presenter?.create(this)
+
+        requestLoadDisplayedPhotos()
     }
 
     override fun onDestroy() {
-        presenter.destroy()
+        presenter?.destroy()
+        presenter = null
 
         super.onDestroy()
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
 
-        if (slideShowFiles.size > 1) presentSlideShow()
+        presentSlideShow()
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        lifecycleScope.coroutineContext.cancelChildren(CancellationException("MainActivity will be background."))
 
-        handler.removeCallbacksAndMessages(null)
+        super.onPause()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -67,21 +97,21 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean =
         when (item?.itemId) {
             R.id.action_menu -> {
-                Log.i(TAG, "Menu action is selected.")
+                logI("Menu action is selected.")
                 true
             }
             R.id.action_license -> {
-                Log.i(TAG, "License action is selected.")
-                presenter.requestLicense()
+                logI("License action is selected.")
+                presenter?.requestShowLicenses()
                 true
             }
             R.id.action_sign_out -> {
-                Log.i(TAG, "Sign out action is selected.")
-                presenter.requestSignOut()
+                logI("Sign out action is selected.")
+                presenter?.requestSignOut()
                 true
             }
             else -> {
-                Log.e(TAG, "No actions are found.")
+                logE("No actions are found.")
                 super.onOptionsItemSelected(item)
             }
         }
@@ -89,29 +119,28 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        presenter.evaluateActivityResult(requestCode, resultCode, data)
+        presenter?.evaluateActivityResult(requestCode, resultCode, data)
     }
 
     override fun getActivity(): Activity = this
 
-    override fun requestSlideShow(files: List<String>) {
-        slideShowFiles = files
-        handler.removeCallbacksAndMessages(null)
-
-        if (slideShowFiles.isEmpty()) {
-            Log.e(TAG, "Files for slide show is empty.")
-            return
-        }
-        if (slideShowFiles.size == 1) {
-            Log.i(TAG, "Present one image.")
-            presentImage(slideShowFiles[0])
-            return
-        }
-        index = 0
-        presentSlideShow()
+    override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
+        updateDisplayedPhotos(displayedPhotos)
     }
 
-    override fun requestFinish() = finish()
+    override fun requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest) {
+        logI("requestUpdateDisplayedPhotosResult: $request")
+        isRequestingUpdatePhotos = false
+        if (request == UpdatePhotosRequest.COMPLETED) {
+            requestLoadDisplayedPhotos()
+        }
+    }
+
+    override fun requestSignOutResult(result: ApiResult) {
+        if (result == ApiResult.SUCCEEDED) {
+            finish()
+        }
+    }
 
     /**
      * 新しいフラグメントに置換する.
@@ -129,12 +158,12 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     private fun presentImage(filePath: String) {
         for (fragment in fragmentManager.fragments) {
             if (fragment is SlideShowFragment) {
-                Log.i(TAG, "Update image to fragment. FilePath: $filePath")
+                logI("Update image to fragment. FilePath: $filePath")
                 fragment.setImageView(filePath)
                 return
             }
         }
-        Log.i(TAG, "Set image to new fragment. FilePath: $filePath")
+        logI("Set image to new fragment. FilePath: $filePath")
         replaceFragment(SlideShowFragment.newInstance(filePath))
     }
 
@@ -142,12 +171,70 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
      * ファイルリストからインデックスに該当するファイルをスライドショーに表示する.
      */
     private fun presentSlideShow() {
-        Log.i(TAG, "Present image. Index: $index")
-        presentImage(slideShowFiles[index])
+        logI("presentSlideShow")
 
-        handler.postDelayed({
-            index = if (index + 1 < slideShowFiles.size) index + 1 else 0
-            presentSlideShow()
-        }, PRESENT_TIME_MILLISECS)
+        lifecycleScope.launch(Dispatchers.Default) {
+            logI("presentSlideShow: Start coroutine.")
+            try {
+                while (true) {
+                    val displayedPhoto = getDisplayedPhoto()
+                    if (displayedPhoto != null) {
+                        // 指定された時間分写真を表示する.
+                        logI("Display photo image.")
+                        withContext(Dispatchers.Main) {
+                            presentImage(displayedPhoto.outputPath)
+                        }
+                        delay(PRESENT_TIME_MILLISECS)
+                    } else {
+                        // 一秒間待つ.
+                        logI("Wait 1 sec...")
+                        delay(1000L)
+                    }
+                }
+            } catch (e: CancellationException) {
+                logW("SlideShow loop was canceled. Reason: $e")
+            } finally {
+                logI("SlideShow loop was ended.")
+            }
+        }
+    }
+
+    private fun requestLoadDisplayedPhotos() {
+        logI("Request load displayed photos.")
+        presenter?.requestLoadDisplayedPhotos()
+    }
+
+    private fun requestUpdateDisplayedPhotos() {
+        logI("Request update displayed photos.")
+        isRequestingUpdatePhotos = true
+        presenter?.requestUpdateDisplayedPhotos()
+    }
+
+    @Synchronized
+    private fun getDisplayedPhoto(): DisplayedPhoto? =
+        if (displayedPhotos.isNotEmpty()) {
+            logI("Get displayed photos. Index: $displayedIndex")
+            if (displayedIndex == 0 && !isRequestingUpdatePhotos) {
+                // index が 0 且つ更新処理中ではなかったら、更新チェックを行う.
+                requestUpdateDisplayedPhotos()
+            }
+            val displayedPhoto = displayedPhotos[displayedIndex]
+            displayedIndex = if (displayedIndex + 1 < displayedPhotos.size) displayedIndex + 1 else 0
+            displayedPhoto
+        } else {
+            logI("There are no displayed photos.")
+            null
+        }
+
+    @Synchronized
+    private fun updateDisplayedPhotos(displayedPhotos: List<DisplayedPhoto>) {
+        if (displayedPhotos.isNotEmpty()) {
+            logI("Update new displayed photos.")
+            this.displayedPhotos = displayedPhotos
+            this.displayedIndex = 0
+        } else {
+            logI("Displayed photos is empty.")
+            requestUpdateDisplayedPhotos()
+        }
     }
 }

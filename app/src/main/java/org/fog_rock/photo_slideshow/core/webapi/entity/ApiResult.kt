@@ -17,5 +17,10 @@ enum class ApiResult {
     /**
      * キャンセルした.
      */
-    CANCELED;
+    CANCELED,
+
+    /**
+     * 無効.
+     */
+    INVALID;
 }

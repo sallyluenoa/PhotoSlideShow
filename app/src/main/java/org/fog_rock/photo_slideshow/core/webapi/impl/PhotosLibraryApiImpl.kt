@@ -1,44 +1,39 @@
 package org.fog_rock.photo_slideshow.core.webapi.impl
 
-import android.util.Log
 import com.google.android.gms.common.api.ApiException
+import com.google.photos.library.v1.PhotosLibraryClient
 import com.google.photos.library.v1.proto.SearchMediaItemsRequest
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.PhotosLibraryApi
-import org.fog_rock.photo_slideshow.core.webapi.client.PhotosLibraryClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
+import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 
-class PhotosLibraryApiImpl(
-    private var clientHolder: PhotosLibraryClientHolder
-): PhotosLibraryApi {
+class PhotosLibraryApiImpl : PhotosLibraryApi {
 
-    companion object {
-        private val TAG = PhotosLibraryApiImpl::class.java.simpleName
-    }
-
-    override fun updateClientHolder(clientHolder: PhotosLibraryClientHolder) {
-        this.clientHolder = clientHolder
-    }
-
-    override fun isAvailableClientHolder(): Boolean = clientHolder.isAvailable()
-
-    override suspend fun requestAlbum(albumId: String): Album =
+    override suspend fun requestAlbum(albumId: String): Album = withContext(Dispatchers.IO) {
         try {
-            clientHolder.client.getAlbum(albumId)
+            photosLibraryClient().getAlbum(albumId)
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get album.")
+            logE("Failed to get album.")
             e.printStackTrace()
             Album.newBuilder().apply { id = albumId }.build()
         }
+    }
 
-    override suspend fun requestMediaItem(mediaItemId: String): MediaItem =
+    override suspend fun requestMediaItem(mediaItemId: String): MediaItem = withContext(Dispatchers.IO) {
         try {
-            clientHolder.client.getMediaItem(mediaItemId)
+            photosLibraryClient().getMediaItem(mediaItemId)
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get mediaItem.")
+            logE("Failed to get mediaItem.")
             e.printStackTrace()
             MediaItem.newBuilder().apply { id = mediaItemId }.build()
         }
+    }
 
     override suspend fun requestUpdateAlbums(albums: List<Album>): List<Album> {
         val newAlbums = emptyList<Album>().toMutableList()
@@ -56,38 +51,49 @@ class PhotosLibraryApiImpl(
         return newMediaItems.toList()
     }
 
-    override suspend fun requestSharedAlbums(): List<Album> =
+    override suspend fun requestSharedAlbums(): List<Album> = withContext(Dispatchers.IO) {
         try {
-            val response = clientHolder.client.listSharedAlbums()
-            val albums = emptyList<Album>()
+            val response = photosLibraryClient().listSharedAlbums()
+            val albums = mutableListOf<Album>()
             for (page in response.iteratePages()) {
-                Log.i(TAG, "Load ListSharedAlbumsPage. PageCount: ${page.pageElementCount}");
-                albums.plus(page.response.sharedAlbumsList)
+                logI("Load ListSharedAlbumsPage. PageCount: ${page.pageElementCount}")
+                albums.addAll(page.response.sharedAlbumsList)
             }
-            albums
+            albums.toList()
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get listSharedAlbums.")
+            logE("Failed to get listSharedAlbums.")
             e.printStackTrace()
-            emptyList()
+            emptyList<Album>()
         }
+    }
 
-    override suspend fun requestMediaItems(album: Album): List<MediaItem> =
+    override suspend fun requestMediaItems(album: Album): List<MediaItem> = withContext(Dispatchers.IO) {
         try {
             val request = SearchMediaItemsRequest.newBuilder().apply {
                 albumId = album.id
                 pageSize = 100
             }.build()
-            val response = clientHolder.client.searchMediaItems(request)
-            val mediaItems = emptyList<MediaItem>()
-            Log.i(TAG, "Total mediaItem count: ${album.mediaItemsCount}")
+            val response = photosLibraryClient().searchMediaItems(request)
+            val mediaItems = mutableListOf<MediaItem>()
+            logI("Total mediaItem count: ${album.mediaItemsCount}")
             for (page in response.iteratePages()) {
-                Log.i(TAG, "Load SearchMediaItemsPage. PageCount: ${page.pageElementCount}")
-                mediaItems.plus(page.response.mediaItemsList)
+                logI("Load SearchMediaItemsPage. PageCount: ${page.pageElementCount}")
+                mediaItems.addAll(page.response.mediaItemsList)
             }
-            mediaItems
+            mediaItems.toList()
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get searchMediaItems.")
+            logE("Failed to get searchMediaItems.")
             e.printStackTrace()
-            emptyList()
+            emptyList<MediaItem>()
         }
+    }
+
+    override fun updatePhotosLibraryClient(tokenInfo: TokenInfo?) =
+        SingletonWebHolder.updatePhotosLibraryClient(tokenInfo)
+
+    override fun currentTokenInfo(): TokenInfo = SingletonWebHolder.tokenInfo
+
+    private fun photosLibraryClient(): PhotosLibraryClient =
+        SingletonWebHolder.photosLibraryClient ?:
+        throw NullPointerException("PhotosLibraryClient is null.")
 }
