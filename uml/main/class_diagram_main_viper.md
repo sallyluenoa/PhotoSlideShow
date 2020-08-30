@@ -34,8 +34,7 @@ namespace app.select #FFFFEE {
     }
     interface Interactor {
       + requestLoadDisplayedPhotos()
-      + requestDownloadPhotos()
-      + requestDownloadPhotos(albums: List<Album>)
+      + requestDownloadPhotos(context: Context, albums: List<Album>?)
       + requestUpdateDatabase(photosInfo: List<PhotoInfo>)
       + isNeededUpdatePhotos(): Boolean
       + hasSelectedAlbum(): Boolean
@@ -73,23 +72,28 @@ namespace app.select #FFFFEE {
     - fragmentManager: FragmentManager
     - displayedPhotos: List<DisplayedPhoto>
     - displayedIndex: Integer
-    - isForeground: Boolean
-    - isUpdateRequested: Boolean
-    - isRunningSlideShow: Boolean
+    - isRequestingUpdatePhotos: Boolean
     - replaceFragment(fragment: Fragment)
     - presentImage(filePath: String)
     - presentSlideShow()
+    - requestLoadDisplayedPhotos()
+    - requestUpdateDisplayedPhotos()
+    - <b>[synchronized]</b> getDisplayedPhoto(): DisplayedPhoto?
+    - <b>[synchronized]</b> updateDisplayedPhotos(displayedPhotos: List<DisplayedPhoto>)
   }
-  class MainPresenter
+  class MainPresenter {
+    - activity(): Activity?
+    - presentSequence(request: UpdatePhotosRequest, value: Any?)
+  }
   class MainInteractor {
-    - context: Context
     - appDatabase: AppDatabase
     - photosDownloader: PhotosDownloader
     - googleWebApis: GoogleWebApis
-    - <b>[suspend]</b> requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
-    - <b>[suspend]</b> requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo>)
-    - <b>[suspend]</b> requestUpdateDatabaseResult(isSucceeded: Boolean)
-    - <b>[suspend]</b> requestDownloadPhotosInner(albums: List<Album>)
+    - userInfoData: UserInfoData
+    - <b>[suspend]</b> loadDisplayedPhotos(): List<DisplayedPhoto>
+    - <b>[suspend]</b> downloadPhotos(context: Context, albums: List<Album>?): List<AppDatabase.PhotoInfo>
+    - <b>[suspend]</b> updateDatabase(photosInfo: List<AppDatabase.PhotoInfo>): Boolean
+    - getOutputDir(context: Context): File?
     - convertMediaItems(mediaItems: List<MediaItem>, size: Int): List<MediaItem>
   }
   class MainRouter

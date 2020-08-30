@@ -73,13 +73,14 @@ namespace app.select #FFFFEE {
     - replaceFragment(fragment: Fragment)
     - requestSignIn()
   }
-  class SplashPresenter
+  class SplashPresenter {
+    - activity(): Activity?
+    - presentSequence(request: SignInRequest)
+  }
   class SplashInteractor {
-    - context: Context
     - appDatabase: AppDatabase
     - googleWebApis: GoogleWebApis
-    - <b>[suspend]</b> requestGoogleSilentSignInResult(result: ApiResult)
-    - <b>[suspend]</b> requestUpdateUserInfoResult(isSucceeded: Boolean)
+    - <b>[suspend]</b> updateUserInfo(): Boolean
   }
   class SplashRouter
 

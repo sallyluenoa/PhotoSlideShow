@@ -1,14 +1,14 @@
 @startuml
-:requestUpdateDisplayedPhotos;
+:RequestLoadDisplayedPhotos;
+:RequestUpdateDisplayedPhotos;
 
-if (isNeededUpdatePhotos) then (NO)
+if (IsNeededUpdatePhotos?) then (NO)
   stop
 endif
 
 partition DecideAlbum {
-  if (hasSelectedAlbums) then (NO)
-    :startSelectActivity;
-    :onActivityResult;
+  if (HasSelectedAlbums?) then (NO)
+    :StartSelectActivity;
 
     if (Is selected album found?) then (NO)
       stop
@@ -17,18 +17,9 @@ partition DecideAlbum {
 }
 
 partition DownloadImages {
-  while (selectedAlbums.foreach)
-    :PhotosLibraryApi#requestMediaItems;
-    :Make random photo MediaItems;
-    :PhotosDownloader#requestMediaItems;
-  end while
+  :RequestDownloadPhotos;
+  :RequestUpdateDatabase;
 }
 
-partition UpdateDatabase {
-  :Database#replaceSelectedData;
-  :Database#findUserInfoData;
-}
-
-:requestUpdatePhotosResult;
 stop
 @enduml

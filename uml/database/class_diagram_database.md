@@ -9,25 +9,24 @@ namespace core.database #FFEEFF {
     }
     class UserInfo << (D, sandybrown) >> {
       + emailAdress: String
-      - tokenInfo: String
-      + updatePhotosTimeMillis: Long
+      + tokenInfo: String
+      + lastUpdatedPhotosTimeMillis: Long
       + tokenInfo(): TokenInfo
       + copy(tokenInfo: TokenInfo): UserInfo
       + updatePhotos(): UserInfo
       + isNeededUpdatePhotos(intervalTimeMillis: Long): Boolean
-      + isAvailableAccessToken(intervalTimeMillis: Long): Boolean
     }
     class SelectedAlbum << (D, sandybrown) >> {
       + userInfoId: Long
       + albumId: String
-      - album: String
+      + album: String
       + album(): Album
       + copy(album: Album): SelectedAlbum
     }
     class DisplayedPhoto << (D, sandybrown) >> {
       + selectedAlbumId: Long
       + mediaItemId: String
-      - mediaItem: String
+      + mediaItem: String
       + outputPath: String
       + isMyFavorite: Boolean
       + mediaItem(): MediaItem
@@ -54,19 +53,24 @@ namespace core.database #FFEEFF {
       + <B>[suspend]</B> update(entities: List<EntityT>)
       + <B>[suspend]</B> delete(entity: EntityT)
       + <B>[suspend]</B> delete(entities: List<EntityT>)
-      + <B>[suspend]</B> findById(id: long): EntityT?
     }
     interface UserInfoDao {
+      + <B>[suspend]</B> getAll(): List<UserInfo>
+      + <B>[suspend]</B> findById(id: Long): UserInfo?
       + <B>[suspend]</B> findByEmailAddress(emailAddress: String): UserInfo?
       + <B>[suspend]</B> findUserInfoDataById(id: Long): UserInfoData?
       + <B>[suspend]</B> findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData?
     }
     interface SelectedAlbumDao {
+      + <B>[suspend]</B> getAll(): List<SelectedAlbum>
+      + <B>[suspend]</B> findById(id: Long): SelectedAlbum?
       + <B>[suspend]</B> findByUniqueKeys(userInfoId: Long, albumId: String): SelectedAlbum?
       + <B>[suspend]</B> findSelectedDataById(id: Long): SelectedData?
       + <B>[suspend]</B> findSelectedDataByUniqueKeys(userInfoId: Long, albumId: String): SelectedData?
     }
     interface DisplayedPhotoDao {
+      + <B>[suspend]</B> getAll(): List<DisplayedPhoto>
+      + <B>[suspend]</B> findById(id: Long): DisplayedPhoto?
       + <B>[suspend]</B> findByUniqueKeys(selectedAlbumId: Long, mediaItemId: String): DisplayedPhoto?
     }
 
@@ -95,19 +99,17 @@ namespace core.database #FFEEFF {
   }
 }
 
-namespace app.module #FFFFEE {
+namespace app.module.lib #FFFFEE {
 
-  namespace entity {
-    class PhotoInfo << (D, sandybrown) >> {
-      + album: Album
-    }
-    class MediaDetail << (D, sandybrown) >> {
-      + mediaItem: MediaItem
-      + outputPath: String
-    }
-
-    PhotoInfo "1" *-right- "*" MediaDetail: + mediaDetails
-  } 
+  class PhotoInfo << (D, sandybrown) >> {
+    + album: Album
+    + displayedPhotos(selectedAlbumId: Long): List<DisplayedPhoto>
+  }
+  class MediaDetail << (D, sandybrown) >> {
+    + mediaItem: MediaItem
+    + outputPath: String
+  }
+  PhotoInfo "1" *-- "*" MediaDetail: + mediaDetails
 
   class AppDatabase {
     + <B>[suspend]</B> updateUserInfo(emailAddress: String, tokenInfo: TokenInfo)
@@ -116,9 +118,13 @@ namespace app.module #FFFFEE {
     + <B>[suspend]</B> findUserInfoByEmailAddress(emailAddress: String): UserInfo?
     + <B>[suspend]</B> findUserInfoDataById(id: Long): UserInfoData?
     + <B>[suspend]</B> findUserInfoDataByEmailAddress(emailAddress: String): UserInfoData?
-    - userInfoDao(): UserInfoDao
-    - selectedAlbumDao(): SelectedAlbumDao
-    - displayedPhotoDao(): DisplayedPhotoDao
+  }
+  namespace impl {
+    class AppDatabaseImpl {
+      - userInfoDao(): UserInfoDao
+      - selectedAlbumDao(): SelectedAlbumDao
+      - displayedPhotoDao(): DisplayedPhotoDao
+    }
   }
 }
 
@@ -126,5 +132,6 @@ core.database.room.SingletonRoomDatabase o-right- core.database.dao.UserInfoDao
 core.database.room.SingletonRoomDatabase o-right- core.database.dao.SelectedAlbumDao
 core.database.room.SingletonRoomDatabase o-right- core.database.dao.DisplayedPhotoDao
 
-app.module.AppDatabase -- core.database.room.SingletonRoomObject
+app.module.lib.impl.AppDatabaseImpl .up.|> app.module.lib.AppDatabase
+app.module.lib.impl.AppDatabaseImpl -- core.database.room.SingletonRoomObject
 @enduml

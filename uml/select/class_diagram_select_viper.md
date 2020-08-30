@@ -43,12 +43,14 @@ namespace app.select #FFFFEE {
 
   class SelectActivity {
     - fragmentManager: FragmentManager
+    + decidedAndFinishAlbum(album: Album)
     - replaceFragment(fragment: Fragment)
   }
   class SelectPresenter
   class SelectInteractor {
     - appDatabase: AppDatabase
     - googleWebApis: GoogleWebApis
+    - <b>[suspend]</b> loadSharedAlbumsResult(): List<Album>
   }
 
   SelectActivity o-down-- SelectPresenter: - presenter

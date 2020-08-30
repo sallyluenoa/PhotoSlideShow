@@ -2,24 +2,17 @@
 start
 
 :Show Progress;
+:RequestLoadDisplayedPhotos;
 
 repeat
-  :requestLoadDisplayedPhotos;
+  :GetDisplayedPhoto;
 
-  if (displayedPhotos.isEmpty()) then (YES)
-    stop
+  if (displayedPhoto != null) then (YES)
+    :PresentImage;
+    :Delay X secs...;
+  else
+    :Delay 1 sec...;
   endif
-
-  repeat
-    if (Is Index 0?) then (YES)
-      :requestUpdateDisplayedPhotos;
-    endif
-
-    :Displayed photos;
-    :Wait a moment...;
-
-    backward:Next Index;
-  repeat while (No notified update photos?)
 
 repeat while
 @enduml

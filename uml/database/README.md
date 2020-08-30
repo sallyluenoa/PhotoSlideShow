@@ -17,7 +17,7 @@
 | update_date | Long | - | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
 | email_address | String | - | o | - | GoogleSignInAccount#email | test@example.com |
 | token_info | String | - | - | - | TokenInfo (JSON) | - |
-| update_photos_date | Long | - | - | - | - | 2020-01-01 00:00:00 |
+| last_updated_photos_date | Long | - | - | - | System.currentTimeMillis() | 2020-01-01 00:00:00 |
 
 ### SelectedAlbum DB
 

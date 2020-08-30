@@ -22,7 +22,7 @@ View++
 View -> Presenter++: requestLoadDisplayedPhotos
   Presenter -> Interactor++: requestLoadDisplayedPhotos
 
-  opt this.userInfoData.id == 0
+  opt this.userInfoData.userInfo.id == 0
     Interactor -> AppDatabase++: findUserInfoDataByEmailAddress
     return UserInfoData?
   end
@@ -65,6 +65,10 @@ end
 == Download Images ==
 
 Presenter -> Interactor++: requestDownloadPhotos
+
+  opt albums.isNullOrEmpty
+    Interactor -> Interactor: Get albums from UserInfoData.dataList.
+  end
 
   loop albums.foreach
     Interactor -> GoogleWebApis++: requestMediaItems

@@ -1,8 +1,9 @@
 @startuml
 start
 :Show app logo 2 secs;
-
 (A)
+:RequestSignIn;
+
 partition RuntimePermission {
   if (IsGrantedRuntimePermissions?) then (YES)
   else (NO)
@@ -17,44 +18,26 @@ partition RuntimePermission {
 }
 
 partition GoogleSignIn {
-  if (IsSignedInAccount?) then (YES)
-    :RequestSilentSignIn;
+  :RequestGoogleSilentSignIn;
 
-    if (Is succeeded?) then (YES)
-    else (NO)
-      (E)
-      detach
-    endif
-
-  else (NO)
+  if (result==ApiResult.SUCCEEDED) then (YES)
+  elseif (result==ApiResult.INVALID) then (YES)
     :StartGoogleSignInActivity;
 
-    if (Is succeeded?) then (YES)
-    else (NO)
+    if (IsSucceededGoogleUserSignIn?) then (NO)
       (E)
       detach
     endif
-
+  else
+    (E)
+    detach
   endif
 }
 
 partition UpdateUserInfo {
-  :getSignedInAccount;
+  :RequestUpdateUserInfo;
 
-  :AppDatabase findUserInfoByEmailAddress;
-
-  if (Is userInfo found?) then (YES)
-    :RequestTokenInfoWithRefreshToken;
-  endif
-
-  if (Is succeeded to get tokenInfo?) then (NO)
-    :RequestTokenInfoWithAuthCode;
-  endif
-
-  if (Is succeeded to get tokenInfo?) then (YES)
-    :AppDatabase updateUserInfo;
-  else 
-    :RevokeAccess;
+  if (IsSucceeded?) then (NO)
     (E)
     detach
   endif

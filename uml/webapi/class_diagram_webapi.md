@@ -56,9 +56,7 @@ namespace core.webapi #EEFFFF {
   }
 
   namespace impl {
-    class GoogleSignInApiImpl {
-      - context: Context
-    }
+    class GoogleSignInApiImpl
     class GoogleOAuth2ApiImpl
     class PhotosLibraryApiImpl {
       - photosLibraryClient(): PhotosLibraryClient
@@ -88,7 +86,7 @@ namespace core.webapi #EEFFFF {
   }
 }
 
-namespace app.module #FFFFEE {
+namespace app.module.lib #FFFFEE {
   class PhotosApiResult<ResultT : Serializable> << (D, sandybrown) >> {
     + photosResults: List<ResultT>
   }
@@ -102,11 +100,16 @@ namespace app.module #FFFFEE {
     + getSignedInEmailAddress(): String
     + isSignedInAccount(): Boolean
     + isSucceededUserSignIn(data: Intent?): Boolean
-    - <B>[suspend]</B> updateTokenInfo(): TokenInfo?
+  }
+  namespace impl {
+    class GoogleWebApisImpl {
+      - context: Context
+      - <B>[suspend]</B> updateTokenInfo(): TokenInfo?
+    }
   }
 }
 
-app.module.PhotosApiResult *-- core.webapi.entity.TokenInfo: + tokenInfo
+app.module.lib.PhotosApiResult *-- core.webapi.entity.TokenInfo: + tokenInfo
 core.webapi.holder.SingletonWebHolder *-- core.webapi.entity.TokenInfo: + tokenInfo
 core.webapi.holder.SingletonWebHolder *-- core.webapi.entity.ClientSecret: + clientSecret
 
@@ -118,7 +121,8 @@ core.webapi.GoogleSignInApi <|.. core.webapi.impl.GoogleSignInApiImpl
 core.webapi.GoogleOAuth2Api <|.. core.webapi.impl.GoogleOAuth2ApiImpl
 core.webapi.PhotosLibraryApi <|.. core.webapi.impl.PhotosLibraryApiImpl
 
-app.module.GoogleWebApis o-- core.webapi.GoogleSignInApi: - googleSignInApi
-app.module.GoogleWebApis o-- core.webapi.GoogleOAuth2Api: - googleOAuth2Api
-app.module.GoogleWebApis o-- core.webapi.PhotosLibraryApi: - photosLibraryApi
+app.module.lib.impl.GoogleWebApisImpl .up.|> app.module.lib.GoogleWebApis
+app.module.lib.impl.GoogleWebApisImpl o-- core.webapi.GoogleSignInApi: - googleSignInApi
+app.module.lib.impl.GoogleWebApisImpl o-- core.webapi.GoogleOAuth2Api: - googleOAuth2Api
+app.module.lib.impl.GoogleWebApisImpl o-- core.webapi.PhotosLibraryApi: - photosLibraryApi
 @enduml
