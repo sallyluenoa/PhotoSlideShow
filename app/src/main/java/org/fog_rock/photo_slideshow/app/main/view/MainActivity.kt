@@ -25,6 +25,7 @@ import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
+import org.fog_rock.photo_slideshow.core.math.impl.SizeCalculatorImpl
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
@@ -59,7 +60,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         presenter = MainPresenter(
             MainInteractor(
                 AppDatabaseImpl(),
-                PhotosDownloaderImpl(FileDownloaderImpl(), ASPECT_WIDTH, ASPECT_HEIGHT),
+                PhotosDownloaderImpl(FileDownloaderImpl(), SizeCalculatorImpl(), ASPECT_WIDTH, ASPECT_HEIGHT),
                 GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())
             ),
             MainRouter()

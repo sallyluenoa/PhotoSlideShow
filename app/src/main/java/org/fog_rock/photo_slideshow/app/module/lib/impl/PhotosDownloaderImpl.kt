@@ -2,10 +2,10 @@ package org.fog_rock.photo_slideshow.app.module.lib.impl
 
 import com.google.photos.types.proto.MediaItem
 import com.google.photos.types.proto.MediaMetadata
+import org.fog_rock.photo_slideshow.app.module.lib.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.file.FileDownloader
-import org.fog_rock.photo_slideshow.app.module.lib.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.math.SizeCalculator
 import java.io.File
 import java.net.MalformedURLException
@@ -13,16 +13,15 @@ import java.net.URL
 
 class PhotosDownloaderImpl(
     private val fileDownloader: FileDownloader,
+    private val sizeCalculator: SizeCalculator,
     private val aspectWidth: Long,
     private val aspectHeight: Long
 ): PhotosDownloader {
 
-    private val calculator = SizeCalculator()
-
     override suspend fun requestDownloads(mediaItems: List<MediaItem>, outputDir: File): List<String> {
         val outputFiles = mutableListOf<String>()
         if (!isValidOutputDir(outputDir)) {
-            logE("Invalid output dir.");
+            logE("Invalid output dir.")
             return outputFiles
         }
         mediaItems.forEach {
@@ -62,7 +61,7 @@ class PhotosDownloaderImpl(
      * ダウンロードURLを取得.
      */
     private fun getDownloadUrl(baseUrl: String, metadata: MediaMetadata): URL? {
-        val scale = calculator.estimateEffectiveScale(
+        val scale = sizeCalculator.estimateEffectiveScale(
             metadata.width, metadata.height, aspectWidth, aspectHeight)
         val width = (metadata.width * scale).toLong()
         val height = (metadata.height * scale).toLong()
