@@ -55,7 +55,7 @@ class SplashPresenter(
                     logI("Succeeded google user sign in.")
                     presentSequence(request.next())
                 } else {
-                    logI( "Failed google user sign in.")
+                    logE( "Failed google user sign in.")
                     callback?.requestSignInResult(request)
                 }
             }
@@ -76,7 +76,7 @@ class SplashPresenter(
                     logI("All runtime permissions are granted by user.")
                     presentSequence(request.next())
                 } else {
-                    logI("Runtime permissions are denied.")
+                    logE("Runtime permissions are denied.")
                     callback?.requestSignInResult(request)
                 }
             }
@@ -95,11 +95,11 @@ class SplashPresenter(
                 presentSequence(request.next())
             }
             ApiResult.INVALID -> {
-                logI("Request google user sign in.")
+                logI("Start GoogleSignInActivity.")
                 router?.startGoogleSignInActivity((activity() ?: return), request.code)
             }
             else -> {
-                logI( "Failed google silent sign in.")
+                logE( "Failed google silent sign in.")
                 callback?.requestSignInResult(request)
             }
         }
@@ -108,10 +108,10 @@ class SplashPresenter(
     override fun requestUpdateUserInfoResult(isSucceeded: Boolean) {
         val request = SignInRequest.UPDATE_USER_INFO
         if (isSucceeded) {
-            logI("Succeeded update user info.")
+            logI("Succeeded to update user info.")
             presentSequence(request.next())
         } else {
-            logI("Failed update user info.")
+            logE("Failed to update user info.")
             callback?.requestSignInResult(request)
         }
     }

@@ -186,6 +186,9 @@ class MainInteractor(
         return true
     }
 
+    /**
+     * 出力先ディレクトリを取得する.
+     */
     private fun getOutputDir(context: Context): File? {
         val outputDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: run {
             logE("Failed to get context#getExternalFilesDir().")
