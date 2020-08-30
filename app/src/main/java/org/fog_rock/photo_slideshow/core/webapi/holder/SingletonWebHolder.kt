@@ -13,6 +13,7 @@ import com.google.photos.library.v1.PhotosLibraryClient
 import com.google.photos.library.v1.PhotosLibrarySettings
 import okhttp3.OkHttpClient
 import org.fog_rock.photo_slideshow.R
+import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.file.AssetsFileReader
 import org.fog_rock.photo_slideshow.core.webapi.entity.ClientSecret
 import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
@@ -20,6 +21,10 @@ import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+/**
+ * WebAPI関連のホルダーオブジェクト.
+ * シングルトンで保持しておきたいクラスオブジェクトを保持する.
+ */
 object SingletonWebHolder {
 
     lateinit var clientSecret: ClientSecret
@@ -32,6 +37,10 @@ object SingletonWebHolder {
 
     var tokenInfo = TokenInfo()
 
+    /**
+     * ClientSecret のロード.
+     * Application#onCreate で呼び出すこと.
+     */
     fun loadClientSecret(assetsFileReader: AssetsFileReader, jsonFileName: String) {
         val jsonString = assetsFileReader.read(jsonFileName)
             ?: throw NullPointerException("Failed to read $jsonFileName")
@@ -41,6 +50,10 @@ object SingletonWebHolder {
             .fromJson(jsonString, ClientSecret::class.java)
     }
 
+    /**
+     * OkHttpClient のセットアップ.
+     * Application#onCreate で呼び出すこと.
+     */
     fun setupOkHttpClient(
         connectionTimeoutMilliSecs: Long,
         readTimeoutMilliSecs: Long,
@@ -53,6 +66,10 @@ object SingletonWebHolder {
         }.build()
     }
 
+    /**
+     * GoogleSignInClient のセットアップ.
+     * Application#onCreate で呼び出すこと.
+     */
     fun setupGoogleSignInClient(
         context: Context,
         scopes: List<PhotoScope>,
@@ -73,8 +90,12 @@ object SingletonWebHolder {
         }
     }
 
+    /**
+     * PhotosLibraryClient の更新.
+     */
     fun updatePhotosLibraryClient(tokenInfo: TokenInfo?) {
         if (tokenInfo != null) {
+            logI("Update PhotosLibraryClient.")
             try {
                 val credentials = OAuth2Credentials.create(AccessToken(tokenInfo.accessToken, null))
                 val settings = PhotosLibrarySettings.newBuilder().apply {
@@ -86,6 +107,7 @@ object SingletonWebHolder {
                 throw IOException("Failed to update PhotosLibraryClient.")
             }
         } else {
+            logI("Reset PhotosLibraryClient.")
             this.photosLibraryClient = null
             this.tokenInfo = TokenInfo()
         }

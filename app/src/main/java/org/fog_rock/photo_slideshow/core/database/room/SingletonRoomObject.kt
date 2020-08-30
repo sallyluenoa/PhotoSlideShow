@@ -11,6 +11,9 @@ import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.database.entity.SelectedAlbum
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
 
+/**
+ * データベースのRoomを保持するシングルトンオブジェクト.
+ */
 object SingletonRoomObject {
 
     /**
@@ -34,6 +37,10 @@ object SingletonRoomObject {
 
     private lateinit var database: SingletonRoomDatabase
 
+    /**
+     * RoomDatabase のセットアップ.
+     * Application#onCreate で呼び出すこと.
+     */
     fun setup(context: Context) {
         database = Room.databaseBuilder(
             context,

@@ -4,6 +4,11 @@ import androidx.room.*
 import com.google.gson.Gson
 import com.google.photos.types.proto.Album
 
+/**
+ * 選択アルバム情報
+ * データベース (Entity)
+ * https://developer.android.com/training/data-storage/room/defining-data?hl=ja
+ */
 @Entity(
     tableName = "selected_album",
     indices = [Index(

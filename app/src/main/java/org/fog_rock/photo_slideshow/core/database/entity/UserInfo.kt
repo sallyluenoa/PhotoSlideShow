@@ -6,14 +6,13 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.google.gson.Gson
 import org.fog_rock.photo_slideshow.core.extension.logD
-import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.toDateString
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 /**
  * ユーザー情報
  * データベース (Entity)
- * https://developer.android.com/training/data-storage/room?hl=ja
+ * https://developer.android.com/training/data-storage/room/defining-data?hl=ja
  */
 @Entity(
     tableName = "users_info",
@@ -74,7 +73,7 @@ data class UserInfo(
      */
     fun isNeededUpdatePhotos(intervalTimeMillis: Long): Boolean {
         val availablePhotosTimeMillis = lastUpdatedPhotosTimeMillis + intervalTimeMillis
-        logI("Photos available date: ${availablePhotosTimeMillis.toDateString()}")
+        logD("Photos available date: ${availablePhotosTimeMillis.toDateString()}")
         return System.currentTimeMillis() > availablePhotosTimeMillis
     }
 }
