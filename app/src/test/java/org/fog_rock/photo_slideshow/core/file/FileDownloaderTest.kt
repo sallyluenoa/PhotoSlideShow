@@ -15,7 +15,7 @@ class FileDownloaderTest {
     @JvmField
     val tempFolder: TemporaryFolder = TemporaryFolder()
 
-    private val fileDownloader: FileDownloader = FileDownloaderImpl(10000L)
+    private val fileDownloader: FileDownloader = FileDownloaderImpl()
 
     @Test
     fun requestDownload() {
