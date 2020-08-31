@@ -5,7 +5,7 @@ import com.google.photos.types.proto.MediaItem
 import kotlinx.coroutines.runBlocking
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
-import org.fog_rock.photo_slideshow.core.webapi.holder.PhotosLibraryClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 import org.fog_rock.photo_slideshow.test.AndroidTestModuleGenerator
 import org.junit.Before
@@ -17,24 +17,24 @@ import org.junit.Test
  */
 class PhotosLibraryApiTest {
 
-    private var clientHolder = PhotosLibraryClientHolder(AndroidTestModuleGenerator.tokenInfo())
-
-    private val photosApi: PhotosLibraryApi = PhotosLibraryApiImpl(clientHolder)
+    private val photosLibraryApi: PhotosLibraryApi = PhotosLibraryApiImpl()
 
     /**
      * テスト前にアクセストークンが有効か確認する.
      */
     @Before
-    fun configClientHolder() {
-        assert(!photosApi.isAvailableClientHolder()) {
+    fun updatePhotosLibraryClient() {
+        val tokenInfo = AndroidTestModuleGenerator.tokenInfo()
+        assert(!tokenInfo.isAvailableAccessToken()) {
             logE("ClientHolder is not available. AccessToken should be updated.")
         }
+        SingletonWebHolder.updatePhotosLibraryClient(tokenInfo)
     }
 
     @Test
     fun requestAlbum() {
         val album = runBlocking {
-            photosApi.requestAlbum(AndroidTestModuleGenerator.albumId())
+            photosLibraryApi.requestAlbum(AndroidTestModuleGenerator.albumId())
         }
         showAlbum(album)
     }
@@ -42,7 +42,7 @@ class PhotosLibraryApiTest {
     @Test
     fun requestMediaItem() {
         val mediaItem = runBlocking {
-            photosApi.requestMediaItem(AndroidTestModuleGenerator.mediaItemId())
+            photosLibraryApi.requestMediaItem(AndroidTestModuleGenerator.mediaItemId())
         }
         showMediaItem(mediaItem)
     }
@@ -55,7 +55,7 @@ class PhotosLibraryApiTest {
                 AndroidTestModuleGenerator.album(2),
                 AndroidTestModuleGenerator.album(3)
             )
-            photosApi.requestUpdateAlbums(albums)
+            photosLibraryApi.requestUpdateAlbums(albums)
         }
         newAlbums.forEach { showAlbum(it) }
     }
@@ -68,7 +68,7 @@ class PhotosLibraryApiTest {
                 AndroidTestModuleGenerator.mediaItem(2),
                 AndroidTestModuleGenerator.mediaItem(3)
             )
-            photosApi.requestUpdateMediaItems(mediaItems)
+            photosLibraryApi.requestUpdateMediaItems(mediaItems)
         }
         newMediaItems.forEach { showMediaItem(it) }
     }
@@ -76,7 +76,7 @@ class PhotosLibraryApiTest {
     @Test
     fun requestSharedAlbums() {
         val albums = runBlocking {
-            photosApi.requestSharedAlbums()
+            photosLibraryApi.requestSharedAlbums()
         }
         logI("[Albums Result] Count: ${albums.size}")
         albums.forEach { showAlbum(it) }
@@ -85,7 +85,7 @@ class PhotosLibraryApiTest {
     @Test
     fun requestMediaItems() {
         val mediaItems = runBlocking {
-            photosApi.requestMediaItems(AndroidTestModuleGenerator.album())
+            photosLibraryApi.requestMediaItems(AndroidTestModuleGenerator.album())
         }
         logI("[MediaItems Result] Count: ${mediaItems.size}")
         mediaItems.forEach {
