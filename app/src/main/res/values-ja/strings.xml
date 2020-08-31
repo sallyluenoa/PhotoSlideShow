@@ -9,11 +9,17 @@
     <string name="no">いいえ</string>
     <string name="start">開始</string>
     <string name="end">終了</string>
+    <string name="retry">再試行</string>
     <string name="menu">メニュー</string>
-    <string name="license">ライセンス</string>
+    <string name="settings">設定</string>
+    <string name="license_info">ライセンス情報</string>
+    <string name="others">その他</string>
+    <string name="account_info">アカウント情報</string>
+    <string name="account_name">アカウント名</string>
+    <string name="email_address">メールアドレス</string>
     <string name="sign_in">サインイン</string>
     <string name="sign_out">サインアウト</string>
-    <string name="retry">再試行</string>
+    <string name="change_user">ユーザー切り替え</string>
 
     <string name="failed_runtime_permissions_title">アプリの権限が拒否されました</string>
     <string name="failed_runtime_permissions_message">もう一度権限許可をリクエストしますか?</string>
