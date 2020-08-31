@@ -17,6 +17,7 @@
     <string name="account_info">アカウント情報</string>
     <string name="account_name">アカウント名</string>
     <string name="email_address">メールアドレス</string>
+    <string name="app_version">アプリバージジョン</string>
     <string name="sign_in">サインイン</string>
     <string name="sign_out">サインアウト</string>
     <string name="change_user">ユーザー切り替え</string>

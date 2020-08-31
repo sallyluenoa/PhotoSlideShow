@@ -19,6 +19,7 @@
 
     <PreferenceCategory android:title="@string/settings">
         <Preference
+            android:key="@string/pref_key_settings"
             android:title="@string/settings"
             android:selectable="true"
             />
@@ -26,17 +27,22 @@
 
     <PreferenceCategory android:title="@string/others">
         <Preference
-            android:key=""
+            android:key="@string/pref_key_app_version"
+            android:title="@string/app_version"
+            android:selectable="false"
+            />
+        <Preference
+            android:key="@string/pref_key_license_info"
             android:title="@string/license_info"
             android:selectable="true"
             />
         <Preference
-            android:key=""
+            android:key="@string/pref_key_change_user"
             android:title="@string/change_user"
             android:selectable="true"
             />
         <Preference
-            android:key=""
+            android:key="@string/pref_key_sign_out"
             android:title="@string/sign_out"
             android:selectable="true"
             />

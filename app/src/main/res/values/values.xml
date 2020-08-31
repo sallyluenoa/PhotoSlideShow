@@ -2,4 +2,10 @@
 <resources>
     <string name="pref_key_account_name" translatable="false">account_name</string>
     <string name="pref_key_email_address" translatable="false">email_address</string>
+    <string name="pref_key_settings" translatable="false">settings</string>
+    <string name="pref_key_app_version" translatable="false">app_version</string>
+    <string name="pref_key_license_info" translatable="false">license_info</string>
+    <string name="pref_key_change_user" translatable="false">change_user</string>
+    <string name="pref_key_sign_out" translatable="false">sign_out</string>
+
 </resources>

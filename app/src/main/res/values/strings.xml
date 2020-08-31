@@ -17,6 +17,7 @@
     <string name="account_info">Account Info</string>
     <string name="account_name">Account Name</string>
     <string name="email_address">Email Address</string>
+    <string name="app_version">App Version</string>
     <string name="sign_in">Sign In</string>
     <string name="sign_out">Sign Out</string>
     <string name="change_user">Change User</string>
