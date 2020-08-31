@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">フォトスライドショー</string>
+
+    <string name="empty"/>
+    <string name="ok">OK</string>
+    <string name="cancel">キャンセル</string>
+    <string name="yes">はい</string>
+    <string name="no">いいえ</string>
+    <string name="start">開始</string>
+    <string name="end">終了</string>
+    <string name="menu">メニュー</string>
+    <string name="license">ライセンス</string>
+    <string name="sign_in">サインイン</string>
+    <string name="sign_out">サインアウト</string>
+    <string name="retry">再試行</string>
+
+    <string name="failed_runtime_permissions_title">アプリの権限が拒否されました</string>
+    <string name="failed_runtime_permissions_message">もう一度権限許可をリクエストしますか?</string>
+    <string name="failed_google_sign_in_title">Googleアカウントでのサインインに失敗しました</string>
+    <string name="failed_google_sign_in_message">@string/retry_sign_in_message</string>
+    <string name="failed_update_user_info_in_title">ユーザー情報の更新に失敗しました</string>
+    <string name="failed_update_user_info_in_message">@string/retry_sign_in_message</string>
+    <string name="failed_unknown_request_title">予期せぬエラーが発生しました</string>
+    <string name="failed_unknown_request_message">@string/retry_sign_in_message</string>
+    <string name="retry_sign_in_message">もう一度サインインし直しますか?</string>
+
+    <string name="confirm_select_album_title">アルバムが選択されました</string>
+    <string name="confirm_select_album_message">スライドショーを開始しますか?\nアルバム名: %1$s</string>
+
+</resources>
