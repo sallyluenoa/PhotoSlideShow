@@ -2,12 +2,13 @@ package org.fog_rock.photo_slideshow.core.webapi
 
 import kotlinx.coroutines.runBlocking
 import org.fog_rock.photo_slideshow.core.extension.logI
-import org.fog_rock.photo_slideshow.core.webapi.holder.GoogleSignInClientHolder
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 import org.fog_rock.photo_slideshow.core.webapi.entity.PhotoScope
+import org.fog_rock.photo_slideshow.core.webapi.holder.SingletonWebHolder
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 import org.fog_rock.photo_slideshow.test.AndroidTestModuleGenerator
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 
 /**
@@ -18,23 +19,28 @@ class GoogleSignInApiTest {
 
     private val appContext = AndroidTestModuleGenerator.appContext()
 
-    private val clientHolder =
-        GoogleSignInClientHolder(appContext, listOf(PhotoScope.READ_ONLY), true, true)
+    private val googleSignInApi: GoogleSignInApi = GoogleSignInApiImpl()
 
-    private val signInApi: GoogleSignInApi = GoogleSignInApiImpl(clientHolder)
+    @Before
+    fun setupGoogleSignInClient() {
+        SingletonWebHolder.setupGoogleSignInClient(
+            appContext, listOf(PhotoScope.READ_ONLY),
+            requestIdToken = false, requestServerAuthCode = true
+        )
+    }
 
     @Test
     fun requestSilentSignIn() {
-        if (GoogleSignInApi.isSignedInAccount(appContext)) {
+        if (googleSignInApi.getSignedInAccount(appContext) != null) {
             // サインイン情報があるので、サイレントサインインの正常系が通る.
             logI("Current status is signed in. Normal case will be checked.")
 
             val result = runBlocking {
-                signInApi.requestSilentSignIn()
+                googleSignInApi.requestSilentSignIn()
             }
             assertEquals(ApiResult.SUCCEEDED, result)
 
-            val account = GoogleSignInApi.getSignedInAccount(appContext)
+            val account = googleSignInApi.getSignedInAccount(appContext)
             logI("[Account Result]\n" +
                     "Name: ${account?.displayName}\nEmail: ${account?.email}\n" +
                     "IdToken: ${account?.idToken}\nServerAuthCode:${account?.serverAuthCode}")
@@ -43,7 +49,7 @@ class GoogleSignInApiTest {
             logI("Current status is signed out. Abnormal case will be checked.")
 
             val result = runBlocking {
-                signInApi.requestSilentSignIn()
+                googleSignInApi.requestSilentSignIn()
             }
             assertEquals(ApiResult.FAILED, result)
         }
@@ -51,12 +57,12 @@ class GoogleSignInApiTest {
 
     @Test
     fun requestSignOut() {
-        if (GoogleSignInApi.isSignedInAccount(appContext)) {
+        if (googleSignInApi.getSignedInAccount(appContext) != null) {
             // サインイン情報があるので、サインアウトの正常系が通る.
             logI("Current status is signed in. Normal case will be checked.")
 
             val result = runBlocking {
-                signInApi.requestSignOut()
+                googleSignInApi.requestSignOut()
             }
             assertEquals(ApiResult.SUCCEEDED, result)
         } else {
@@ -64,7 +70,7 @@ class GoogleSignInApiTest {
             logI("Current status is signed out. Abnormal case will be checked.")
 
             val result = runBlocking {
-                signInApi.requestSignOut()
+                googleSignInApi.requestSignOut()
             }
             assertEquals(ApiResult.FAILED, result)
         }
@@ -72,12 +78,12 @@ class GoogleSignInApiTest {
 
     @Test
     fun requestRevokeAccess() {
-        if (GoogleSignInApi.isSignedInAccount(appContext)) {
+        if (googleSignInApi.getSignedInAccount(appContext) != null) {
             // サインイン情報があるので、アカウントアクセス破棄の正常系が通る.
             logI("Current status is signed in. Normal case will be checked.")
 
             val result = runBlocking {
-                signInApi.requestRevokeAccess()
+                googleSignInApi.requestRevokeAccess()
             }
             assertEquals(ApiResult.SUCCEEDED, result)
         } else {
@@ -85,7 +91,7 @@ class GoogleSignInApiTest {
             logI("Current status is signed out. Abnormal case will be checked.")
 
             val result = runBlocking {
-                signInApi.requestRevokeAccess()
+                googleSignInApi.requestRevokeAccess()
             }
             assertEquals(ApiResult.FAILED, result)
         }

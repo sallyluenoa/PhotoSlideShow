@@ -1,9 +1,10 @@
-package org.fog_rock.photo_slideshow.core.file
+package org.fog_rock.photo_slideshow.app.module.lib
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import org.fog_rock.photo_slideshow.app.module.lib.PhotosDownloader
 import org.fog_rock.photo_slideshow.app.module.lib.impl.PhotosDownloaderImpl
+import org.fog_rock.photo_slideshow.core.file.FileDownloader
+import org.fog_rock.photo_slideshow.core.math.SizeCalculator
 import org.fog_rock.photo_slideshow.test.TestModuleGenerator
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -32,7 +33,13 @@ class PhotosDownloaderTest {
                     // テストでは PNG 拡張子だけダウンロード処理に成功したと仮定する.
                     return outputFile.extension.toLowerCase() == "png"
                 }
-            }, WIDTH, HEIGHT
+            },
+            object : SizeCalculator {
+                override fun estimateEffectiveScale(
+                    orgWidth: Long, orgHeight: Long, expWidth: Long, expHeight: Long
+                ): Float = 1.0f
+            },
+            WIDTH, HEIGHT
         )
 
     @Test

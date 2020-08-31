@@ -7,7 +7,8 @@ import org.junit.Test
 
 class AssetsFileReaderTest {
 
-    private val fileReader = AssetsFileReaderImpl(AndroidTestModuleGenerator.testContext())
+    private val fileReader: AssetsFileReader =
+        AssetsFileReaderImpl(AndroidTestModuleGenerator.testContext())
 
     @Test
     fun read() {
