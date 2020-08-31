@@ -30,6 +30,14 @@ android {
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
     }
+    signingConfigs {
+        release {
+            storeFile file(productKeystorePath)
+            keyAlias productKeyAlias
+            storePassword productStorePassward
+            keyPassword productKeyPassword
+        }
+    }
 }
 
 dependencies {
