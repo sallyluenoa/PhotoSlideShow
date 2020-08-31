@@ -27,15 +27,21 @@ android {
             applicationIdSuffix ".debug"
         }
     }
-    packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-    }
     signingConfigs {
         release {
             storeFile file(productKeystorePath)
             keyAlias productKeyAlias
             storePassword productStorePassward
             keyPassword productKeyPassword
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+    }
+    configurations {
+        all {
+            exclude module: 'httpclient'
+            exclude module: 'commons-logging'
         }
     }
 }
