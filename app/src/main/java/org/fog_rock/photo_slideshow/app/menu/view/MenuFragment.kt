@@ -32,11 +32,6 @@ class MenuFragment : PreferenceFragmentCompat() {
      */
     interface Callback {
         /**
-         * 設定がタップされたときのイベント.
-         */
-        fun onClickedSettings()
-
-        /**
          * ライセンス情報がタップされたときのイベント.
          */
         fun onClickedLicenseInfo()
@@ -64,10 +59,6 @@ class MenuFragment : PreferenceFragmentCompat() {
         findPreference<Preference>(getString(R.string.pref_key_app_version))?.summary =
             BuildConfig.VERSION_NAME
 
-        findPreference<Preference>(getString(R.string.pref_key_settings))?.setOnPreferenceClickListener {
-            getActivityCallback()?.onClickedSettings()
-            true
-        }
         findPreference<Preference>(getString(R.string.pref_key_license_info))?.setOnPreferenceClickListener {
             getActivityCallback()?.onClickedLicenseInfo()
             true

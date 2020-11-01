@@ -22,6 +22,28 @@
     <string name="sign_out">Sign Out</string>
     <string name="change_user">Change User</string>
 
+    <string name="number_of_10_photos">10 photos</string>
+    <string name="number_of_20_photos">20 photos</string>
+    <string name="number_of_30_photos">30 photos</string>
+    <string name="number_of_40_photos">40 photos</string>
+    <string name="number_of_50_photos">50 photos</string>
+    <string name="time_interval_5_seconds">5 seconds</string>
+    <string name="time_interval_10_seconds">10 seconds</string>
+    <string name="time_interval_30_seconds">30 seconds</string>
+    <string name="time_interval_60_seconds">60 seconds</string>
+    <string name="update_time_1_hour">1 hour</string>
+    <string name="update_time_3_hours">3 hours</string>
+    <string name="update_time_6_hours">6 hours</string>
+    <string name="update_time_12_hours">12 hours</string>
+    <string name="update_time_24_hours">24 hours</string>
+
+    <string name="number_of_photos_title">The Number of Photos</string>
+    <string name="number_of_photos_summary">Displays up to %1$s.</string>
+    <string name="time_interval_of_photos_title">Time Interval of Photos</string>
+    <string name="time_interval_of_photos_summary">Photos are displayed every %1$s.</string>
+    <string name="server_update_time_title">Server Update Time</string>
+    <string name="server_update_time_summary">We update photos from the server every %1$s.</string>
+
     <string name="failed_runtime_permissions_title">Permissions are denied.</string>
     <string name="failed_runtime_permissions_message">Are you sure to request permissions again?</string>
     <string name="failed_google_sign_in_title">Failed to sign in with Google account.</string>

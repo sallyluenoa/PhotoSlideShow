@@ -22,6 +22,7 @@
             android:key="@string/pref_key_settings"
             android:title="@string/settings"
             android:selectable="true"
+            android:fragment="org.fog_rock.photo_slideshow.app.menu.view.SettingsFragment"
             />
     </PreferenceCategory>
 

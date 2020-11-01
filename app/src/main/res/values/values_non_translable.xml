@@ -8,4 +8,8 @@
     <string name="pref_key_change_user" translatable="false">change_user</string>
     <string name="pref_key_sign_out" translatable="false">sign_out</string>
 
+    <string name="pref_key_number_of_photos" translatable="false">number_of_photos</string>
+    <string name="pref_key_time_interval_of_photos" translatable="false">time_interval_of_photos</string>
+    <string name="pref_key_server_update_time" translatable="false">server_update_time</string>
+
 </resources>
