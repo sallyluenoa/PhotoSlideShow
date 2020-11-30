@@ -38,11 +38,9 @@ class SelectActivity : AppCompatActivity(), SelectContract.PresenterCallback {
             GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl()))
         )
         presenter?.create(this)
-
-        presenter?.requestLoadSharedAlbums()
     }
 
-    override fun requestLoadSharedAlbumsResult(albums: List<Album>) {
+    override fun createLoadResult(albums: List<Album>) {
         if (albums.isNotEmpty()) {
             replaceFragment(SharingAlbumsFragment.newInstance(albums))
         } else {

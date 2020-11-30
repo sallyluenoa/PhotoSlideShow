@@ -25,12 +25,7 @@ class SelectPresenter(
         callback = null
     }
 
-    override fun requestLoadSharedAlbums() {
-        interactor?.requestLoadSharedAlbums()
+    override fun createLoadResult(albums: List<Album>) {
+        callback?.createLoadResult(albums)
     }
-
-    override fun requestLoadSharedAlbumsResult(albums: List<Album>) {
-        callback?.requestLoadSharedAlbumsResult(albums)
-    }
-
 }
