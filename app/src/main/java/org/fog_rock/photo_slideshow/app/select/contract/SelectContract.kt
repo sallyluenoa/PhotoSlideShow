@@ -3,7 +3,7 @@ package org.fog_rock.photo_slideshow.app.select.contract
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 
-class SelectContract {
+interface SelectContract {
 
     interface Presenter : ViperContract.Presenter {
         /**

@@ -23,7 +23,6 @@ import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
-import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 import java.io.File
 import java.util.concurrent.CancellationException
 
@@ -41,8 +40,7 @@ class MainInteractor(
     private var callback: MainContract.InteractorCallback? = null
 
     private var userInfoData = UserInfoData(
-        UserInfo(googleWebApis.getSignedInEmailAddress(), TokenInfo()),
-        emptyList()
+        UserInfo(googleWebApis.getSignedInEmailAddress()), emptyList()
     )
 
     override fun create(callback: ViperContract.InteractorCallback) {

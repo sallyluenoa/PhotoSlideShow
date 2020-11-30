@@ -44,7 +44,7 @@ data class UserInfo(
 ): BaseEntity {
 
     constructor(
-        emailAddress: String, tokenInfo: TokenInfo
+        emailAddress: String, tokenInfo: TokenInfo = TokenInfo()
     ): this(
         0,
         System.currentTimeMillis(),
