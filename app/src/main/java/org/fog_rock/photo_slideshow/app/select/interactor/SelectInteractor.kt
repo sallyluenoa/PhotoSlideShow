@@ -26,7 +26,7 @@ class SelectInteractor(
         if (callback is SelectContract.InteractorCallback) {
             this.callback = callback
         } else {
-            IllegalArgumentException("SelectContract.InteractorCallback should be set.")
+            throw IllegalArgumentException("SelectContract.InteractorCallback should be set.")
         }
     }
 

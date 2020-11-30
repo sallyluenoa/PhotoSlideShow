@@ -29,7 +29,7 @@ class SplashInteractor(
         if (callback is SplashContract.InteractorCallback) {
             this.callback = callback
         } else {
-            IllegalArgumentException("SplashContract.InteractorCallback should be set.")
+            throw IllegalArgumentException("SplashContract.InteractorCallback should be set.")
         }
     }
 

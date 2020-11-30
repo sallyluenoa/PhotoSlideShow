@@ -28,7 +28,7 @@ class MainPresenter(
             this.callback = callback
             interactor?.create(this)
         } else {
-            IllegalArgumentException("MainContract.PresenterCallback should be set.")
+            throw IllegalArgumentException("MainContract.PresenterCallback should be set.")
         }
     }
 

@@ -49,7 +49,7 @@ class MainInteractor(
         if (callback is MainContract.InteractorCallback) {
             this.callback = callback
         } else {
-            IllegalArgumentException("MainContract.InteractorCallback should be set.")
+            throw IllegalArgumentException("MainContract.InteractorCallback should be set.")
         }
     }
 

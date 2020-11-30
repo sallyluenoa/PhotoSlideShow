@@ -29,7 +29,7 @@ class SplashPresenter(
             this.callback = callback
             interactor?.create(this)
         } else {
-            IllegalArgumentException("SplashContract.PresenterCallback should be set.")
+            throw IllegalArgumentException("SplashContract.PresenterCallback should be set.")
         }
     }
 

@@ -15,7 +15,7 @@ class SelectPresenter(
             this.callback = callback
             interactor?.create(this)
         } else {
-            IllegalArgumentException("SelectContract.PresenterCallback should be set.")
+            throw IllegalArgumentException("SelectContract.PresenterCallback should be set.")
         }
     }
 
