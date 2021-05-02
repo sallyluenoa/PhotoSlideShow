@@ -94,8 +94,8 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
             R.id.action_menu -> {
                 logI("Menu action is selected.")
                 true
