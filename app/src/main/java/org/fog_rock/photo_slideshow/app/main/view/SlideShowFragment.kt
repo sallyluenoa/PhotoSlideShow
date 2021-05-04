@@ -3,16 +3,14 @@ package org.fog_rock.photo_slideshow.app.main.view
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.databinding.FragmentSlideShowBinding
 
 class SlideShowFragment : Fragment() {
-
-    private val TAG = SlideShowFragment::class.java.simpleName
 
     companion object {
 
@@ -30,7 +28,7 @@ class SlideShowFragment : Fragment() {
 
     private val args: Bundle by lazy {
         arguments ?: run {
-            Log.e(TAG, "Not found arguments.")
+            logE("Not found arguments.")
             Bundle()
         }
     }
@@ -70,11 +68,11 @@ class SlideShowFragment : Fragment() {
      */
     fun setImageView(filePath: String): Boolean {
         if (filePath.isEmpty()) {
-            Log.e(TAG, "Failed to get initialized image file.")
+            logE("Failed to get initialized image file.")
             return false
         }
         val newBitmap = BitmapFactory.decodeFile(filePath) ?: run {
-            Log.e(TAG, "Failed to convert bitmap.")
+            logE("Failed to convert bitmap.")
             return false
         }
         binding.imageView.setImageBitmap(newBitmap)
