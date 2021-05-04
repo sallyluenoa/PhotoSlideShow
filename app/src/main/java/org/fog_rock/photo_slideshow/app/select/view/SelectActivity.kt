@@ -18,17 +18,19 @@ import org.fog_rock.photo_slideshow.core.extension.putArrayListExtra
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
+import org.fog_rock.photo_slideshow.databinding.ActivitySelectBinding
 
 class SelectActivity : AppCompatActivity(), SelectContract.PresenterCallback {
 
-    private val fragmentManager = supportFragmentManager
+    private lateinit var binding: ActivitySelectBinding
 
     private var presenter: SelectContract.Presenter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_select)
+        binding = ActivitySelectBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         replaceFragment(
             AppSimpleFragment.newInstance(
                 AppSimpleFragment.Layout.PROGRESS))
@@ -68,7 +70,7 @@ class SelectActivity : AppCompatActivity(), SelectContract.PresenterCallback {
      * 新しいフラグメントに置換する.
      */
     private fun replaceFragment(fragment: Fragment) {
-        fragmentManager.beginTransaction().apply {
+        supportFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container, fragment)
         }.commit()
     }

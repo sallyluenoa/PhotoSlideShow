@@ -8,8 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.fragment_slide_show.*
-import org.fog_rock.photo_slideshow.R
+import org.fog_rock.photo_slideshow.databinding.FragmentSlideShowBinding
 
 class SlideShowFragment : Fragment() {
 
@@ -36,13 +35,19 @@ class SlideShowFragment : Fragment() {
         }
     }
 
+    private var _binding: FragmentSlideShowBinding? = null
+    private val binding get() = _binding!!
+
     private var bitmap: Bitmap? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_slide_show, container, false)
+    ): View {
+        _binding = FragmentSlideShowBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -51,10 +56,11 @@ class SlideShowFragment : Fragment() {
         setImageView(filePath)
     }
 
-    override fun onDestroy() {
-        recycleBitmap(bitmap)
+    override fun onDestroyView() {
+        super.onDestroyView()
 
-        super.onDestroy()
+        _binding = null
+        recycleBitmap(bitmap)
     }
 
     /**
@@ -71,7 +77,7 @@ class SlideShowFragment : Fragment() {
             Log.e(TAG, "Failed to convert bitmap.")
             return false
         }
-        imageView.setImageBitmap(newBitmap)
+        binding.imageView.setImageBitmap(newBitmap)
         recycleBitmap(bitmap)
         bitmap = newBitmap
         return true

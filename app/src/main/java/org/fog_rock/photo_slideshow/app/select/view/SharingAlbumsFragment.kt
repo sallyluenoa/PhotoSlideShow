@@ -8,13 +8,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.photos.types.proto.Album
-import kotlinx.android.synthetic.main.fragment_sharing_albums.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
 import org.fog_rock.photo_slideshow.core.extension.getArrayExtra
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.putArrayExtra
+import org.fog_rock.photo_slideshow.databinding.FragmentSharingAlbumsBinding
 
 class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdapter.OnItemClickListener {
 
@@ -44,6 +44,9 @@ class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdap
         args.getArrayExtra<Album>(ARGS_ALBUMS) ?: emptyArray()
     }
 
+    private var _binding: FragmentSharingAlbumsBinding? = null
+    private val binding get() = _binding!!
+
     private var selectedView: View? = null
     private var selectedAlbum: Album? = null
 
@@ -51,17 +54,26 @@ class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdap
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_sharing_albums, container, false)
+    ): View {
+        _binding = FragmentSharingAlbumsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val albumsAdapter = AlbumsAdapter(albums, this)
-        recyclerView.apply {
+        binding.recyclerView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
             adapter = albumsAdapter
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _binding = null
     }
 
     override fun onDialogResult(requestCode: Int, resultCode: Int, data: Intent) {
