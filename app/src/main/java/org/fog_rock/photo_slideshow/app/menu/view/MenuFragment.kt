@@ -2,6 +2,9 @@ package org.fog_rock.photo_slideshow.app.menu.view
 
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -33,6 +36,11 @@ class MenuFragment : PreferenceFragmentCompat() {
      */
     interface Callback {
         /**
+         * フラグメントの生成.
+         */
+        fun onCreateMenuFragment()
+
+        /**
          * ライセンス情報がタップされたときのイベント.
          */
         fun onClickedLicenseInfo()
@@ -46,6 +54,15 @@ class MenuFragment : PreferenceFragmentCompat() {
          * サインアウトがタップされたときのイベント.
          */
         fun onClickedSignOut()
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        getActivityCallback()?.onCreateMenuFragment()
+        return super.onCreateView(inflater, container, savedInstanceState)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

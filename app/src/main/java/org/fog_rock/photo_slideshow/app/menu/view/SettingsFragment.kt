@@ -1,12 +1,33 @@
 package org.fog_rock.photo_slideshow.app.menu.view
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import org.fog_rock.photo_slideshow.R
 
 class SettingsFragment : PreferenceFragmentCompat() {
+
+    /**
+     * コールバック
+     */
+    interface Callback {
+        /**
+         * フラグメントの生成.
+         */
+        fun onCreateSettingsFragment()
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        getActivityCallback()?.onCreateSettingsFragment()
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences_settings, rootKey)
@@ -34,5 +55,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 true
             } else false
         }
+    }
+
+    private fun getActivityCallback(): Callback? {
+        val activity = requireActivity()
+        return if (activity is Callback) activity else null
     }
 }
