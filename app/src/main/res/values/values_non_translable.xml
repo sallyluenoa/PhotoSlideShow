@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="pref_key_root" translatable="false">preference_root</string>
+
     <string name="pref_key_account_name" translatable="false">account_name</string>
     <string name="pref_key_email_address" translatable="false">email_address</string>
     <string name="pref_key_settings" translatable="false">settings</string>

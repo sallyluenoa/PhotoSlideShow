@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.databinding.ActivityMenuBinding
 
@@ -19,7 +18,8 @@ class MenuActivity : AppCompatActivity(), MenuFragment.Callback, PreferenceFragm
 
         binding = ActivityMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
+        replaceFragment(MenuFragment.newInstance(
+            this,"Example Account", "example@gmail.com"))
     }
 
     override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {

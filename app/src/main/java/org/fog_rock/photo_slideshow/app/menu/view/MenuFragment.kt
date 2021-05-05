@@ -1,5 +1,6 @@
 package org.fog_rock.photo_slideshow.app.menu.view
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
@@ -15,12 +16,12 @@ class MenuFragment : PreferenceFragmentCompat() {
         private const val ARGS_EMAIL_ADDRESS = "email_address"
 
         fun newInstance(
-            rootKey: String? = null,
+            context: Context,
             accountName: String,
             emailAddress: String
         ): Fragment = MenuFragment().apply {
             arguments = Bundle().apply {
-                if (!rootKey.isNullOrEmpty()) putString(ARG_PREFERENCE_ROOT, rootKey)
+                putString(ARG_PREFERENCE_ROOT, context.getString(R.string.pref_key_root))
                 putString(ARGS_ACCOUNT_NAME, accountName)
                 putString(ARGS_EMAIL_ADDRESS, emailAddress)
             }
