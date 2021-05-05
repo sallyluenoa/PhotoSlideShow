@@ -3,7 +3,6 @@ box "VIPER" #FFFFEE
   participant View
   participant Presenter
   participant Interactor
-  participant Router
 end box
 
 box "Database" #FFEEFF
@@ -16,9 +15,10 @@ end box
 
 == Load Shared Albums ==
 
+[-> View: onCreate
 View++
-View -> Presenter++: requestLoadSharedAlbums
-  Presenter -> Interactor++: requestLoadSharedAlbums
+View -> Presenter++: create
+  Presenter -> Interactor++: create
 
     Interactor -> GoogleWebApis++: requestSharedAlbums
     return PhotosApiResult<Album>
@@ -27,8 +27,8 @@ View -> Presenter++: requestLoadSharedAlbums
       Interactor -> AppDatabase: updateUserInfo
     end
 
-  return Callback#requestLoadSharedAlbumsResult
-return Callback#requestLoadSharedAlbumsResult
+  return Callback#createLoadResult
+return Callback#createLoadResult
 
 View -> View: Show shared albums.
 [<-- View--

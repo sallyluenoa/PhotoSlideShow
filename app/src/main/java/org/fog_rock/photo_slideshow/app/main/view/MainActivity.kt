@@ -8,7 +8,6 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
@@ -30,6 +29,7 @@ import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
+import org.fog_rock.photo_slideshow.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         private const val ASPECT_HEIGHT = 1000L
     }
 
-    private val fragmentManager = supportFragmentManager
+    private lateinit var binding: ActivityMainBinding
 
     private var presenter: MainContract.Presenter? = null
 
@@ -51,8 +51,9 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
         replaceFragment(
             AppSimpleFragment.newInstance(
                 AppSimpleFragment.Layout.PROGRESS))
@@ -94,8 +95,8 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean =
+        when (item.itemId) {
             R.id.action_menu -> {
                 logI("Menu action is selected.")
                 true
@@ -146,7 +147,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
      * 新しいフラグメントに置換する.
      */
     private fun replaceFragment(fragment: Fragment) {
-        fragmentManager.beginTransaction().apply {
+        supportFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container, fragment)
         }.commit()
     }
@@ -156,7 +157,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
      * @param filePath 画像ファイルパス
      */
     private fun presentImage(filePath: String) {
-        for (fragment in fragmentManager.fragments) {
+        for (fragment in supportFragmentManager.fragments) {
             if (fragment is SlideShowFragment) {
                 logI("Update image to fragment. FilePath: $filePath")
                 fragment.setImageView(filePath)

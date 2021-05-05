@@ -23,6 +23,7 @@ import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
+import org.fog_rock.photo_slideshow.databinding.ActivitySplashBinding
 
 class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, AppDialogFragment.Callback {
 
@@ -30,14 +31,15 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
         private const val DISPLAY_LOGO_TIME_MILLIS = 2000L
     }
 
-    private val fragmentManager = supportFragmentManager
+    private lateinit var binding: ActivitySplashBinding
 
     private var presenter: SplashContract.Presenter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_splash)
+        binding = ActivitySplashBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         replaceFragment(
             AppSimpleFragment.newInstance(
                 AppSimpleFragment.Layout.LOGO))
@@ -101,7 +103,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
                 setPositiveLabel(R.string.retry)
                 setNegativeLabel(R.string.cancel)
                 setCancelable(false)
-            }.show(fragmentManager, request.code)
+            }.show(supportFragmentManager, request.code)
         }
     }
 
@@ -109,7 +111,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
      * 新しいフラグメントに置換する.
      */
     private fun replaceFragment(fragment: Fragment) {
-        fragmentManager.beginTransaction().apply {
+        supportFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container, fragment)
         }.commit()
     }

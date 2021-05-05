@@ -130,13 +130,13 @@ class AppDialogFragment : DialogFragment() {
             setMessage(message)
         }
         if (!positiveLabel.isNullOrEmpty()) {
-            builder.setPositiveButton(positiveLabel) { dialog, which ->
+            builder.setPositiveButton(positiveLabel) { _, which ->
                 dismiss()
                 callDialogResult(which)
             }
         }
         if (!negativeLabel.isNullOrEmpty()) {
-            builder.setNegativeButton(negativeLabel) { dialog, which ->
+            builder.setNegativeButton(negativeLabel) { _, which ->
                 dismiss()
                 callDialogResult(which)
             }

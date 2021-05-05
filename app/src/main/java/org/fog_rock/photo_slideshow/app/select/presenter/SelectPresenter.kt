@@ -15,7 +15,7 @@ class SelectPresenter(
             this.callback = callback
             interactor?.create(this)
         } else {
-            IllegalArgumentException("SelectContract.PresenterCallback should be set.")
+            throw IllegalArgumentException("SelectContract.PresenterCallback should be set.")
         }
     }
 
@@ -25,12 +25,7 @@ class SelectPresenter(
         callback = null
     }
 
-    override fun requestLoadSharedAlbums() {
-        interactor?.requestLoadSharedAlbums()
+    override fun createLoadResult(albums: List<Album>) {
+        callback?.createLoadResult(albums)
     }
-
-    override fun requestLoadSharedAlbumsResult(albums: List<Album>) {
-        callback?.requestLoadSharedAlbumsResult(albums)
-    }
-
 }

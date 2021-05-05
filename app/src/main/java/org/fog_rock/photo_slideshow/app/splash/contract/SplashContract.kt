@@ -7,7 +7,7 @@ import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
-class SplashContract {
+interface SplashContract {
 
     interface Presenter : ViperContract.Presenter {
         /**

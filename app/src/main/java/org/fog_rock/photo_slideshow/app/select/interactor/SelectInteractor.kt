@@ -25,8 +25,9 @@ class SelectInteractor(
     override fun create(callback: ViperContract.InteractorCallback) {
         if (callback is SelectContract.InteractorCallback) {
             this.callback = callback
+            createLoad()
         } else {
-            IllegalArgumentException("SelectContract.InteractorCallback should be set.")
+            throw IllegalArgumentException("SelectContract.InteractorCallback should be set.")
         }
     }
 
@@ -35,18 +36,18 @@ class SelectInteractor(
         callback = null
     }
 
-    override fun requestLoadSharedAlbums() {
+    private fun createLoad() {
         viewModelScope.launch(Dispatchers.Default) {
-            logI("requestLoadSharedAlbums: Start coroutine.")
-            val albums = loadSharedAlbumsResult()
+            logI("initLoad: Start coroutine.")
+            val albums = loadSharedAlbums()
             withContext(Dispatchers.Main) {
-                callback?.requestLoadSharedAlbumsResult(albums)
+                callback?.createLoadResult(albums)
             }
-            logI("requestLoadSharedAlbums: End coroutine.")
+            logI("initLoad: End coroutine.")
         }
     }
 
-    private suspend fun loadSharedAlbumsResult(): List<Album> {
+    private suspend fun loadSharedAlbums(): List<Album> {
         val emailAddress = googleWebApis.getSignedInEmailAddress()
         val userInfo = appDatabase.findUserInfoByEmailAddress(emailAddress) ?: run {
             logE("Not found UserInfo from database.")

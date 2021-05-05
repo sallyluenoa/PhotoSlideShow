@@ -23,17 +23,13 @@ namespace core.viper.ViperContract #DDDDDD {
 namespace app.select #FFFFEE {
 
   namespace app.select.SelectContract #EEEEEE {
-    interface Presenter {
-      + requestLoadSharedAlbums()
-    }
+    interface Presenter
     interface PresenterCallback {
-      + requestLoadSharedAlbumsResult(albums: List<Album>)
+      + createLoadResult(albums: List<Album>)
     }
-    interface Interactor {
-      + requestLoadSharedAlbums()
-    }
+    interface Interactor
     interface InteractorCallback {
-      + requestLoadSharedAlbumsResult(albums: List<Album>)
+      + createLoadResult(albums: List<Album>)
     }
 
     PresenterCallback -[hidden]-> Presenter
@@ -50,7 +46,8 @@ namespace app.select #FFFFEE {
   class SelectInteractor {
     - appDatabase: AppDatabase
     - googleWebApis: GoogleWebApis
-    - <b>[suspend]</b> loadSharedAlbumsResult(): List<Album>
+    - createLoad()
+    - <b>[suspend]</b> loadSharedAlbums(): List<Album>
   }
 
   SelectActivity o-down-- SelectPresenter: - presenter

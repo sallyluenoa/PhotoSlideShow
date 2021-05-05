@@ -3,37 +3,25 @@ package org.fog_rock.photo_slideshow.app.select.contract
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 
-class SelectContract {
+interface SelectContract {
 
-    interface Presenter : ViperContract.Presenter {
-        /**
-         * 共有アルバムの取得をリクエストする.
-         * @see PresenterCallback.requestLoadSharedAlbumsResult
-         */
-        fun requestLoadSharedAlbums()
-    }
+    interface Presenter : ViperContract.Presenter
 
     interface PresenterCallback : ViperContract.PresenterCallback {
         /**
-         * 共有アルバムの取得結果.
-         * @see Presenter.requestLoadSharedAlbums
+         * 初期化処理のデータロード結果.
+         * @see ViperContract.Presenter.create
          */
-        fun requestLoadSharedAlbumsResult(albums: List<Album>)
+        fun createLoadResult(albums: List<Album>)
     }
 
-    interface Interactor : ViperContract.Interactor {
-        /**
-         * 共有アルバムの取得をリクエストする.
-         * @see InteractorCallback.requestLoadSharedAlbumsResult
-         */
-        fun requestLoadSharedAlbums()
-    }
+    interface Interactor : ViperContract.Interactor
 
     interface InteractorCallback : ViperContract.InteractorCallback {
         /**
-         * 共有アルバムの取得結果.
-         * @see Interactor.requestLoadSharedAlbums
+         * 初期化処理のデータロード結果.
+         * @see ViperContract.Interactor.create
          */
-        fun requestLoadSharedAlbumsResult(albums: List<Album>)
+        fun createLoadResult(albums: List<Album>)
     }
 }

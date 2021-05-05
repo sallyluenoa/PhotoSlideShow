@@ -10,7 +10,7 @@ import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
-class MainContract {
+interface MainContract {
 
     interface Presenter : ViperContract.Presenter {
         /**
