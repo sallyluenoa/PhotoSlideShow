@@ -8,15 +8,17 @@ import androidx.preference.PreferenceFragmentCompat
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
 import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.databinding.ActivityMenuBinding
 
 class MenuActivity : AppCompatActivity(), MenuFragment.Callback, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
-    private val fragmentManager = supportFragmentManager
+    private lateinit var binding: ActivityMenuBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_menu)
+        binding = ActivityMenuBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
     }
 
@@ -47,7 +49,7 @@ class MenuActivity : AppCompatActivity(), MenuFragment.Callback, PreferenceFragm
      * 新しいフラグメントに置換する.
      */
     private fun replaceFragment(fragment: Fragment) {
-        fragmentManager.beginTransaction().apply {
+        supportFragmentManager.beginTransaction().apply {
             replace(R.id.fragment_container, fragment)
             addToBackStack(null)
         }.commit()
