@@ -3,8 +3,6 @@ package org.fog_rock.photo_slideshow.app.main.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -20,7 +18,6 @@ import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
-import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
@@ -53,10 +50,13 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
         replaceFragment(
             AppSimpleFragment.newInstance(
                 AppSimpleFragment.Layout.PROGRESS))
+
+        binding.menuButton.setOnClickListener {
+            presenter?.requestShowMenu()
+        }
 
         presenter = MainPresenter(
             MainInteractor(
@@ -89,33 +89,6 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
         super.onPause()
     }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            R.id.action_menu -> {
-                logI("Menu action is selected.")
-                true
-            }
-            R.id.action_license -> {
-                logI("License action is selected.")
-                presenter?.requestShowLicenses()
-                true
-            }
-            R.id.action_sign_out -> {
-                logI("Sign out action is selected.")
-                presenter?.requestSignOut()
-                true
-            }
-            else -> {
-                logE("No actions are found.")
-                super.onOptionsItemSelected(item)
-            }
-        }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

@@ -6,6 +6,7 @@
 
     <!-- See https://www.colordic.org/ -->
 
+    <color name="colorClear">#00000000</color>
     <color name="colorWhite">@android:color/white</color>
     <color name="colorBlack">@android:color/black</color>
 

@@ -30,6 +30,11 @@ enum class UpdatePhotosRequest(val code: Int) {
     COMPLETED(1111),
 
     /**
+     * メニュー表示
+     */
+    SHOW_MENU(2000),
+
+    /**
      * 不明.
      */
     UNKNOWN(9999),

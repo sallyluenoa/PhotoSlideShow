@@ -3,7 +3,6 @@ package org.fog_rock.photo_slideshow.app.main.presenter
 import android.app.Activity
 import android.content.Intent
 import com.google.photos.types.proto.Album
-import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
 import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
@@ -47,12 +46,8 @@ class MainPresenter(
         presentSequence(UpdatePhotosRequest.CONFIG_UPDATE)
     }
 
-    override fun requestShowLicenses() {
-        router?.startOssLicensesMenuActivity((activity() ?: return), R.string.license)
-    }
-
-    override fun requestSignOut() {
-        interactor?.requestSignOut()
+    override fun requestShowMenu() {
+        router?.startMenuActivity((activity() ?: return), UpdatePhotosRequest.SHOW_MENU.code)
     }
 
     override fun evaluateActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -74,6 +69,9 @@ class MainPresenter(
                 }
                 logI("Succeeded to get albums selected by user.")
                 presentSequence(request.next(), albums)
+            }
+            UpdatePhotosRequest.SHOW_MENU -> {
+                logI("result of showing menu.")
             }
             else -> {
                 logE("Unknown requestCode: $requestCode")

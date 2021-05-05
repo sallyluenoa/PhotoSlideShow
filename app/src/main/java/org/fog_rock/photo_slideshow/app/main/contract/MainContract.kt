@@ -26,14 +26,9 @@ interface MainContract {
         fun requestUpdateDisplayedPhotos()
 
         /**
-         * ライセンス表示を要求.
+         * メニュー画面表示を要求.
          */
-        fun requestShowLicenses()
-
-        /**
-         * サインアウトを要求.
-         */
-        fun requestSignOut()
+        fun requestShowMenu()
 
         /**
          * Activity#onActivityResult()の結果を評価する.
@@ -135,8 +130,8 @@ interface MainContract {
         fun startSelectActivity(activity: Activity, requestCode: Int)
 
         /**
-         * OssLicensesMenuActivityの表示.
+         * MenuActivityの表示.
          */
-        fun startOssLicensesMenuActivity(activity: Activity, titleResId: Int)
+        fun startMenuActivity(activity: Activity, requestCode: Int)
     }
 }
