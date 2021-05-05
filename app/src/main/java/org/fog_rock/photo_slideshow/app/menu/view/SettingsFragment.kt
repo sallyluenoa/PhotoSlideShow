@@ -33,7 +33,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         setPreferencesFromResource(R.xml.preferences_settings, rootKey)
 
         val numberListPreference = findPreference<ListPreference>(getString(R.string.pref_key_number_of_photos))
-        numberListPreference?.setOnPreferenceChangeListener { preference, newValue ->
+        numberListPreference?.setOnPreferenceChangeListener { preference, _ ->
             if (preference is ListPreference) {
                 preference.summary = getString(R.string.number_of_photos_summary, preference.entry)
                 true
@@ -41,7 +41,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         val intervalListPreference = findPreference<ListPreference>(getString(R.string.pref_key_time_interval_of_photos))
-        intervalListPreference?.setOnPreferenceChangeListener { preference, newValue ->
+        intervalListPreference?.setOnPreferenceChangeListener { preference, _ ->
             if (preference is ListPreference) {
                 preference.summary = getString(R.string.time_interval_of_photos_summary, preference.entry)
                 true
@@ -49,7 +49,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         val updateTimeListPreference = findPreference<ListPreference>(getString(R.string.pref_key_server_update_time))
-        updateTimeListPreference?.setOnPreferenceChangeListener { preference, newValue ->
+        updateTimeListPreference?.setOnPreferenceChangeListener { preference, _ ->
             if (preference is ListPreference) {
                 preference.summary = getString(R.string.server_update_time_summary, preference.entry)
                 true
