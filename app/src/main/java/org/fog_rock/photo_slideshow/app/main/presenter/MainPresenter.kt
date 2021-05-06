@@ -106,10 +106,6 @@ class MainPresenter(
         }
     }
 
-    override fun requestSignOutResult(result: ApiResult) {
-        callback?.requestSignOutResult(result)
-    }
-
     private fun activity(): Activity? = callback?.getActivity()
 
     /**

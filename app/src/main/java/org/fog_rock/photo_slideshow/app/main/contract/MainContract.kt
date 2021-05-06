@@ -49,11 +49,6 @@ interface MainContract {
          * @see Presenter.requestUpdateDisplayedPhotos
          */
         fun requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest)
-
-        /**
-         * サインアウトの要求結果.
-         */
-        fun requestSignOutResult(result: ApiResult)
     }
 
     interface Interactor : ViperContract.Interactor {
@@ -74,12 +69,6 @@ interface MainContract {
          * @see InteractorCallback.requestUpdateDatabaseResult
          */
         fun requestUpdateDatabase(photosInfo: List<AppDatabase.PhotoInfo>)
-
-        /**
-         * サインアウト要求.
-         * @see InteractorCallback.requestSignOutResult
-         */
-        fun requestSignOut()
 
         /**
          * 写真更新する必要があるか.
@@ -110,12 +99,6 @@ interface MainContract {
          * @see Interactor.requestUpdateDatabase
          */
         fun requestUpdateDatabaseResult(isSucceeded: Boolean)
-
-        /**
-         * サインアウト結果.
-         * @see Interactor.requestSignOut
-         */
-        fun requestSignOutResult(result: ApiResult)
     }
 
     interface Router : ViperContract.Router {

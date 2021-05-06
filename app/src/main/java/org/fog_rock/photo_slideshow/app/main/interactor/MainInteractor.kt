@@ -89,10 +89,6 @@ class MainInteractor(
         }
     }
 
-    override fun requestSignOut() {
-        // TODO: Implement later.
-    }
-
     override fun isNeededUpdatePhotos(): Boolean =
         userInfoData.userInfo.isNeededUpdatePhotos(INTERVAL_UPDATE_MILLISECS)
 

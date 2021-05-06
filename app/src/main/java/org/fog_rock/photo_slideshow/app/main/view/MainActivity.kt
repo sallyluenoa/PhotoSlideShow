@@ -110,12 +110,6 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         }
     }
 
-    override fun requestSignOutResult(result: ApiResult) {
-        if (result == ApiResult.SUCCEEDED) {
-            finish()
-        }
-    }
-
     /**
      * 新しいフラグメントに置換する.
      */
