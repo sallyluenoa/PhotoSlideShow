@@ -12,8 +12,10 @@ import org.fog_rock.photo_slideshow.app.menu.contract.MenuContract
 import org.fog_rock.photo_slideshow.app.menu.interactor.MenuInteractor
 import org.fog_rock.photo_slideshow.app.menu.presenter.MenuPresenter
 import org.fog_rock.photo_slideshow.app.menu.router.MenuRouter
+import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
@@ -44,6 +46,7 @@ class MenuActivity : AppCompatActivity(),
 
         presenter = MenuPresenter(
             MenuInteractor(
+                AppDatabaseImpl(),
                 GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())
             ),
             MenuRouter()
@@ -92,6 +95,14 @@ class MenuActivity : AppCompatActivity(),
 
     override fun createLoadResult(accountName: String, emailAddress: String) {
         replaceFragment(MenuFragment.newInstance(this, accountName, emailAddress), false)
+    }
+
+    override fun requestChangeUserResult(result: ApiResult) {
+//        TODO("Not yet implemented")
+    }
+
+    override fun requestSignOutResult(result: ApiResult) {
+//        TODO("Not yet implemented")
     }
 
     /**

@@ -8,12 +8,13 @@ import org.fog_rock.photo_slideshow.core.database.entity.SelectedAlbum
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfoData
 import org.fog_rock.photo_slideshow.core.database.room.SingletonRoomObject
+import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 class AppDatabaseImpl(): AppDatabase {
 
     override suspend fun updateUserInfo(emailAddress: String, tokenInfo: TokenInfo) {
-        val userInfo = userInfoDao().findByEmailAddress(emailAddress)
+        val userInfo = findUserInfoByEmailAddress(emailAddress)
         if (userInfo != null) {
             userInfoDao().update(userInfo.copy(tokenInfo))
         } else {
@@ -21,7 +22,11 @@ class AppDatabaseImpl(): AppDatabase {
         }
     }
 
-    override suspend fun deleteUserInfo(userInfo: UserInfo) {
+    override suspend fun deleteUserInfo(emailAddress: String) {
+        val userInfo = findUserInfoByEmailAddress(emailAddress) ?: run {
+            logW("Not found userInfo.")
+            return
+        }
         userInfoDao().delete(userInfo)
     }
 
