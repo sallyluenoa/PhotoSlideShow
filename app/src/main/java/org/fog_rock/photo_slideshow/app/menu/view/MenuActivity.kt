@@ -1,5 +1,6 @@
 package org.fog_rock.photo_slideshow.app.menu.view
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -7,14 +8,25 @@ import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.app.menu.contract.MenuContract
+import org.fog_rock.photo_slideshow.app.menu.interactor.MenuInteractor
+import org.fog_rock.photo_slideshow.app.menu.presenter.MenuPresenter
+import org.fog_rock.photo_slideshow.app.menu.router.MenuRouter
+import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
+import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
+import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
+import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
+import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
 import org.fog_rock.photo_slideshow.databinding.ActivityMenuBinding
 
 class MenuActivity : AppCompatActivity(),
+    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
     MenuFragment.Callback, SettingsFragment.Callback,
-    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+    MenuContract.PresenterCallback {
 
     private lateinit var binding: ActivityMenuBinding
+
+    private var presenter: MenuContract.Presenter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,8 +38,17 @@ class MenuActivity : AppCompatActivity(),
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        replaceFragment(MenuFragment.newInstance(
-            this,"Example Account", "example@gmail.com"), false)
+        replaceFragment(
+            AppSimpleFragment.newInstance(
+                AppSimpleFragment.Layout.PROGRESS), false)
+
+        presenter = MenuPresenter(
+            MenuInteractor(
+                GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())
+            ),
+            MenuRouter()
+        )
+        presenter?.create(this)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
@@ -52,22 +73,25 @@ class MenuActivity : AppCompatActivity(),
     }
 
     override fun onClickedLicenseInfo() {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        logI("onClickedLicenseInfo")
+        presenter?.requestShowLicenses()
     }
 
     override fun onClickedChangeUser() {
-//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        logI("onClickedChangeUser")
+        presenter?.requestChangeUser()
     }
 
     override fun onClickedSignOut() {
- //       TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        logI("onClickedSignOut")
+        presenter?.requestSignOut()
     }
 
     override fun onCreateSettingsFragment() {
         binding.toolbar.setTitle(R.string.settings)
+    }
+
+    override fun getActivity(): Activity = this
+
+    override fun createLoadResult(accountName: String, emailAddress: String) {
+        replaceFragment(MenuFragment.newInstance(this, accountName, emailAddress), false)
     }
 
     /**
