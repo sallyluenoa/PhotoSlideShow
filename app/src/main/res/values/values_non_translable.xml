@@ -14,4 +14,8 @@
     <string name="pref_key_time_interval_of_photos" translatable="false">time_interval_of_photos</string>
     <string name="pref_key_server_update_time" translatable="false">server_update_time</string>
 
+    <string name="default_value_number_of_photos" translatable="false">30</string>
+    <string name="default_value_time_interval_of_photos" translatable="false">30</string>
+    <string name="default_value_server_update_time" translatable="false">24</string>
+
 </resources>
