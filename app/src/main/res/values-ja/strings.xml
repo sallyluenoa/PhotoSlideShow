@@ -57,4 +57,15 @@
     <string name="confirm_select_album_title">アルバムが選択されました</string>
     <string name="confirm_select_album_message">スライドショーを開始しますか?\nアルバム名: %1$s</string>
 
+    <string name="confirm_change_user_title">ユーザー切り替えをします</string>
+    <string name="confirm_change_user_message">Googleアカウントへのアクセス及び内部データは保持されます。</string>
+    <string name="confirm_sign_out_title">サインアウトをします</string>
+    <string name="confirm_sign_out_message">Googleアカウントへのアクセス及び内部データはすべて削除されます。</string>
+
+    <string name="failed_change_user_title">ユーザー切り替えに失敗しました</string>
+    <string name="failed_change_user_message">@string/try_again_message</string>
+    <string name="failed_sign_out_title">サインアウトに失敗しました</string>
+    <string name="failed_sign_out_message">@string/try_again_message</string>
+    <string name="try_again_message">しばらくしてからもう一度やり直してください。</string>
+
 </resources>
