@@ -14,13 +14,13 @@ interface MenuContract {
 
         /**
          * ユーザーの切り替えを要求.
-         * @see PresenterCallback.requestChangeUserResult
+         * @see PresenterCallback.onFailedChangeUser
          */
         fun requestChangeUser()
 
         /**
          * サインアウトを要求.
-         * @see PresenterCallback.requestSignOutResult
+         * @see PresenterCallback.onFailedSignOut
          */
         fun requestSignOut()
     }
@@ -33,16 +33,16 @@ interface MenuContract {
         fun createLoadResult(accountName: String, emailAddress: String)
 
         /**
-         * ユーザーの切り替え要求の結果.
+         * ユーザーの切り替えに失敗.
          * @see Presenter.requestChangeUser
          */
-        fun requestChangeUserResult(result: ApiResult)
+        fun onFailedChangeUser()
 
         /**
-         * サインアウト要求の結果.
+         * サインアウトに失敗.
          * @see Presenter.requestSignOut
          */
-        fun requestSignOutResult(result: ApiResult)
+        fun onFailedSignOut()
     }
 
     interface Interactor : ViperContract.Interactor {
@@ -80,6 +80,12 @@ interface MenuContract {
     }
 
     interface Router : ViperContract.Router {
+        /**
+         * SplashActivityの表示.
+         * これまでの画面はすべて終了する.
+         */
+        fun startSplashActivityAndFinishAll(activity: Activity)
+
         /**
          * OssLicensesMenuActivityの表示.
          */

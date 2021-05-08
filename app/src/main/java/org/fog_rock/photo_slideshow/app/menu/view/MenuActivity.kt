@@ -21,7 +21,6 @@ import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
 import org.fog_rock.photo_slideshow.core.extension.logI
-import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
@@ -142,6 +141,13 @@ class MenuActivity : AppCompatActivity(),
         presenter?.create(this)
     }
 
+    override fun onDestroy() {
+        presenter?.destroy()
+        presenter = null
+
+        super.onDestroy()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             android.R.id.home -> {
@@ -207,20 +213,12 @@ class MenuActivity : AppCompatActivity(),
         replaceFragment(MenuFragment.newInstance(this, accountName, emailAddress), false)
     }
 
-    override fun requestChangeUserResult(result: ApiResult) {
-        if (result == ApiResult.SUCCEEDED) {
-            finishWithSignedOut()
-        } else {
-            showDialogFragment(DialogRequest.FAILED_CHANGE_USER)
-        }
+    override fun onFailedChangeUser() {
+        showDialogFragment(DialogRequest.FAILED_CHANGE_USER)
     }
 
-    override fun requestSignOutResult(result: ApiResult) {
-        if (result == ApiResult.SUCCEEDED) {
-            finishWithSignedOut()
-        } else {
-            showDialogFragment(DialogRequest.FAILED_SIGN_OUT)
-        }
+    override fun onFailedSignOut() {
+        showDialogFragment(DialogRequest.FAILED_SIGN_OUT)
     }
 
     /**
@@ -238,12 +236,5 @@ class MenuActivity : AppCompatActivity(),
      */
     private fun showDialogFragment(request: DialogRequest) {
         request.show(this, supportFragmentManager)
-    }
-
-    private fun finishWithSignedOut() {
-        val intent = Intent().apply {
-        }
-        setResult(RESULT_OK, intent)
-        finish()
     }
 }
