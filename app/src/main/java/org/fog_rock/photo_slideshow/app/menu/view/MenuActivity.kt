@@ -209,7 +209,7 @@ class MenuActivity : AppCompatActivity(),
 
     override fun getActivity(): Activity = this
 
-    override fun createLoadResult(accountName: String, emailAddress: String) {
+    override fun onCreateResult(accountName: String, emailAddress: String) {
         replaceFragment(MenuFragment.newInstance(this, accountName, emailAddress), false)
     }
 

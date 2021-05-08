@@ -30,7 +30,7 @@ interface MenuContract {
          * 初期化処理のデータロード結果.
          * @see ViperContract.Presenter.create
          */
-        fun createLoadResult(accountName: String, emailAddress: String)
+        fun onCreateResult(accountName: String, emailAddress: String)
 
         /**
          * ユーザーの切り替えに失敗.
@@ -48,13 +48,13 @@ interface MenuContract {
     interface Interactor : ViperContract.Interactor {
         /**
          * ユーザーの切り替えを要求.
-         * @see InteractorCallback.requestChangeUserResult
+         * @see InteractorCallback.onChangeUserResult
          */
         fun requestChangeUser()
 
         /**
          * サインアウトを要求.
-         * @see InteractorCallback.requestSignOutResult
+         * @see InteractorCallback.onSignOutResult
          */
         fun requestSignOut()
     }
@@ -64,19 +64,19 @@ interface MenuContract {
          * 初期化処理のデータロード結果.
          * @see ViperContract.Interactor.create
          */
-        fun createLoadResult(accountName: String, emailAddress: String)
+        fun onCreateResult(accountName: String, emailAddress: String)
 
         /**
          * ユーザーの切り替え要求の結果.
          * @see Interactor.requestChangeUser
          */
-        fun requestChangeUserResult(result: ApiResult)
+        fun onChangeUserResult(result: ApiResult)
 
         /**
          * サインアウト要求の結果.
          * @see Interactor.requestSignOut
          */
-        fun requestSignOutResult(result: ApiResult)
+        fun onSignOutResult(result: ApiResult)
     }
 
     interface Router : ViperContract.Router {

@@ -35,7 +35,7 @@ class MenuInteractor(
         viewModelScope.launch(Dispatchers.Default) {
             val result = changeUser()
             withContext(Dispatchers.Main) {
-                callback?.requestChangeUserResult(result)
+                callback?.onChangeUserResult(result)
             }
         }
     }
@@ -44,7 +44,7 @@ class MenuInteractor(
         viewModelScope.launch(Dispatchers.Default) {
             val result = signOut()
             withContext(Dispatchers.Main) {
-                callback?.requestSignOutResult(result)
+                callback?.onSignOutResult(result)
             }
         }
     }
@@ -55,7 +55,7 @@ class MenuInteractor(
             val accountName = account.displayName ?: ""
             val emailAddress = account.email ?: ""
             withContext(Dispatchers.Main) {
-                callback?.createLoadResult(accountName, emailAddress)
+                callback?.onCreateResult(accountName, emailAddress)
             }
         }
     }

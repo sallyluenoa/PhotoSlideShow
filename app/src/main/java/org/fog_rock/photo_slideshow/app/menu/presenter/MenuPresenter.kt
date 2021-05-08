@@ -42,12 +42,12 @@ class MenuPresenter(
         interactor?.requestSignOut()
     }
 
-    override fun createLoadResult(accountName: String, emailAddress: String) {
-        callback?.createLoadResult(accountName, emailAddress)
+    override fun onCreateResult(accountName: String, emailAddress: String) {
+        callback?.onCreateResult(accountName, emailAddress)
     }
 
-    override fun requestChangeUserResult(result: ApiResult) {
-        logI("requestChangeUserResult: $result")
+    override fun onChangeUserResult(result: ApiResult) {
+        logI("onChangeUserResult: $result")
         if (result == ApiResult.SUCCEEDED || result == ApiResult.INVALID) {
             logI("Start SplashActivity.")
             router?.startSplashActivityAndFinishAll(activity() ?: return)
@@ -57,8 +57,8 @@ class MenuPresenter(
         }
     }
 
-    override fun requestSignOutResult(result: ApiResult) {
-        logI("requestSignOutResult: $result")
+    override fun onSignOutResult(result: ApiResult) {
+        logI("onSignOutResult: $result")
         if (result == ApiResult.SUCCEEDED || result == ApiResult.INVALID) {
             logI("Start SplashActivity.")
             router?.startSplashActivityAndFinishAll(activity() ?: return)
