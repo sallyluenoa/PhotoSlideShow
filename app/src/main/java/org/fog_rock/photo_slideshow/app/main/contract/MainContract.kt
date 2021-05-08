@@ -8,7 +8,6 @@ import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
 import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
-import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 interface MainContract {
 
@@ -102,11 +101,6 @@ interface MainContract {
     }
 
     interface Router : ViperContract.Router {
-        /**
-         * SplashActivityの表示.
-         */
-        fun startSplashActivity(activity: Activity)
-
         /**
          * SelectActivityの表示.
          */

@@ -10,10 +10,6 @@ import org.fog_rock.photo_slideshow.app.splash.view.SplashActivity
 
 class MainRouter : MainContract.Router {
 
-    override fun startSplashActivity(activity: Activity) {
-        activity.startActivity(Intent(activity, SplashActivity::class.java))
-    }
-
     override fun startSelectActivity(activity: Activity, requestCode: Int) {
         activity.startActivityForResult(Intent(activity, SelectActivity::class.java), requestCode)
     }
