@@ -36,11 +36,11 @@ class MenuActivity : AppCompatActivity(),
      */
     private enum class DialogRequest (
         val code: Int,
-        @StringRes val titleResId: Int,
-        @StringRes val messageResId: Int,
-        @StringRes val positiveResId: Int,
-        @StringRes val negativeResId: Int,
-        val cancelable: Boolean
+        @StringRes private val titleResId: Int?,
+        @StringRes private val messageResId: Int?,
+        @StringRes private val positiveResId: Int?,
+        @StringRes private val negativeResId: Int?,
+        private val cancelable: Boolean
     ) {
         /**
          * ユーザー切り替えの確認.
@@ -74,7 +74,7 @@ class MenuActivity : AppCompatActivity(),
             R.string.failed_change_user_title,
             R.string.failed_change_user_message,
             R.string.ok,
-            R.string.empty,
+            null,
             false
         ),
 
@@ -86,7 +86,7 @@ class MenuActivity : AppCompatActivity(),
             R.string.failed_sign_out_title,
             R.string.failed_sign_out_message,
             R.string.ok,
-            R.string.empty,
+            null,
             false
         ),
         ;
@@ -104,10 +104,10 @@ class MenuActivity : AppCompatActivity(),
          */
         fun show(context: Context, fragmentManager: FragmentManager) {
             AppDialogFragment.Builder(context).apply {
-                if (titleResId != R.string.empty) setTitle(titleResId)
-                if (messageResId != R.string.empty) setMessage(messageResId)
-                if (positiveResId != R.string.empty) setPositiveLabel(positiveResId)
-                if (negativeResId != R.string.empty) setNegativeLabel(negativeResId)
+                if (titleResId != null) setTitle(titleResId)
+                if (messageResId != null) setMessage(messageResId)
+                if (positiveResId != null) setPositiveLabel(positiveResId)
+                if (negativeResId != null) setNegativeLabel(negativeResId)
                 setCancelable(cancelable)
             }.show(fragmentManager, code)
         }
