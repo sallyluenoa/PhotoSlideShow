@@ -80,8 +80,8 @@ class MainPresenter(
         }
     }
 
-    override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
-        callback?.requestLoadDisplayedPhotosResult(displayedPhotos)
+    override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>, timeIntervalSecs: Int) {
+        callback?.requestLoadDisplayedPhotosResult(displayedPhotos, timeIntervalSecs)
     }
 
     override fun requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo>) {

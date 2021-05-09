@@ -14,6 +14,7 @@ import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
 import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
 import org.fog_rock.photo_slideshow.app.main.router.MainRouter
 import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
+import org.fog_rock.photo_slideshow.app.module.lib.impl.AppSettingsImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
@@ -31,8 +32,6 @@ import org.fog_rock.photo_slideshow.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     companion object {
-        private const val PRESENT_TIME_MILLISECS = 5000L
-
         private const val ASPECT_WIDTH = 500L
         private const val ASPECT_HEIGHT = 1000L
     }
@@ -43,6 +42,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     private var displayedPhotos = emptyList<DisplayedPhoto>()
     private var displayedIndex = 0
+    private var timeIntervalSecs = 0
     private var isRequestingUpdatePhotos = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
         presenter = MainPresenter(
             MainInteractor(
+                AppSettingsImpl(this),
                 AppDatabaseImpl(),
                 PhotosDownloaderImpl(FileDownloaderImpl(), SizeCalculatorImpl(), ASPECT_WIDTH, ASPECT_HEIGHT),
                 GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())
@@ -98,8 +99,10 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     override fun getActivity(): Activity = this
 
-    override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
-        updateDisplayedPhotos(displayedPhotos)
+    override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>, timeIntervalSecs: Int) {
+        logI("requestLoadDisplayedPhotosResult() " +
+                "displayedPhotosSize: ${displayedPhotos.size}, timeIntervalSecs: $timeIntervalSecs")
+        updateDisplayedPhotos(displayedPhotos, timeIntervalSecs)
     }
 
     override fun requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest) {
@@ -152,7 +155,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
                         withContext(Dispatchers.Main) {
                             presentImage(displayedPhoto.outputPath)
                         }
-                        delay(PRESENT_TIME_MILLISECS)
+                        delay(timeIntervalSecs * 1000L)
                     } else {
                         // 一秒間待つ.
                         logI("Wait 1 sec...")
@@ -195,7 +198,8 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         }
 
     @Synchronized
-    private fun updateDisplayedPhotos(displayedPhotos: List<DisplayedPhoto>) {
+    private fun updateDisplayedPhotos(displayedPhotos: List<DisplayedPhoto>, timeIntervalSecs: Int) {
+        this.timeIntervalSecs = timeIntervalSecs
         if (displayedPhotos.isNotEmpty()) {
             logI("Update new displayed photos.")
             this.displayedPhotos = displayedPhotos

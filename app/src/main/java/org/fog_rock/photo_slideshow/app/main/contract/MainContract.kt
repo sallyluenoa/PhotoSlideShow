@@ -13,13 +13,13 @@ interface MainContract {
 
     interface Presenter : ViperContract.Presenter {
         /**
-         * 写真のロードをリクエストする.
+         * 写真表示のためのデータ取得を要求.
          * @see PresenterCallback.requestLoadDisplayedPhotosResult
          */
         fun requestLoadDisplayedPhotos()
 
         /**
-         * 写真更新に必要な一連処理をリクエストする.
+         * 写真更新に必要な一連処理を要求.
          * @see PresenterCallback.requestUpdateDisplayedPhotosResult
          */
         fun requestUpdateDisplayedPhotos()
@@ -38,10 +38,10 @@ interface MainContract {
 
     interface PresenterCallback : ViperContract.PresenterCallback {
         /**
-         * 写真をロードした結果.
+         * 写真表示のためのデータ取得結果.
          * @see Presenter.requestLoadDisplayedPhotos
          */
-        fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
+        fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>, timeIntervalSecs: Int)
 
         /**
          * 写真更新に必要な一連処理の結果.
@@ -52,7 +52,7 @@ interface MainContract {
 
     interface Interactor : ViperContract.Interactor {
         /**
-         * ユーザー情報の取得要求.
+         * 写真表示のためのデータ取得を要求.
          * @see InteractorCallback.requestLoadDisplayedPhotosResult
          */
         fun requestLoadDisplayedPhotos()
@@ -82,10 +82,10 @@ interface MainContract {
 
     interface InteractorCallback : ViperContract.InteractorCallback {
         /**
-         * ユーザー情報の取得要求の結果.
+         * 写真表示のためのデータ取得結果.
          * @see Interactor.requestLoadDisplayedPhotos
          */
-        fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>)
+        fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>, timeIntervalSecs: Int)
 
         /**
          * 写真リストのダウンロード要求の結果.
