@@ -19,6 +19,7 @@ import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
+import org.fog_rock.photo_slideshow.core.extension.ONE_SECOND_MILLIS
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
@@ -155,11 +156,11 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
                         withContext(Dispatchers.Main) {
                             presentImage(displayedPhoto.outputPath)
                         }
-                        delay(timeIntervalSecs * 1000L)
+                        delay(timeIntervalSecs * ONE_SECOND_MILLIS)
                     } else {
                         // 一秒間待つ.
                         logI("Wait 1 sec...")
-                        delay(1000L)
+                        delay(ONE_SECOND_MILLIS)
                     }
                 }
             } catch (e: CancellationException) {

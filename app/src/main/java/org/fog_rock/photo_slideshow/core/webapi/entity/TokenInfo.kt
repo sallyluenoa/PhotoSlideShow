@@ -1,6 +1,8 @@
 package org.fog_rock.photo_slideshow.core.webapi.entity
 
 import com.google.api.client.auth.oauth2.TokenResponse
+import org.fog_rock.photo_slideshow.core.extension.ONE_MINUTE_MILLIS
+import org.fog_rock.photo_slideshow.core.extension.ONE_SECOND_MILLIS
 import org.fog_rock.photo_slideshow.core.extension.logD
 import org.fog_rock.photo_slideshow.core.extension.toDateString
 
@@ -18,10 +20,10 @@ data class TokenInfo(
 
     companion object {
         // 有効期限までのバッファー時間
-        private const val INTERVAL_EXPIRED_MILLISECS = 60 * 1000L
+        private const val INTERVAL_EXPIRED_MILLIS = ONE_MINUTE_MILLIS
 
         private fun convertExpiredAccessTokenTimeMillis(expiresInSeconds: Long?): Long =
-            if (expiresInSeconds != null) System.currentTimeMillis() + expiresInSeconds * 1000L else 0
+            if (expiresInSeconds != null) System.currentTimeMillis() + expiresInSeconds * ONE_SECOND_MILLIS else 0
     }
 
     constructor(): this("", "", 0)
@@ -48,7 +50,7 @@ data class TokenInfo(
      * @return 現在の時間が「アクセストークン有効期限 - バッファー時間」を過ぎていなければ true
      */
     fun isAvailableAccessToken(): Boolean {
-        val availableAccessTokenTimeMillis = expiredAccessTokenTimeMillis - INTERVAL_EXPIRED_MILLISECS
+        val availableAccessTokenTimeMillis = expiredAccessTokenTimeMillis - INTERVAL_EXPIRED_MILLIS
         logD("Access token available date: ${availableAccessTokenTimeMillis.toDateString()}")
         return System.currentTimeMillis() < availableAccessTokenTimeMillis
     }
