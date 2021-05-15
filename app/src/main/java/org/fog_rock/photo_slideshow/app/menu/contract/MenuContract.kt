@@ -30,7 +30,10 @@ interface MenuContract {
          * 初期化処理のデータロード結果.
          * @see ViperContract.Presenter.create
          */
-        fun onCreateResult(accountName: String, emailAddress: String)
+        fun onCreateResult(
+            accountName: String, emailAddress: String,
+            numberOfPhotos: Int, timeIntervalOfPhotos: Int, serverUpdateTime: Int
+        )
 
         /**
          * ユーザーの切り替えに失敗.
@@ -64,7 +67,10 @@ interface MenuContract {
          * 初期化処理のデータロード結果.
          * @see ViperContract.Interactor.create
          */
-        fun onCreateResult(accountName: String, emailAddress: String)
+        fun onCreateResult(
+            accountName: String, emailAddress: String,
+            numberOfPhotos: Int, timeIntervalOfPhotos: Int, serverUpdateTime: Int
+        )
 
         /**
          * ユーザーの切り替え要求の結果.

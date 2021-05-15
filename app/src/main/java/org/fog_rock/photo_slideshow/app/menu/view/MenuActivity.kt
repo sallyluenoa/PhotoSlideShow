@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.MenuItem
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +18,7 @@ import org.fog_rock.photo_slideshow.app.menu.interactor.MenuInteractor
 import org.fog_rock.photo_slideshow.app.menu.presenter.MenuPresenter
 import org.fog_rock.photo_slideshow.app.menu.router.MenuRouter
 import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
+import org.fog_rock.photo_slideshow.app.module.lib.impl.AppSettingsImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
@@ -117,6 +119,13 @@ class MenuActivity : AppCompatActivity(),
 
     private var presenter: MenuContract.Presenter? = null
 
+    private var orgNumberOfPhotos = -1
+    private var orgTimeIntervalOfPhotos = -1
+    private var orgServerUpdateTime = -1
+    private var chgNumberOfPhotos = -1
+    private var chgTimeIntervalOfPhotos = -1
+    private var chgServerUpdateTime = -1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -133,6 +142,7 @@ class MenuActivity : AppCompatActivity(),
 
         presenter = MenuPresenter(
             MenuInteractor(
+                AppSettingsImpl(this),
                 AppDatabaseImpl(),
                 GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())
             ),
@@ -151,10 +161,18 @@ class MenuActivity : AppCompatActivity(),
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
         when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                if (!showSettingsChangedDialog()) onBackPressed()
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean =
+        when (keyCode) {
+            KeyEvent.KEYCODE_BACK -> {
+                if (showSettingsChangedDialog()) true else super.onKeyDown(keyCode, event)
+            }
+            else -> super.onKeyDown(keyCode, event)
         }
 
     override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {
@@ -187,8 +205,12 @@ class MenuActivity : AppCompatActivity(),
         }
     }
 
-    override fun onCreateMenuFragment() {
-        binding.toolbar.setTitle(R.string.menu)
+    override fun onCreateViewFragment(className: String) {
+        when (className) {
+            MenuFragment::class.java.simpleName -> binding.toolbar.setTitle(R.string.menu)
+            SettingsFragment::class.java.simpleName -> binding.toolbar.setTitle(R.string.settings)
+            else -> {}
+        }
     }
 
     override fun onClickedLicenseInfo() {
@@ -203,13 +225,33 @@ class MenuActivity : AppCompatActivity(),
         showDialogFragment(DialogRequest.CONFIRM_SIGN_OUT)
     }
 
-    override fun onCreateSettingsFragment() {
-        binding.toolbar.setTitle(R.string.settings)
+    override fun onChangedNumberOfPhotos(changedValue: Int) {
+        logI("onChangedNumberOfPhotos: $chgNumberOfPhotos -> $changedValue")
+        chgNumberOfPhotos = changedValue
+    }
+
+    override fun onChangedTimeIntervalOfPhotos(changedValue: Int) {
+        logI("onChangedNumberOfPhotos: $chgTimeIntervalOfPhotos -> $changedValue")
+        chgTimeIntervalOfPhotos = changedValue
+    }
+
+    override fun onChangedServerUpdateTime(changedValue: Int) {
+        logI("onChangedNumberOfPhotos: $chgServerUpdateTime -> $changedValue")
+        chgServerUpdateTime = changedValue
     }
 
     override fun getActivity(): Activity = this
 
-    override fun onCreateResult(accountName: String, emailAddress: String) {
+    override fun onCreateResult(
+        accountName: String, emailAddress: String,
+        numberOfPhotos: Int, timeIntervalOfPhotos: Int, serverUpdateTime: Int
+    ) {
+        orgNumberOfPhotos = numberOfPhotos
+        orgTimeIntervalOfPhotos = timeIntervalOfPhotos
+        orgServerUpdateTime = serverUpdateTime
+        chgNumberOfPhotos = orgNumberOfPhotos
+        chgTimeIntervalOfPhotos = orgTimeIntervalOfPhotos
+        chgServerUpdateTime = orgServerUpdateTime
         replaceFragment(MenuFragment.newInstance(this, accountName, emailAddress), false)
     }
 
@@ -236,5 +278,13 @@ class MenuActivity : AppCompatActivity(),
      */
     private fun showDialogFragment(request: DialogRequest) {
         request.show(this, supportFragmentManager)
+    }
+
+    private fun showSettingsChangedDialog(): Boolean {
+        if (supportFragmentManager.backStackEntryCount > 0) return false
+        if (orgNumberOfPhotos == chgNumberOfPhotos
+            && orgTimeIntervalOfPhotos == chgTimeIntervalOfPhotos
+            && orgServerUpdateTime == chgServerUpdateTime) return false
+        return true
     }
 }

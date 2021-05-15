@@ -7,11 +7,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.menu.contract.MenuContract
 import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
+import org.fog_rock.photo_slideshow.app.module.lib.AppSettings
 import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 class MenuInteractor(
+    private val appSettings: AppSettings,
     private val appDatabase: AppDatabase,
     private val googleWebApis: GoogleWebApis
 ) : ViewModel(), MenuContract.Interactor {
@@ -50,14 +52,14 @@ class MenuInteractor(
     }
 
     private fun createLoad() {
-        viewModelScope.launch(Dispatchers.Default) {
-            val account = googleWebApis.getSignedInAccount()
-            val accountName = account.displayName ?: ""
-            val emailAddress = account.email ?: ""
-            withContext(Dispatchers.Main) {
-                callback?.onCreateResult(accountName, emailAddress)
-            }
-        }
+        val account = googleWebApis.getSignedInAccount()
+        callback?.onCreateResult(
+            account.displayName ?: "",
+            account.email ?: "",
+            appSettings.getNumberOfPhotos(),
+            appSettings.getTimeIntervalOfPhotos(),
+            appSettings.getServerUpdateTime()
+        )
     }
 
     private suspend fun changeUser(): ApiResult =

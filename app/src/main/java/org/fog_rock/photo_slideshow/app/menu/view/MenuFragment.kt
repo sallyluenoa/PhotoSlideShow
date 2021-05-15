@@ -10,6 +10,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import org.fog_rock.photo_slideshow.BuildConfig
 import org.fog_rock.photo_slideshow.R
+import org.fog_rock.photo_slideshow.core.extension.tag
 
 class MenuFragment : PreferenceFragmentCompat() {
 
@@ -34,12 +35,7 @@ class MenuFragment : PreferenceFragmentCompat() {
     /**
      * コールバック
      */
-    interface Callback {
-        /**
-         * フラグメントの生成.
-         */
-        fun onCreateMenuFragment()
-
+    interface Callback: FragmentCallback {
         /**
          * ライセンス情報がタップされたときのイベント.
          */
@@ -61,7 +57,7 @@ class MenuFragment : PreferenceFragmentCompat() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        getActivityCallback()?.onCreateMenuFragment()
+        getActivityCallback()?.onCreateViewFragment(tag())
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 

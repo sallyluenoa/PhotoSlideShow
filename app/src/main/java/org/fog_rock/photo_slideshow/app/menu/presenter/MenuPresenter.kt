@@ -42,8 +42,13 @@ class MenuPresenter(
         interactor?.requestSignOut()
     }
 
-    override fun onCreateResult(accountName: String, emailAddress: String) {
-        callback?.onCreateResult(accountName, emailAddress)
+    override fun onCreateResult(
+        accountName: String, emailAddress: String,
+        numberOfPhotos: Int, timeIntervalOfPhotos: Int, serverUpdateTime: Int
+    ) {
+        callback?.onCreateResult(
+            accountName, emailAddress, numberOfPhotos, timeIntervalOfPhotos, serverUpdateTime
+        )
     }
 
     override fun onChangeUserResult(result: ApiResult) {
