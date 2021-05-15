@@ -57,6 +57,9 @@
     <string name="confirm_select_album_title">The album is selected.</string>
     <string name="confirm_select_album_message">Are you sure to start slide show?\nAlbum Name: %1$s</string>
 
+    <string name="alert_changed_settings_title">App settings are changed.</string>
+    <string name="alert_changed_settings_message">The partial settings will be applied next update.</string>
+
     <string name="confirm_change_user_title">You will be changed user.</string>
     <string name="confirm_change_user_message">Access your Google account and app internal data will be kept.</string>
     <string name="confirm_sign_out_title">You will be signed out.</string>

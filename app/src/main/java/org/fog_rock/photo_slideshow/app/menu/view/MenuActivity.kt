@@ -45,10 +45,22 @@ class MenuActivity : AppCompatActivity(),
         private val cancelable: Boolean
     ) {
         /**
+         * 設定変更が適用されることの通知.
+         */
+        ALERT_CHANGED_SETTINGS(
+            1000,
+            R.string.alert_changed_settings_title,
+            R.string.alert_changed_settings_message,
+            R.string.ok,
+            null,
+            false
+        ),
+
+        /**
          * ユーザー切り替えの確認.
          */
         CONFIRM_CHANGE_USER(
-            1000,
+            1010,
             R.string.confirm_change_user_title,
             R.string.confirm_change_user_message,
             R.string.change_user,
@@ -60,7 +72,7 @@ class MenuActivity : AppCompatActivity(),
          * サインアウトの確認.
          */
         CONFIRM_SIGN_OUT(
-            1001,
+            1011,
             R.string.confirm_sign_out_title,
             R.string.confirm_sign_out_message,
             R.string.sign_out,
@@ -72,7 +84,7 @@ class MenuActivity : AppCompatActivity(),
          * ユーザー切り替えに失敗.
          */
         FAILED_CHANGE_USER(
-            1010,
+            1100,
             R.string.failed_change_user_title,
             R.string.failed_change_user_message,
             R.string.ok,
@@ -84,7 +96,7 @@ class MenuActivity : AppCompatActivity(),
          * サインアウトに失敗.
          */
         FAILED_SIGN_OUT(
-            1100,
+            1101,
             R.string.failed_sign_out_title,
             R.string.failed_sign_out_message,
             R.string.ok,
@@ -187,6 +199,9 @@ class MenuActivity : AppCompatActivity(),
         logI("onDialogResult() requestCode: $requestCode, resultCode: $resultCode")
 
         when (DialogRequest.convertFromCode(requestCode)) {
+            DialogRequest.ALERT_CHANGED_SETTINGS -> {
+                finish()
+            }
             DialogRequest.CONFIRM_CHANGE_USER -> {
                 if (resultCode == AppDialogFragment.BUTTON_POSITIVE) {
                     logI("Try to request change user.")
@@ -277,14 +292,22 @@ class MenuActivity : AppCompatActivity(),
      * ダイアログを表示する.
      */
     private fun showDialogFragment(request: DialogRequest) {
+        logI("Show dialog fragment: $request")
         request.show(this, supportFragmentManager)
     }
 
     private fun showSettingsChangedDialog(): Boolean {
-        if (supportFragmentManager.backStackEntryCount > 0) return false
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            logI("Back stack fragments are remained.")
+            return false
+        }
         if (orgNumberOfPhotos == chgNumberOfPhotos
             && orgTimeIntervalOfPhotos == chgTimeIntervalOfPhotos
-            && orgServerUpdateTime == chgServerUpdateTime) return false
+            && orgServerUpdateTime == chgServerUpdateTime) {
+            logI("No changed settings.")
+            return false
+        }
+        showDialogFragment(DialogRequest.ALERT_CHANGED_SETTINGS)
         return true
     }
 }

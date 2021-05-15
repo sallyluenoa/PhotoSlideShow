@@ -57,6 +57,9 @@
     <string name="confirm_select_album_title">アルバムが選択されました</string>
     <string name="confirm_select_album_message">スライドショーを開始しますか?\nアルバム名: %1$s</string>
 
+    <string name="alert_changed_settings_title">設定が変更されました</string>
+    <string name="alert_changed_settings_message">一部設定は次回の更新にて反映される場合があります。</string>
+
     <string name="confirm_change_user_title">ユーザー切り替えをします</string>
     <string name="confirm_change_user_message">Googleアカウントへのアクセス及び内部データは保持されます。</string>
     <string name="confirm_sign_out_title">サインアウトをします</string>
