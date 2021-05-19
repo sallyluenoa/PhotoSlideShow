@@ -4,12 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.google.photos.types.proto.Album
-import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
+import org.fog_rock.photo_slideshow.app.module.ui.replaceFragment
 import org.fog_rock.photo_slideshow.app.select.contract.SelectContract
 import org.fog_rock.photo_slideshow.app.select.entity.SelectAlbumsResult
 import org.fog_rock.photo_slideshow.app.select.interactor.SelectInteractor
@@ -31,9 +30,7 @@ class SelectActivity : AppCompatActivity(), SelectContract.PresenterCallback {
 
         binding = ActivitySelectBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        replaceFragment(
-            AppSimpleFragment.newInstance(
-                AppSimpleFragment.Layout.PROGRESS))
+        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
 
         presenter = SelectPresenter(SelectInteractor(
             AppDatabaseImpl(),
@@ -64,14 +61,5 @@ class SelectActivity : AppCompatActivity(), SelectContract.PresenterCallback {
         }
         setResult(RESULT_OK, intent)
         finish()
-    }
-
-    /**
-     * 新しいフラグメントに置換する.
-     */
-    private fun replaceFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.fragment_container, fragment)
-        }.commit()
     }
 }

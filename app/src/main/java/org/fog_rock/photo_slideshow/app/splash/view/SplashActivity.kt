@@ -14,6 +14,7 @@ import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
+import org.fog_rock.photo_slideshow.app.module.ui.replaceFragment
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.app.splash.interactor.SplashInteractor
@@ -40,9 +41,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
 
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        replaceFragment(
-            AppSimpleFragment.newInstance(
-                AppSimpleFragment.Layout.LOGO))
+        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.LOGO))
 
         presenter = SplashPresenter(
             SplashInteractor(
@@ -55,9 +54,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
 
         lifecycleScope.launch(Dispatchers.Main) {
             delay(DISPLAY_LOGO_TIME_MILLIS)
-            replaceFragment(
-                AppSimpleFragment.newInstance(
-                    AppSimpleFragment.Layout.EMPTY))
+            replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.EMPTY))
             requestSignIn()
         }
     }
@@ -105,15 +102,6 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
                 setCancelable(false)
             }.show(supportFragmentManager, request.code)
         }
-    }
-
-    /**
-     * 新しいフラグメントに置換する.
-     */
-    private fun replaceFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.fragment_container, fragment)
-        }.commit()
     }
 
     /**
