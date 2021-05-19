@@ -8,7 +8,7 @@ import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
-import org.fog_rock.photo_slideshow.app.module.ui.replaceFragment
+import org.fog_rock.photo_slideshow.app.module.ui.extension.replaceFragment
 import org.fog_rock.photo_slideshow.app.select.contract.SelectContract
 import org.fog_rock.photo_slideshow.app.select.entity.SelectAlbumsResult
 import org.fog_rock.photo_slideshow.app.select.interactor.SelectInteractor

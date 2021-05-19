@@ -21,8 +21,8 @@ import org.fog_rock.photo_slideshow.app.module.lib.impl.AppSettingsImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
-import org.fog_rock.photo_slideshow.app.module.ui.addFragment
-import org.fog_rock.photo_slideshow.app.module.ui.replaceFragment
+import org.fog_rock.photo_slideshow.app.module.ui.extension.addFragment
+import org.fog_rock.photo_slideshow.app.module.ui.extension.replaceFragment
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl

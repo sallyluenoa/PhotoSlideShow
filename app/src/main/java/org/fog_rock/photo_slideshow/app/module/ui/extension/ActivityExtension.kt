@@ -1,4 +1,4 @@
-package org.fog_rock.photo_slideshow.app.module.ui
+package org.fog_rock.photo_slideshow.app.module.ui.extension
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
