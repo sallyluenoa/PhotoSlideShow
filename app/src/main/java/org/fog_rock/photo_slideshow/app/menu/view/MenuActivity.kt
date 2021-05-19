@@ -8,7 +8,6 @@ import android.view.KeyEvent
 import android.view.MenuItem
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -22,6 +21,8 @@ import org.fog_rock.photo_slideshow.app.module.lib.impl.AppSettingsImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
+import org.fog_rock.photo_slideshow.app.module.ui.addFragment
+import org.fog_rock.photo_slideshow.app.module.ui.replaceFragment
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
@@ -148,9 +149,7 @@ class MenuActivity : AppCompatActivity(),
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        replaceFragment(
-            AppSimpleFragment.newInstance(
-                AppSimpleFragment.Layout.PROGRESS), false)
+        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
 
         presenter = MenuPresenter(
             MenuInteractor(
@@ -188,10 +187,11 @@ class MenuActivity : AppCompatActivity(),
         }
 
     override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {
-        val fragment = supportFragmentManager.fragmentFactory.instantiate(classLoader, pref.fragment)
-        fragment.setTargetFragment(caller, 0)
-        fragment.arguments = caller.arguments
-        replaceFragment(fragment, true)
+        val fragment = supportFragmentManager.fragmentFactory.instantiate(classLoader, pref.fragment).apply {
+            setTargetFragment(caller, 0)
+            arguments = caller.arguments
+        }
+        addFragment(fragment)
         return true
     }
 
@@ -267,7 +267,7 @@ class MenuActivity : AppCompatActivity(),
         chgNumberOfPhotos = orgNumberOfPhotos
         chgTimeIntervalOfPhotos = orgTimeIntervalOfPhotos
         chgServerUpdateTime = orgServerUpdateTime
-        replaceFragment(MenuFragment.newInstance(this, accountName, emailAddress), false)
+        replaceFragment(MenuFragment.newInstance(this, accountName, emailAddress))
     }
 
     override fun onFailedChangeUser() {
@@ -276,16 +276,6 @@ class MenuActivity : AppCompatActivity(),
 
     override fun onFailedSignOut() {
         showDialogFragment(DialogRequest.FAILED_SIGN_OUT)
-    }
-
-    /**
-     * 新しいフラグメントに置換する.
-     */
-    private fun replaceFragment(fragment: Fragment, addStack: Boolean) {
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.fragment_container, fragment)
-            if (addStack) addToBackStack(null)
-        }.commit()
     }
 
     /**
