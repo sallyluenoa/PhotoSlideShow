@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    android:key="@string/pref_key_root"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="@string/pref_key_number_of_photos"
+        android:title="@string/number_of_photos_title"
+        android:dialogTitle="@string/number_of_photos_title"
+        android:summary="@string/number_of_photos_summary"
+        android:entries="@array/titles_number_of_photos"
+        android:entryValues="@array/values_number_of_photos"
+        android:defaultValue="@string/default_value_number_of_photos"
+        android:selectable="true"
+        />
+
+    <ListPreference
+        android:key="@string/pref_key_time_interval_of_photos"
+        android:title="@string/time_interval_of_photos_title"
+        android:dialogTitle="@string/time_interval_of_photos_title"
+        android:summary="@string/time_interval_of_photos_summary"
+        android:entries="@array/titles_time_interval_of_photos"
+        android:entryValues="@array/values_time_interval_of_photos"
+        android:defaultValue="@string/default_value_time_interval_of_photos"
+        android:selectable="true"
+        />
+
+    <ListPreference
+        android:key="@string/pref_key_server_update_time"
+        android:title="@string/server_update_time_title"
+        android:dialogTitle="@string/server_update_time_title"
+        android:summary="@string/server_update_time_summary"
+        android:entries="@array/titles_server_update_time"
+        android:entryValues="@array/values_server_update_time"
+        android:defaultValue="@string/default_value_server_update_time"
+        android:selectable="true"
+        />
+
+</PreferenceScreen>

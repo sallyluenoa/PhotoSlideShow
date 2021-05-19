@@ -13,29 +13,23 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
+import org.fog_rock.photo_slideshow.app.module.lib.AppSettings
 import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
 import org.fog_rock.photo_slideshow.app.module.lib.PhotosDownloader
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfo
 import org.fog_rock.photo_slideshow.core.database.entity.UserInfoData
-import org.fog_rock.photo_slideshow.core.extension.logD
-import org.fog_rock.photo_slideshow.core.extension.logE
-import org.fog_rock.photo_slideshow.core.extension.logI
-import org.fog_rock.photo_slideshow.core.extension.logW
+import org.fog_rock.photo_slideshow.core.extension.*
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import java.io.File
 import java.util.concurrent.CancellationException
 
 class MainInteractor(
+    private val appSettings: AppSettings,
     private val appDatabase: AppDatabase,
     private val photosDownloader: PhotosDownloader,
     private val googleWebApis: GoogleWebApis
 ): ViewModel(), MainContract.Interactor {
-
-    companion object {
-        private const val INTERVAL_UPDATE_MILLISECS = 24 * 60 * 60 * 1000L
-        private const val MEDIA_ITEMS_PICKUP_SIZE = 10
-    }
 
     private var callback: MainContract.InteractorCallback? = null
 
@@ -61,7 +55,7 @@ class MainInteractor(
             logI("requestLoadDisplayedPhotos: Start coroutine.")
             val displayedPhotos = loadDisplayedPhotos()
             withContext(Dispatchers.Main) {
-                callback?.requestLoadDisplayedPhotosResult(displayedPhotos)
+                callback?.requestLoadDisplayedPhotosResult(displayedPhotos, appSettings.getTimeIntervalOfPhotos())
             }
             logI("requestLoadDisplayedPhotos: End coroutine.")
         }
@@ -89,12 +83,8 @@ class MainInteractor(
         }
     }
 
-    override fun requestSignOut() {
-        // TODO: Implement later.
-    }
-
     override fun isNeededUpdatePhotos(): Boolean =
-        userInfoData.userInfo.isNeededUpdatePhotos(INTERVAL_UPDATE_MILLISECS)
+        userInfoData.userInfo.isNeededUpdatePhotos(appSettings.getServerUpdateTime() * ONE_HOUR_MILLIS)
 
     override fun hasSelectedAlbums(): Boolean = userInfoData.dataList.isNotEmpty()
 
@@ -156,7 +146,7 @@ class MainInteractor(
             }
 
             // ランダムピックアップしたMediaItemリストを元に、画像ファイルをダウンロードする.
-            val mediaItems = convertMediaItems(result.photosResults, MEDIA_ITEMS_PICKUP_SIZE)
+            val mediaItems = convertMediaItems(result.photosResults, appSettings.getNumberOfPhotos())
             val outputPaths = photosDownloader.requestDownloads(mediaItems, outputDir)
 
             // MediaDetailリストを作成.

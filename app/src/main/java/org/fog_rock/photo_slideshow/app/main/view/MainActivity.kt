@@ -3,8 +3,6 @@ package org.fog_rock.photo_slideshow.app.main.view
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -16,11 +14,12 @@ import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
 import org.fog_rock.photo_slideshow.app.main.presenter.MainPresenter
 import org.fog_rock.photo_slideshow.app.main.router.MainRouter
 import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
+import org.fog_rock.photo_slideshow.app.module.lib.impl.AppSettingsImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
-import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.ONE_SECOND_MILLIS
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
@@ -34,8 +33,6 @@ import org.fog_rock.photo_slideshow.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     companion object {
-        private const val PRESENT_TIME_MILLISECS = 5000L
-
         private const val ASPECT_WIDTH = 500L
         private const val ASPECT_HEIGHT = 1000L
     }
@@ -46,6 +43,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     private var displayedPhotos = emptyList<DisplayedPhoto>()
     private var displayedIndex = 0
+    private var timeIntervalSecs = 0
     private var isRequestingUpdatePhotos = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,13 +51,17 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
         replaceFragment(
             AppSimpleFragment.newInstance(
                 AppSimpleFragment.Layout.PROGRESS))
 
+        binding.menuButton.setOnClickListener {
+            presenter?.requestShowMenu()
+        }
+
         presenter = MainPresenter(
             MainInteractor(
+                AppSettingsImpl(this),
                 AppDatabaseImpl(),
                 PhotosDownloaderImpl(FileDownloaderImpl(), SizeCalculatorImpl(), ASPECT_WIDTH, ASPECT_HEIGHT),
                 GoogleWebApisImpl(this, GoogleSignInApiImpl(), GoogleOAuth2ApiImpl(), PhotosLibraryApiImpl())
@@ -90,33 +92,6 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         super.onPause()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        when (item.itemId) {
-            R.id.action_menu -> {
-                logI("Menu action is selected.")
-                true
-            }
-            R.id.action_license -> {
-                logI("License action is selected.")
-                presenter?.requestShowLicenses()
-                true
-            }
-            R.id.action_sign_out -> {
-                logI("Sign out action is selected.")
-                presenter?.requestSignOut()
-                true
-            }
-            else -> {
-                logE("No actions are found.")
-                super.onOptionsItemSelected(item)
-            }
-        }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -125,8 +100,10 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
     override fun getActivity(): Activity = this
 
-    override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>) {
-        updateDisplayedPhotos(displayedPhotos)
+    override fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>, timeIntervalSecs: Int) {
+        logI("requestLoadDisplayedPhotosResult() " +
+                "displayedPhotosSize: ${displayedPhotos.size}, timeIntervalSecs: $timeIntervalSecs")
+        updateDisplayedPhotos(displayedPhotos, timeIntervalSecs)
     }
 
     override fun requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest) {
@@ -134,12 +111,6 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         isRequestingUpdatePhotos = false
         if (request == UpdatePhotosRequest.COMPLETED) {
             requestLoadDisplayedPhotos()
-        }
-    }
-
-    override fun requestSignOutResult(result: ApiResult) {
-        if (result == ApiResult.SUCCEEDED) {
-            finish()
         }
     }
 
@@ -185,11 +156,11 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
                         withContext(Dispatchers.Main) {
                             presentImage(displayedPhoto.outputPath)
                         }
-                        delay(PRESENT_TIME_MILLISECS)
+                        delay(timeIntervalSecs * ONE_SECOND_MILLIS)
                     } else {
                         // 一秒間待つ.
                         logI("Wait 1 sec...")
-                        delay(1000L)
+                        delay(ONE_SECOND_MILLIS)
                     }
                 }
             } catch (e: CancellationException) {
@@ -228,7 +199,8 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
         }
 
     @Synchronized
-    private fun updateDisplayedPhotos(displayedPhotos: List<DisplayedPhoto>) {
+    private fun updateDisplayedPhotos(displayedPhotos: List<DisplayedPhoto>, timeIntervalSecs: Int) {
+        this.timeIntervalSecs = timeIntervalSecs
         if (displayedPhotos.isNotEmpty()) {
             logI("Update new displayed photos.")
             this.displayedPhotos = displayedPhotos

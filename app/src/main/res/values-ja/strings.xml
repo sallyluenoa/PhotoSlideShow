@@ -9,11 +9,40 @@
     <string name="no">いいえ</string>
     <string name="start">開始</string>
     <string name="end">終了</string>
+    <string name="retry">再試行</string>
     <string name="menu">メニュー</string>
-    <string name="license">ライセンス</string>
+    <string name="settings">設定</string>
+    <string name="license_info">ライセンス情報</string>
+    <string name="others">その他</string>
+    <string name="account_info">アカウント情報</string>
+    <string name="account_name">アカウント名</string>
+    <string name="email_address">メールアドレス</string>
+    <string name="app_version">アプリバージジョン</string>
     <string name="sign_in">サインイン</string>
     <string name="sign_out">サインアウト</string>
-    <string name="retry">再試行</string>
+    <string name="change_user">ユーザー切り替え</string>
+
+    <string name="number_of_10_photos">10枚</string>
+    <string name="number_of_20_photos">20枚</string>
+    <string name="number_of_30_photos">30枚</string>
+    <string name="number_of_40_photos">40枚</string>
+    <string name="number_of_50_photos">50枚</string>
+    <string name="time_interval_5_seconds">5秒</string>
+    <string name="time_interval_10_seconds">10秒</string>
+    <string name="time_interval_30_seconds">30秒</string>
+    <string name="time_interval_60_seconds">60秒</string>
+    <string name="update_time_1_hour">1時間</string>
+    <string name="update_time_3_hours">3時間</string>
+    <string name="update_time_6_hours">6時間</string>
+    <string name="update_time_12_hours">12時間</string>
+    <string name="update_time_24_hours">24時間</string>
+
+    <string name="number_of_photos_title">写真の表示枚数</string>
+    <string name="number_of_photos_summary">最大%1$sの写真を表示します。</string>
+    <string name="time_interval_of_photos_title">写真の表示時間</string>
+    <string name="time_interval_of_photos_summary">写真を%1$sごとに表示します。</string>
+    <string name="server_update_time_title">サーバーの更新時間</string>
+    <string name="server_update_time_summary">%1$sごとにサーバーから写真を更新します。</string>
 
     <string name="failed_runtime_permissions_title">アプリの権限が拒否されました</string>
     <string name="failed_runtime_permissions_message">もう一度権限許可をリクエストしますか?</string>
@@ -27,5 +56,19 @@
 
     <string name="confirm_select_album_title">アルバムが選択されました</string>
     <string name="confirm_select_album_message">スライドショーを開始しますか?\nアルバム名: %1$s</string>
+
+    <string name="alert_changed_settings_title">設定が変更されました</string>
+    <string name="alert_changed_settings_message">一部設定は次回の更新にて反映される場合があります。</string>
+
+    <string name="confirm_change_user_title">ユーザー切り替えをします</string>
+    <string name="confirm_change_user_message">Googleアカウントへのアクセス及び内部データは保持されます。</string>
+    <string name="confirm_sign_out_title">サインアウトをします</string>
+    <string name="confirm_sign_out_message">Googleアカウントへのアクセス及び内部データはすべて削除されます。</string>
+
+    <string name="failed_change_user_title">ユーザー切り替えに失敗しました</string>
+    <string name="failed_change_user_message">@string/try_again_message</string>
+    <string name="failed_sign_out_title">サインアウトに失敗しました</string>
+    <string name="failed_sign_out_message">@string/try_again_message</string>
+    <string name="try_again_message">しばらくしてからもう一度やり直してください。</string>
 
 </resources>

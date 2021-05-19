@@ -40,9 +40,9 @@ interface AppDatabase {
     suspend fun updateUserInfo(emailAddress: String, tokenInfo: TokenInfo)
 
     /**
-     * DBからユーザー情報を削除する.
+     * DBからメールアドレスに紐づくユーザー情報を全削除する.
      */
-    suspend fun deleteUserInfo(userInfo: UserInfo)
+    suspend fun deleteUserInfo(emailAddress: String)
 
     /**
      * DBのユーザー情報全般を画像情報リストで置き換える.
