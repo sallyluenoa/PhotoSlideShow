@@ -10,6 +10,8 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import org.fog_rock.photo_slideshow.BuildConfig
 import org.fog_rock.photo_slideshow.R
+import org.fog_rock.photo_slideshow.app.module.ui.extension.FragmentCallback
+import org.fog_rock.photo_slideshow.app.module.ui.extension.getActivityCallback
 import org.fog_rock.photo_slideshow.core.extension.tag
 
 class MenuFragment : PreferenceFragmentCompat() {
@@ -57,7 +59,7 @@ class MenuFragment : PreferenceFragmentCompat() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        getActivityCallback()?.onCreateViewFragment(tag())
+        getActivityCallback<Callback>()?.onCreateViewFragment(tag())
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -74,21 +76,16 @@ class MenuFragment : PreferenceFragmentCompat() {
             BuildConfig.VERSION_NAME
 
         findPreference<Preference>(getString(R.string.pref_key_license_info))?.setOnPreferenceClickListener {
-            getActivityCallback()?.onClickedLicenseInfo()
+            getActivityCallback<Callback>()?.onClickedLicenseInfo()
             true
         }
         findPreference<Preference>(getString(R.string.pref_key_change_user))?.setOnPreferenceClickListener {
-            getActivityCallback()?.onClickedChangeUser()
+            getActivityCallback<Callback>()?.onClickedChangeUser()
             true
         }
         findPreference<Preference>(getString(R.string.pref_key_sign_out))?.setOnPreferenceClickListener {
-            getActivityCallback()?.onClickedSignOut()
+            getActivityCallback<Callback>()?.onClickedSignOut()
             true
         }
-    }
-
-    private fun getActivityCallback(): Callback? {
-        val activity = requireActivity()
-        return if (activity is Callback) activity else null
     }
 }
