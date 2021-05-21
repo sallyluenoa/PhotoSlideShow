@@ -16,12 +16,9 @@ class SlideShowFragment : Fragment() {
 
         private const val ARGS_FILE_PATH = "file_path"
 
-        fun newInstance(filePath: String): Fragment {
-            val args = Bundle().apply {
+        fun newInstance(filePath: String): Fragment = SlideShowFragment().apply {
+            arguments = Bundle().apply {
                 putSerializable(ARGS_FILE_PATH, filePath)
-            }
-            return SlideShowFragment().apply {
-                arguments = args
             }
         }
     }

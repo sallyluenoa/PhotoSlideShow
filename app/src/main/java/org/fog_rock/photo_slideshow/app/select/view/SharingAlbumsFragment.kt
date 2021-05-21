@@ -24,12 +24,9 @@ class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdap
 
         private const val ARGS_ALBUMS = "albums"
 
-        fun newInstance(albums: List<Album>): Fragment {
-            val args = Bundle().apply {
+        fun newInstance(albums: List<Album>): Fragment = SharingAlbumsFragment().apply {
+            arguments = Bundle().apply {
                 putArrayExtra(ARGS_ALBUMS, albums.toTypedArray())
-            }
-            return SharingAlbumsFragment().apply {
-                arguments = args
             }
         }
     }
