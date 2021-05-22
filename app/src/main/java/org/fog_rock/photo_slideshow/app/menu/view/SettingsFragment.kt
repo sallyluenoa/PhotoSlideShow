@@ -33,12 +33,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
         fun onChangedServerUpdateTime(changedValue: Int)
     }
 
+    private val callback: Callback? by lazy {
+        getActivityCallback()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        getActivityCallback<Callback>()?.onCreateViewFragment(tag())
+        callback?.onCreateViewFragment(tag())
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -50,7 +54,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 if (it is ListPreference) getString(R.string.number_of_photos_summary, it.entry) else ""
             }
             setOnPreferenceChangeListener { _, newValue ->
-                getActivityCallback<Callback>()?.onChangedNumberOfPhotos(newValue.toString().toInt())
+                callback?.onChangedNumberOfPhotos(newValue.toString().toInt())
                 true
             }
         }
@@ -60,7 +64,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 if (it is ListPreference) getString(R.string.time_interval_of_photos_summary, it.entry) else ""
             }
             setOnPreferenceChangeListener { _, newValue ->
-                getActivityCallback<Callback>()?.onChangedTimeIntervalOfPhotos(newValue.toString().toInt())
+                callback?.onChangedTimeIntervalOfPhotos(newValue.toString().toInt())
                 true
             }
         }
@@ -70,7 +74,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 if (it is ListPreference) getString(R.string.server_update_time_summary, it.entry) else ""
             }
             setOnPreferenceChangeListener { _, newValue ->
-                getActivityCallback<Callback>()?.onChangedServerUpdateTime(newValue.toString().toInt())
+                callback?.onChangedServerUpdateTime(newValue.toString().toInt())
                 true
             }
         }

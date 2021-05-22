@@ -54,6 +54,10 @@ class MenuFragment : PreferenceFragmentCompat() {
         fun onClickedSignOut()
     }
 
+    private val callback: Callback? by lazy {
+        getActivityCallback()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -76,15 +80,15 @@ class MenuFragment : PreferenceFragmentCompat() {
             BuildConfig.VERSION_NAME
 
         findPreference<Preference>(getString(R.string.pref_key_license_info))?.setOnPreferenceClickListener {
-            getActivityCallback<Callback>()?.onClickedLicenseInfo()
+            callback?.onClickedLicenseInfo()
             true
         }
         findPreference<Preference>(getString(R.string.pref_key_change_user))?.setOnPreferenceClickListener {
-            getActivityCallback<Callback>()?.onClickedChangeUser()
+            callback?.onClickedChangeUser()
             true
         }
         findPreference<Preference>(getString(R.string.pref_key_sign_out))?.setOnPreferenceClickListener {
-            getActivityCallback<Callback>()?.onClickedSignOut()
+            callback?.onClickedSignOut()
             true
         }
     }
