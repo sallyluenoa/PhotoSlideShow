@@ -51,14 +51,14 @@ class AppDialogFragment : DialogFragment() {
      * ビルダークラス
      */
     class Builder(private val context: Context) {
-        private var title: String? = null
-        private var message: String? = null
-        private var positiveLabel: String? = null
-        private var negativeLabel: String? = null
-        private var cancelable = true
+        private var _title: String? = null
+        private var _message: String? = null
+        private var _positiveLabel: String? = null
+        private var _negativeLabel: String? = null
+        private var _cancelable = true
 
         fun setTitle(title: String): Builder {
-            this.title = title
+            this._title = title
             return this
         }
         fun setTitle(@StringRes title: Int): Builder =
@@ -66,7 +66,7 @@ class AppDialogFragment : DialogFragment() {
             else this
 
         fun setMessage(message: String): Builder {
-            this.message = message
+            this._message = message
             return this
         }
         fun setMessage(@StringRes message: Int): Builder =
@@ -74,7 +74,7 @@ class AppDialogFragment : DialogFragment() {
             else this
 
         fun setPositiveLabel(positiveLabel: String): Builder {
-            this.positiveLabel = positiveLabel
+            this._positiveLabel = positiveLabel
             return this
         }
         fun setPositiveLabel(@StringRes positiveLabel: Int): Builder =
@@ -82,7 +82,7 @@ class AppDialogFragment : DialogFragment() {
             else this
 
         fun setNegativeLabel(negativeLabel: String): Builder {
-            this.negativeLabel = negativeLabel
+            this._negativeLabel = negativeLabel
             return this
         }
         fun setNegativeLabel(@StringRes negativeLabel: Int): Builder =
@@ -90,7 +90,7 @@ class AppDialogFragment : DialogFragment() {
             else this
 
         fun setCancelable(cancelable: Boolean): Builder {
-            this.cancelable = cancelable
+            this._cancelable = cancelable
             return this
         }
 
@@ -112,13 +112,13 @@ class AppDialogFragment : DialogFragment() {
             AppDialogFragment().apply {
                 arguments = Bundle().apply {
                     putInt(ARGS_REQUEST_CODE, requestCode)
-                    putString(ARGS_TITLE, title)
-                    putString(ARGS_MESSAGE, message)
-                    putString(ARGS_POSITIVE_LABEL, positiveLabel)
-                    putString(ARGS_NEGATIVE_LABEL, negativeLabel)
+                    putString(ARGS_TITLE, _title)
+                    putString(ARGS_MESSAGE, _message)
+                    putString(ARGS_POSITIVE_LABEL, _positiveLabel)
+                    putString(ARGS_NEGATIVE_LABEL, _negativeLabel)
                     putBoolean(ARGS_IS_PARENT_ACTIVITY, isParentActivity)
                 }
-                isCancelable = cancelable
+                isCancelable = _cancelable
             }.show(fragmentManager, null)
         }
     }
