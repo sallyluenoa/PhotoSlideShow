@@ -124,25 +124,23 @@ class AppDialogFragment : DialogFragment() {
     private val positiveLabel: String? by lazy { args.getString(ARGS_POSITIVE_LABEL) }
     private val negativeLabel: String? by lazy { args.getString(ARGS_NEGATIVE_LABEL) }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(requireActivity()).apply {
-            setTitle(title)
-            setMessage(message)
-        }
-        if (!positiveLabel.isNullOrEmpty()) {
-            builder.setPositiveButton(positiveLabel) { _, which ->
-                dismiss()
-                callDialogResult(which)
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
+        AlertDialog.Builder(requireActivity()).apply {
+            if (!title.isNullOrEmpty()) setTitle(title)
+            if (!message.isNullOrEmpty()) setMessage(message)
+            if (!positiveLabel.isNullOrEmpty()) {
+                setPositiveButton(positiveLabel) { _, which ->
+                    dismiss()
+                    callDialogResult(which)
+                }
             }
-        }
-        if (!negativeLabel.isNullOrEmpty()) {
-            builder.setNegativeButton(negativeLabel) { _, which ->
-                dismiss()
-                callDialogResult(which)
+            if (!negativeLabel.isNullOrEmpty()) {
+                setNegativeButton(negativeLabel) { _, which ->
+                    dismiss()
+                    callDialogResult(which)
+                }
             }
-        }
-        return builder.create()
-    }
+        }.create()
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
