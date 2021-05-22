@@ -22,12 +22,9 @@ class MainPresenter(
     private var callback: MainContract.PresenterCallback? = null
 
     override fun create(callback: ViperContract.PresenterCallback) {
-        if (callback is MainContract.PresenterCallback) {
-            this.callback = callback
-            interactor?.create(this)
-        } else {
-            throw IllegalArgumentException("MainContract.PresenterCallback should be set.")
-        }
+        this.callback = callback.downCast()
+            ?: throw IllegalArgumentException("MainContract.PresenterCallback should be set.")
+        interactor?.create(this)
     }
 
     override fun destroy() {

@@ -14,6 +14,7 @@ import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
 import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import java.util.concurrent.CancellationException
@@ -26,11 +27,8 @@ class SplashInteractor(
     private var callback: SplashContract.InteractorCallback? = null
 
     override fun create(callback: ViperContract.InteractorCallback) {
-        if (callback is SplashContract.InteractorCallback) {
-            this.callback = callback
-        } else {
-            throw IllegalArgumentException("SplashContract.InteractorCallback should be set.")
-        }
+        this.callback = callback.downCast()
+            ?: throw IllegalArgumentException("SplashContract.InteractorCallback should be set.")
     }
 
     override fun destroy() {

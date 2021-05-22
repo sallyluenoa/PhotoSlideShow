@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import org.fog_rock.photo_slideshow.app.splash.contract.SplashContract
 import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
@@ -25,12 +26,9 @@ class SplashPresenter(
     private var callback: SplashContract.PresenterCallback? = null
 
     override fun create(callback: ViperContract.PresenterCallback) {
-        if (callback is SplashContract.PresenterCallback) {
-            this.callback = callback
-            interactor?.create(this)
-        } else {
-            throw IllegalArgumentException("SplashContract.PresenterCallback should be set.")
-        }
+        this.callback = callback.downCast()
+            ?: throw IllegalArgumentException("SplashContract.PresenterCallback should be set.")
+        interactor?.create(this)
     }
 
     override fun destroy() {
