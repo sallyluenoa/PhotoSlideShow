@@ -134,14 +134,13 @@ class MainPresenter(
                 interactor?.requestDownloadPhotos((activity() ?: return), albums)
             }
             UpdatePhotosRequest.UPDATE_DATABASE -> {
-                val photosInfo = value.downCast<List<AppDatabase.PhotoInfo>>()
-                if (photosInfo != null) {
-                    logI("Request update database.")
-                    interactor?.requestUpdateDatabase(photosInfo)
-                } else {
+                val photosInfo = value.downCast<List<AppDatabase.PhotoInfo>>() ?: run {
                     logE("PhotosInfo is null.")
                     callback?.requestUpdateDisplayedPhotosResult(request)
+                    return
                 }
+                logI("Request update database.")
+                interactor?.requestUpdateDatabase(photosInfo)
             }
             UpdatePhotosRequest.COMPLETED -> {
                 logI("All requests are completed.")

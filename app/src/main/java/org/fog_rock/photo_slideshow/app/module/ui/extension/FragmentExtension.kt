@@ -1,11 +1,7 @@
 package org.fog_rock.photo_slideshow.app.module.ui.extension
 
 import androidx.fragment.app.Fragment
-
-inline fun <reified CallbackT: FragmentCallback> Fragment.getActivityCallback(): CallbackT? {
-    val activity = requireActivity()
-    return if (activity is CallbackT) activity else null
-}
+import org.fog_rock.photo_slideshow.core.extension.downCast
 
 /**
  * フラグメントコールバック
@@ -18,3 +14,6 @@ interface FragmentCallback {
      */
     fun onCreateViewFragment(className: String)
 }
+
+inline fun <reified CallbackT: FragmentCallback> Fragment.getActivityCallback(): CallbackT? =
+    requireActivity().downCast()

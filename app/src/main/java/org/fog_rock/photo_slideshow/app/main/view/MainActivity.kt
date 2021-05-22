@@ -19,6 +19,7 @@ import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
 import org.fog_rock.photo_slideshow.app.module.ui.extension.replaceFragment
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.ONE_SECOND_MILLIS
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
@@ -116,11 +117,10 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
      */
     private fun presentImage(filePath: String) {
         for (fragment in supportFragmentManager.fragments) {
-            if (fragment is SlideShowFragment) {
-                logI("Update image to fragment. FilePath: $filePath")
-                fragment.setImageView(filePath)
-                return
-            }
+            val slideShowFragment = fragment.downCast<SlideShowFragment>()?: continue
+            logI("Update image to fragment. FilePath: $filePath")
+            slideShowFragment.setImageView(filePath)
+            return
         }
         logI("Set image to new fragment. FilePath: $filePath")
         replaceFragment(SlideShowFragment.newInstance(filePath))
