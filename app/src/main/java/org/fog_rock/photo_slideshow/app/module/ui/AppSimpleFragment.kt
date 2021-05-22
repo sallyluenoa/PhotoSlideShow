@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import org.fog_rock.photo_slideshow.R
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.logE
 
 /**
@@ -55,9 +56,8 @@ class AppSimpleFragment : Fragment() {
             Bundle()
         }
     }
-
     private val layout: Layout by lazy {
-        args.getSerializable(ARGS_LAYOUT) as Layout
+        args.getSerializable(ARGS_LAYOUT).downCast() ?: Layout.EMPTY
     }
 
     override fun onCreateView(

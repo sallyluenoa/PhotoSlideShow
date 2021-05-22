@@ -10,23 +10,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
-import org.fog_rock.photo_slideshow.core.extension.getArrayExtra
+import org.fog_rock.photo_slideshow.core.extension.getListExtra
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
-import org.fog_rock.photo_slideshow.core.extension.putArrayExtra
+import org.fog_rock.photo_slideshow.core.extension.putListExtra
 import org.fog_rock.photo_slideshow.databinding.FragmentSharingAlbumsBinding
 
 class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdapter.OnItemClickListener {
 
-    private val CODE_CONFIRM_SELECT = 1000
-
     companion object {
 
+        private const val CODE_CONFIRM_SELECT = 1000
         private const val ARGS_ALBUMS = "albums"
 
         fun newInstance(albums: List<Album>): Fragment = SharingAlbumsFragment().apply {
             arguments = Bundle().apply {
-                putArrayExtra(ARGS_ALBUMS, albums.toTypedArray())
+                putListExtra(ARGS_ALBUMS, albums)
             }
         }
     }
@@ -37,8 +36,8 @@ class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdap
             Bundle()
         }
     }
-    private val albums: Array<Album> by lazy {
-        args.getArrayExtra<Album>(ARGS_ALBUMS) ?: emptyArray()
+    private val albums: List<Album> by lazy {
+        args.getListExtra(ARGS_ALBUMS) ?: emptyList()
     }
 
     private var _binding: FragmentSharingAlbumsBinding? = null

@@ -9,11 +9,10 @@ import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
 import org.fog_rock.photo_slideshow.app.select.entity.SelectAlbumsResult
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.downCast
-import org.fog_rock.photo_slideshow.core.extension.getArrayListExtra
+import org.fog_rock.photo_slideshow.core.extension.getListExtra
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
-import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
 class MainPresenter(
     private var interactor: MainContract.Interactor?,
@@ -62,7 +61,7 @@ class MainPresenter(
                     callback?.requestUpdateDisplayedPhotosResult(request)
                     return
                 }
-                val albums = data?.getArrayListExtra<Album>(SelectAlbumsResult.DECIDED_ALBUMS.key()) ?: run {
+                val albums = data?.getListExtra<Album>(SelectAlbumsResult.DECIDED_ALBUMS.key()) ?: run {
                     logE("Failed to get albums from intent.")
                     callback?.requestUpdateDisplayedPhotosResult(request)
                     return

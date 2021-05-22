@@ -9,7 +9,7 @@ import com.google.photos.types.proto.Album
 import org.fog_rock.photo_slideshow.R
 
 class AlbumsAdapter(
-    private val albums: Array<Album>,
+    private val albums: List<Album>,
     private val listener: OnItemClickListener
 ): RecyclerView.Adapter<AlbumsAdapter.AlbumsViewHolder>() {
 
