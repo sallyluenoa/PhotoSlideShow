@@ -63,7 +63,7 @@ class MenuFragment : PreferenceFragmentCompat() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        getActivityCallback<Callback>()?.onCreateViewFragment(tag())
+        callback?.onCreateViewFragment(tag())
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
