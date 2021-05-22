@@ -111,6 +111,6 @@ class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdap
             setPositiveLabel(R.string.start)
             setNegativeLabel(R.string.cancel)
             setCancelable(false)
-        }.show(childFragmentManager, CODE_CONFIRM_SELECT)
+        }.show(this, CODE_CONFIRM_SELECT)
     }
 }

@@ -8,7 +8,10 @@ import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logW
 
@@ -28,6 +31,7 @@ class AppDialogFragment : DialogFragment() {
         private const val ARGS_MESSAGE = "message"
         private const val ARGS_POSITIVE_LABEL = "positive_label"
         private const val ARGS_NEGATIVE_LABEL = "negative_label"
+        private const val ARGS_IS_PARENT_ACTIVITY = "is_parent_activity"
     }
 
     /**
@@ -91,24 +95,31 @@ class AppDialogFragment : DialogFragment() {
         }
 
         /**
-         * AppDialogFragmentを生成.
-         * @param fragmentManager Activity#getSupportFragmentManager() or Fragment#getChildFragmentManager()
-         * @param requestCode リクエストコード
+         * Activity 上に AppDialogFragment を表示.
          */
-        fun show(fragmentManager: FragmentManager, requestCode: Int) {
-            val args = Bundle().apply {
-                putInt(ARGS_REQUEST_CODE, requestCode)
-                putString(ARGS_TITLE, title)
-                putString(ARGS_MESSAGE, message)
-                putString(ARGS_POSITIVE_LABEL, positiveLabel)
-                putString(ARGS_NEGATIVE_LABEL, negativeLabel)
-            }
-            val fragment = AppDialogFragment()
-                .apply {
-                arguments = args
+        fun show(activity: FragmentActivity, requestCode: Int) {
+            show(activity.supportFragmentManager, requestCode, true)
+        }
+
+        /**
+         * Fragment 上に AppDialogFragment を表示.
+         */
+        fun show(fragment: Fragment, requestCode: Int) {
+            show(fragment.childFragmentManager, requestCode, false)
+        }
+
+        private fun show(fragmentManager: FragmentManager, requestCode: Int, isParentActivity: Boolean) {
+            AppDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(ARGS_REQUEST_CODE, requestCode)
+                    putString(ARGS_TITLE, title)
+                    putString(ARGS_MESSAGE, message)
+                    putString(ARGS_POSITIVE_LABEL, positiveLabel)
+                    putString(ARGS_NEGATIVE_LABEL, negativeLabel)
+                    putBoolean(ARGS_IS_PARENT_ACTIVITY, isParentActivity)
+                }
                 isCancelable = cancelable
-            }
-            fragment.show(fragmentManager, null)
+            }.show(fragmentManager, null)
         }
     }
 
@@ -123,6 +134,14 @@ class AppDialogFragment : DialogFragment() {
     private val message: String? by lazy { args.getString(ARGS_MESSAGE) }
     private val positiveLabel: String? by lazy { args.getString(ARGS_POSITIVE_LABEL) }
     private val negativeLabel: String? by lazy { args.getString(ARGS_NEGATIVE_LABEL) }
+    private val isParentActivity: Boolean by lazy { args.getBoolean(ARGS_IS_PARENT_ACTIVITY, true) }
+
+    private val callback: Callback? by lazy {
+        (if (isParentActivity) requireActivity().downCast() else parentFragment.downCast()) ?: run {
+            logW("No implemented callback.")
+            null
+        }
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
         AlertDialog.Builder(requireActivity()).apply {
@@ -149,16 +168,6 @@ class AppDialogFragment : DialogFragment() {
 
     private fun callDialogResult(which: Int) {
         val intent = Intent().apply { putExtras(args) }
-        val fragment = parentFragment
-        if (fragment != null && fragment is Callback) {
-            fragment.onDialogResult(requestCode, which, intent)
-            return
-        }
-        val activity = requireActivity()
-        if (activity is Callback) {
-            activity.onDialogResult(requestCode, which, intent)
-            return
-        }
-        logW("Not implemented callback.")
+        callback?.onDialogResult(requestCode, which, intent)
     }
 }

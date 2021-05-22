@@ -99,7 +99,7 @@ class SplashActivity : AppCompatActivity(), SplashContract.PresenterCallback, Ap
                 setPositiveLabel(R.string.retry)
                 setNegativeLabel(R.string.cancel)
                 setCancelable(false)
-            }.show(supportFragmentManager, request.code)
+            }.show(this, request.code)
         }
     }
 
