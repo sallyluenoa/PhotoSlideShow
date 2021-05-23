@@ -16,12 +16,9 @@ class SlideShowFragment : Fragment() {
 
         private const val ARGS_FILE_PATH = "file_path"
 
-        fun newInstance(filePath: String): Fragment {
-            val args = Bundle().apply {
-                putSerializable(ARGS_FILE_PATH, filePath)
-            }
-            return SlideShowFragment().apply {
-                arguments = args
+        fun newInstance(filePath: String): Fragment = SlideShowFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARGS_FILE_PATH, filePath)
             }
         }
     }
@@ -31,6 +28,9 @@ class SlideShowFragment : Fragment() {
             logE("Not found arguments.")
             Bundle()
         }
+    }
+    private val filePath: String by lazy {
+        args.getString(ARGS_FILE_PATH, "")
     }
 
     private var _binding: FragmentSlideShowBinding? = null
@@ -50,7 +50,6 @@ class SlideShowFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val filePath = args.getString(ARGS_FILE_PATH, "")
         setImageView(filePath)
     }
 

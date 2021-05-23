@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.core.extension.tag
+import org.fog_rock.photo_slideshow.app.module.ui.extension.FragmentCallback
+import org.fog_rock.photo_slideshow.app.module.ui.extension.getActivityCallback
+import org.fog_rock.photo_slideshow.core.extension.TAG
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -31,12 +33,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
         fun onChangedServerUpdateTime(changedValue: Int)
     }
 
+    private val callback: Callback? by lazy {
+        getActivityCallback()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        getActivityCallback()?.onCreateViewFragment(tag())
+        callback?.onCreateViewFragment(TAG)
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -48,7 +54,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 if (it is ListPreference) getString(R.string.number_of_photos_summary, it.entry) else ""
             }
             setOnPreferenceChangeListener { _, newValue ->
-                getActivityCallback()?.onChangedNumberOfPhotos(newValue.toString().toInt())
+                callback?.onChangedNumberOfPhotos(newValue.toString().toInt())
                 true
             }
         }
@@ -58,7 +64,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 if (it is ListPreference) getString(R.string.time_interval_of_photos_summary, it.entry) else ""
             }
             setOnPreferenceChangeListener { _, newValue ->
-                getActivityCallback()?.onChangedTimeIntervalOfPhotos(newValue.toString().toInt())
+                callback?.onChangedTimeIntervalOfPhotos(newValue.toString().toInt())
                 true
             }
         }
@@ -68,14 +74,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 if (it is ListPreference) getString(R.string.server_update_time_summary, it.entry) else ""
             }
             setOnPreferenceChangeListener { _, newValue ->
-                getActivityCallback()?.onChangedServerUpdateTime(newValue.toString().toInt())
+                callback?.onChangedServerUpdateTime(newValue.toString().toInt())
                 true
             }
         }
-    }
-
-    private fun getActivityCallback(): Callback? {
-        val activity = requireActivity()
-        return if (activity is Callback) activity else null
     }
 }

@@ -4,10 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
-import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.main.contract.MainContract
 import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
 import org.fog_rock.photo_slideshow.app.main.interactor.MainInteractor
@@ -18,13 +16,14 @@ import org.fog_rock.photo_slideshow.app.module.lib.impl.AppSettingsImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.PhotosDownloaderImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
+import org.fog_rock.photo_slideshow.app.module.ui.extension.replaceFragment
 import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.extension.ONE_SECOND_MILLIS
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.extension.logW
 import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
 import org.fog_rock.photo_slideshow.core.math.impl.SizeCalculatorImpl
-import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
@@ -51,9 +50,7 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        replaceFragment(
-            AppSimpleFragment.newInstance(
-                AppSimpleFragment.Layout.PROGRESS))
+        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
 
         binding.menuButton.setOnClickListener {
             presenter?.requestShowMenu()
@@ -115,25 +112,15 @@ class MainActivity : AppCompatActivity(), MainContract.PresenterCallback {
     }
 
     /**
-     * 新しいフラグメントに置換する.
-     */
-    private fun replaceFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.fragment_container, fragment)
-        }.commit()
-    }
-
-    /**
      * 画像を表示する.
      * @param filePath 画像ファイルパス
      */
     private fun presentImage(filePath: String) {
         for (fragment in supportFragmentManager.fragments) {
-            if (fragment is SlideShowFragment) {
-                logI("Update image to fragment. FilePath: $filePath")
-                fragment.setImageView(filePath)
-                return
-            }
+            val slideShowFragment = fragment.downCast<SlideShowFragment>()?: continue
+            logI("Update image to fragment. FilePath: $filePath")
+            slideShowFragment.setImageView(filePath)
+            return
         }
         logI("Set image to new fragment. FilePath: $filePath")
         replaceFragment(SlideShowFragment.newInstance(filePath))

@@ -9,6 +9,7 @@ import org.fog_rock.photo_slideshow.app.menu.contract.MenuContract
 import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
 import org.fog_rock.photo_slideshow.app.module.lib.AppSettings
 import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
@@ -21,12 +22,9 @@ class MenuInteractor(
     private var callback: MenuContract.InteractorCallback? = null
 
     override fun create(callback: ViperContract.InteractorCallback) {
-        if (callback is MenuContract.InteractorCallback) {
-            this.callback = callback
-            createLoad()
-        } else {
-            throw IllegalArgumentException("MenuContract.InteractorCallback should be set.")
-        }
+        this.callback = callback.downCast()
+            ?: throw IllegalArgumentException("MenuContract.InteractorCallback should be set.")
+        createLoad()
     }
 
     override fun destroy() {
@@ -66,9 +64,9 @@ class MenuInteractor(
         googleWebApis.requestSignOut(false)
 
     private suspend fun signOut(): ApiResult {
+        val emailAddress = googleWebApis.getSignedInEmailAddress()
         val result = googleWebApis.requestSignOut(true)
         if (result == ApiResult.SUCCEEDED) {
-            val emailAddress = googleWebApis.getSignedInEmailAddress()
             appDatabase.deleteUserInfo(emailAddress)
         }
         return result

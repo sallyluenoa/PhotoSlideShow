@@ -12,9 +12,8 @@ private const val ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm'Z'"
 
 fun Long.toDateString(
     format: String = ISO_8601_FORMAT,
-    timeZone: TimeZone = TimeZone.getDefault()
-): String {
-    val df = SimpleDateFormat(format, Locale.US)
-    df.timeZone = timeZone
-    return df.format(Date(this))
-}
+    timezone: TimeZone = TimeZone.getDefault()
+): String =
+    SimpleDateFormat(format, Locale.US).apply {
+        timeZone = timezone
+    }.format(Date(this))

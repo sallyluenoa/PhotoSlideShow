@@ -3,6 +3,7 @@ package org.fog_rock.photo_slideshow.app.menu.presenter
 import android.app.Activity
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.menu.contract.MenuContract
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
@@ -15,12 +16,9 @@ class MenuPresenter(
     private var callback: MenuContract.PresenterCallback? = null
 
     override fun create(callback: ViperContract.PresenterCallback) {
-        if (callback is MenuContract.PresenterCallback) {
-            this.callback = callback
-            interactor?.create(this)
-        } else {
-            throw IllegalArgumentException("MenuContract.PresenterCallback should be set.")
-        }
+        this.callback = callback.downCast()
+            ?: throw IllegalArgumentException("MenuContract.PresenterCallback should be set.")
+        interactor?.create(this)
     }
 
     override fun destroy() {

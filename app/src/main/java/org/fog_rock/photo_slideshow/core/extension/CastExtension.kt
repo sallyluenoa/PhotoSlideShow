@@ -4,37 +4,28 @@ import android.content.Intent
 import android.os.Bundle
 import java.io.Serializable
 
-@Suppress("UNCHECKED_CAST")
-fun <ChildT> Any?.downCast(): ChildT? = this as ChildT
+inline fun <reified ChildT> Any?.downCast(): ChildT? = if (this is ChildT) this else null
 
-fun <SerializableT: Serializable> Intent.putArrayExtra(name: String, value: Array<SerializableT>): Intent {
-    this.putExtra(name, value)
-    return this
-}
+fun <SerialT: Serializable> Intent.putArrayExtra(name: String, value: Array<SerialT>): Intent =
+    this.apply { putExtra(name, value) }
 
-fun <SerializableT: Serializable> Intent.getArrayExtra(name: String): Array<SerializableT>? =
-    this.getSerializableExtra(name).downCast<Array<SerializableT>>()
+inline fun <reified SerialT: Serializable> Intent.getArrayExtra(name: String): Array<SerialT>? =
+    this.getSerializableExtra(name).downCast<Array<SerialT>>()
 
-fun <SerializableT: Serializable> Intent.putArrayListExtra(name: String, value: ArrayList<SerializableT>): Intent {
-    this.putExtra(name, value)
-    return this
-}
+inline fun <reified SerialT: Serializable> Intent.putListExtra(name: String, value: List<SerialT>): Intent =
+    putArrayExtra(name, value.toTypedArray())
 
-fun <SerializableT: Serializable> Intent.getArrayListExtra(name: String): ArrayList<SerializableT>? =
-    this.getSerializableExtra(name).downCast<ArrayList<SerializableT>>()
+inline fun <reified SerialT: Serializable> Intent.getListExtra(name: String): List<SerialT>? =
+    getArrayExtra<SerialT>(name)?.toList()
 
-fun <SerializableT: Serializable> Bundle.putArrayExtra(name: String, value: Array<SerializableT>): Bundle {
-    this.putSerializable(name, value)
-    return this
-}
+fun <SerialT: Serializable> Bundle.putArrayExtra(name: String, value: Array<SerialT>): Bundle =
+    this.apply { putSerializable(name, value) }
 
-fun <SerializableT: Serializable> Bundle.getArrayExtra(name: String): Array<SerializableT>? =
-    this.getSerializable(name).downCast<Array<SerializableT>>()
+inline fun <reified SerialT: Serializable> Bundle.getArrayExtra(name: String): Array<SerialT>? =
+    this.getSerializable(name).downCast<Array<SerialT>>()
 
-fun <SerializableT: Serializable> Bundle.putArrayListExtra(name: String, value: ArrayList<SerializableT>): Bundle {
-    this.putSerializable(name, value)
-    return this
-}
+inline fun <reified SerialT: Serializable> Bundle.putListExtra(name: String, value: List<SerialT>): Bundle =
+    putArrayExtra(name, value.toTypedArray())
 
-fun <SerializableT: Serializable> Bundle.getArrayListExtra(name: String): ArrayList<SerializableT>? =
-    this.getSerializable(name).downCast<ArrayList<SerializableT>>()
+inline fun <reified SerialT: Serializable> Bundle.getListExtra(name: String): List<SerialT>? =
+    getArrayExtra<SerialT>(name)?.toList()

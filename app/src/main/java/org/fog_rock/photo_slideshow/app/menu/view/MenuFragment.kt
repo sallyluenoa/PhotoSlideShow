@@ -10,7 +10,9 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import org.fog_rock.photo_slideshow.BuildConfig
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.core.extension.tag
+import org.fog_rock.photo_slideshow.app.module.ui.extension.FragmentCallback
+import org.fog_rock.photo_slideshow.app.module.ui.extension.getActivityCallback
+import org.fog_rock.photo_slideshow.core.extension.TAG
 
 class MenuFragment : PreferenceFragmentCompat() {
 
@@ -52,12 +54,16 @@ class MenuFragment : PreferenceFragmentCompat() {
         fun onClickedSignOut()
     }
 
+    private val callback: Callback? by lazy {
+        getActivityCallback()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        getActivityCallback()?.onCreateViewFragment(tag())
+        callback?.onCreateViewFragment(TAG)
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -74,21 +80,16 @@ class MenuFragment : PreferenceFragmentCompat() {
             BuildConfig.VERSION_NAME
 
         findPreference<Preference>(getString(R.string.pref_key_license_info))?.setOnPreferenceClickListener {
-            getActivityCallback()?.onClickedLicenseInfo()
+            callback?.onClickedLicenseInfo()
             true
         }
         findPreference<Preference>(getString(R.string.pref_key_change_user))?.setOnPreferenceClickListener {
-            getActivityCallback()?.onClickedChangeUser()
+            callback?.onClickedChangeUser()
             true
         }
         findPreference<Preference>(getString(R.string.pref_key_sign_out))?.setOnPreferenceClickListener {
-            getActivityCallback()?.onClickedSignOut()
+            callback?.onClickedSignOut()
             true
         }
-    }
-
-    private fun getActivityCallback(): Callback? {
-        val activity = requireActivity()
-        return if (activity is Callback) activity else null
     }
 }

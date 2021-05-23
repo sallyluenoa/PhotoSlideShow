@@ -38,11 +38,8 @@ class MainInteractor(
     )
 
     override fun create(callback: ViperContract.InteractorCallback) {
-        if (callback is MainContract.InteractorCallback) {
-            this.callback = callback
-        } else {
-            throw IllegalArgumentException("MainContract.InteractorCallback should be set.")
-        }
+        this.callback = callback.downCast()
+            ?: throw IllegalArgumentException("MainContract.InteractorCallback should be set.")
     }
 
     override fun destroy() {

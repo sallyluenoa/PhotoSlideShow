@@ -8,7 +8,10 @@ import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logW
 
@@ -28,6 +31,7 @@ class AppDialogFragment : DialogFragment() {
         private const val ARGS_MESSAGE = "message"
         private const val ARGS_POSITIVE_LABEL = "positive_label"
         private const val ARGS_NEGATIVE_LABEL = "negative_label"
+        private const val ARGS_IS_PARENT_ACTIVITY = "is_parent_activity"
     }
 
     /**
@@ -47,14 +51,14 @@ class AppDialogFragment : DialogFragment() {
      * ビルダークラス
      */
     class Builder(private val context: Context) {
-        private var title: String? = null
-        private var message: String? = null
-        private var positiveLabel: String? = null
-        private var negativeLabel: String? = null
-        private var cancelable = true
+        private var _title: String? = null
+        private var _message: String? = null
+        private var _positiveLabel: String? = null
+        private var _negativeLabel: String? = null
+        private var _cancelable = true
 
         fun setTitle(title: String): Builder {
-            this.title = title
+            this._title = title
             return this
         }
         fun setTitle(@StringRes title: Int): Builder =
@@ -62,7 +66,7 @@ class AppDialogFragment : DialogFragment() {
             else this
 
         fun setMessage(message: String): Builder {
-            this.message = message
+            this._message = message
             return this
         }
         fun setMessage(@StringRes message: Int): Builder =
@@ -70,7 +74,7 @@ class AppDialogFragment : DialogFragment() {
             else this
 
         fun setPositiveLabel(positiveLabel: String): Builder {
-            this.positiveLabel = positiveLabel
+            this._positiveLabel = positiveLabel
             return this
         }
         fun setPositiveLabel(@StringRes positiveLabel: Int): Builder =
@@ -78,7 +82,7 @@ class AppDialogFragment : DialogFragment() {
             else this
 
         fun setNegativeLabel(negativeLabel: String): Builder {
-            this.negativeLabel = negativeLabel
+            this._negativeLabel = negativeLabel
             return this
         }
         fun setNegativeLabel(@StringRes negativeLabel: Int): Builder =
@@ -86,29 +90,36 @@ class AppDialogFragment : DialogFragment() {
             else this
 
         fun setCancelable(cancelable: Boolean): Builder {
-            this.cancelable = cancelable
+            this._cancelable = cancelable
             return this
         }
 
         /**
-         * AppDialogFragmentを生成.
-         * @param fragmentManager Activity#getSupportFragmentManager() or Fragment#getChildFragmentManager()
-         * @param requestCode リクエストコード
+         * Activity 上に AppDialogFragment を表示.
          */
-        fun show(fragmentManager: FragmentManager, requestCode: Int) {
-            val args = Bundle().apply {
-                putInt(ARGS_REQUEST_CODE, requestCode)
-                putString(ARGS_TITLE, title)
-                putString(ARGS_MESSAGE, message)
-                putString(ARGS_POSITIVE_LABEL, positiveLabel)
-                putString(ARGS_NEGATIVE_LABEL, negativeLabel)
-            }
-            val fragment = AppDialogFragment()
-                .apply {
-                arguments = args
-                isCancelable = cancelable
-            }
-            fragment.show(fragmentManager, null)
+        fun show(activity: FragmentActivity, requestCode: Int) {
+            show(activity.supportFragmentManager, requestCode, true)
+        }
+
+        /**
+         * Fragment 上に AppDialogFragment を表示.
+         */
+        fun show(fragment: Fragment, requestCode: Int) {
+            show(fragment.childFragmentManager, requestCode, false)
+        }
+
+        private fun show(fragmentManager: FragmentManager, requestCode: Int, isParentActivity: Boolean) {
+            AppDialogFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(ARGS_REQUEST_CODE, requestCode)
+                    putString(ARGS_TITLE, _title)
+                    putString(ARGS_MESSAGE, _message)
+                    putString(ARGS_POSITIVE_LABEL, _positiveLabel)
+                    putString(ARGS_NEGATIVE_LABEL, _negativeLabel)
+                    putBoolean(ARGS_IS_PARENT_ACTIVITY, isParentActivity)
+                }
+                isCancelable = _cancelable
+            }.show(fragmentManager, null)
         }
     }
 
@@ -123,26 +134,32 @@ class AppDialogFragment : DialogFragment() {
     private val message: String? by lazy { args.getString(ARGS_MESSAGE) }
     private val positiveLabel: String? by lazy { args.getString(ARGS_POSITIVE_LABEL) }
     private val negativeLabel: String? by lazy { args.getString(ARGS_NEGATIVE_LABEL) }
+    private val isParentActivity: Boolean by lazy { args.getBoolean(ARGS_IS_PARENT_ACTIVITY, true) }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(requireActivity()).apply {
-            setTitle(title)
-            setMessage(message)
+    private val callback: Callback? by lazy {
+        (if (isParentActivity) requireActivity().downCast() else parentFragment.downCast()) ?: run {
+            logW("No implemented callback.")
+            null
         }
-        if (!positiveLabel.isNullOrEmpty()) {
-            builder.setPositiveButton(positiveLabel) { _, which ->
-                dismiss()
-                callDialogResult(which)
-            }
-        }
-        if (!negativeLabel.isNullOrEmpty()) {
-            builder.setNegativeButton(negativeLabel) { _, which ->
-                dismiss()
-                callDialogResult(which)
-            }
-        }
-        return builder.create()
     }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
+        AlertDialog.Builder(requireActivity()).apply {
+            if (!title.isNullOrEmpty()) setTitle(title)
+            if (!message.isNullOrEmpty()) setMessage(message)
+            if (!positiveLabel.isNullOrEmpty()) {
+                setPositiveButton(positiveLabel) { _, which ->
+                    dismiss()
+                    callDialogResult(which)
+                }
+            }
+            if (!negativeLabel.isNullOrEmpty()) {
+                setNegativeButton(negativeLabel) { _, which ->
+                    dismiss()
+                    callDialogResult(which)
+                }
+            }
+        }.create()
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
@@ -151,16 +168,6 @@ class AppDialogFragment : DialogFragment() {
 
     private fun callDialogResult(which: Int) {
         val intent = Intent().apply { putExtras(args) }
-        val fragment = parentFragment
-        if (fragment != null && fragment is Callback) {
-            fragment.onDialogResult(requestCode, which, intent)
-            return
-        }
-        val activity = requireActivity()
-        if (activity is Callback) {
-            activity.onDialogResult(requestCode, which, intent)
-            return
-        }
-        logW("Not implemented callback.")
+        callback?.onDialogResult(requestCode, which, intent)
     }
 }

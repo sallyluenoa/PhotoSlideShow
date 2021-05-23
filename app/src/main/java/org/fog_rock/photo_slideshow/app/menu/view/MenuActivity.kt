@@ -8,6 +8,7 @@ import android.view.KeyEvent
 import android.view.MenuItem
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -21,8 +22,8 @@ import org.fog_rock.photo_slideshow.app.module.lib.impl.AppSettingsImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
-import org.fog_rock.photo_slideshow.app.module.ui.addFragment
-import org.fog_rock.photo_slideshow.app.module.ui.replaceFragment
+import org.fog_rock.photo_slideshow.app.module.ui.extension.addFragment
+import org.fog_rock.photo_slideshow.app.module.ui.extension.replaceFragment
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
@@ -117,14 +118,14 @@ class MenuActivity : AppCompatActivity(),
         /**
          * リクエストに応じたダイアログを表示する.
          */
-        fun show(context: Context, fragmentManager: FragmentManager) {
-            AppDialogFragment.Builder(context).apply {
+        fun show(activity: FragmentActivity) {
+            AppDialogFragment.Builder(activity).apply {
                 if (titleResId != null) setTitle(titleResId)
                 if (messageResId != null) setMessage(messageResId)
                 if (positiveResId != null) setPositiveLabel(positiveResId)
                 if (negativeResId != null) setNegativeLabel(negativeResId)
                 setCancelable(cancelable)
-            }.show(fragmentManager, code)
+            }.show(activity, code)
         }
     }
 
@@ -283,7 +284,7 @@ class MenuActivity : AppCompatActivity(),
      */
     private fun showDialogFragment(request: DialogRequest) {
         logI("Show dialog fragment: $request")
-        request.show(this, supportFragmentManager)
+        request.show(this)
     }
 
     private fun showSettingsChangedDialog(): Boolean {

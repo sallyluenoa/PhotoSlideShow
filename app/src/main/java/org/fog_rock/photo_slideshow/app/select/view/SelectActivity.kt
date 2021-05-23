@@ -4,17 +4,16 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.google.photos.types.proto.Album
-import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.lib.impl.AppDatabaseImpl
 import org.fog_rock.photo_slideshow.app.module.lib.impl.GoogleWebApisImpl
 import org.fog_rock.photo_slideshow.app.module.ui.AppSimpleFragment
+import org.fog_rock.photo_slideshow.app.module.ui.extension.replaceFragment
 import org.fog_rock.photo_slideshow.app.select.contract.SelectContract
 import org.fog_rock.photo_slideshow.app.select.entity.SelectAlbumsResult
 import org.fog_rock.photo_slideshow.app.select.interactor.SelectInteractor
 import org.fog_rock.photo_slideshow.app.select.presenter.SelectPresenter
-import org.fog_rock.photo_slideshow.core.extension.putArrayListExtra
+import org.fog_rock.photo_slideshow.core.extension.putListExtra
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleOAuth2ApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.GoogleSignInApiImpl
 import org.fog_rock.photo_slideshow.core.webapi.impl.PhotosLibraryApiImpl
@@ -31,9 +30,7 @@ class SelectActivity : AppCompatActivity(), SelectContract.PresenterCallback {
 
         binding = ActivitySelectBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        replaceFragment(
-            AppSimpleFragment.newInstance(
-                AppSimpleFragment.Layout.PROGRESS))
+        replaceFragment(AppSimpleFragment.newInstance(AppSimpleFragment.Layout.PROGRESS))
 
         presenter = SelectPresenter(SelectInteractor(
             AppDatabaseImpl(),
@@ -60,18 +57,9 @@ class SelectActivity : AppCompatActivity(), SelectContract.PresenterCallback {
         // TODO: 今は１アルバム選択だが、複数選択を実装予定.
         val albums = arrayListOf(album)
         val intent = Intent().apply {
-            putArrayListExtra(SelectAlbumsResult.DECIDED_ALBUMS.key(), albums)
+            putListExtra(SelectAlbumsResult.DECIDED_ALBUMS.key(), albums)
         }
         setResult(RESULT_OK, intent)
         finish()
-    }
-
-    /**
-     * 新しいフラグメントに置換する.
-     */
-    private fun replaceFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.fragment_container, fragment)
-        }.commit()
     }
 }

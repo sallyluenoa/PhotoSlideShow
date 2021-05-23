@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import org.fog_rock.photo_slideshow.R
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.logE
 
 /**
@@ -21,13 +23,9 @@ class AppSimpleFragment : Fragment() {
         /**
          * 新規インスタンス生成.
          */
-        fun newInstance(layout: Layout): Fragment {
-            val args = Bundle().apply {
+        fun newInstance(layout: Layout): Fragment = AppSimpleFragment().apply {
+            arguments = Bundle().apply {
                 putSerializable(ARGS_LAYOUT, layout)
-            }
-            return AppSimpleFragment()
-                .apply {
-                arguments = args
             }
         }
     }
@@ -35,7 +33,7 @@ class AppSimpleFragment : Fragment() {
     /**
      * 画面レイアウト種別.
      */
-    enum class Layout(val resId: Int) {
+    enum class Layout(@LayoutRes val resId: Int) {
         /**
          * 真っ白なレイアウト
          */
@@ -58,9 +56,8 @@ class AppSimpleFragment : Fragment() {
             Bundle()
         }
     }
-
     private val layout: Layout by lazy {
-        args.getSerializable(ARGS_LAYOUT) as Layout
+        args.getSerializable(ARGS_LAYOUT).downCast() ?: Layout.EMPTY
     }
 
     override fun onCreateView(

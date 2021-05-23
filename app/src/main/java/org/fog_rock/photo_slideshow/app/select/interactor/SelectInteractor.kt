@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
 import org.fog_rock.photo_slideshow.app.module.lib.GoogleWebApis
 import org.fog_rock.photo_slideshow.app.select.contract.SelectContract
+import org.fog_rock.photo_slideshow.core.extension.downCast
 import org.fog_rock.photo_slideshow.core.extension.logE
 import org.fog_rock.photo_slideshow.core.extension.logI
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
@@ -23,12 +24,9 @@ class SelectInteractor(
     private var callback: SelectContract.InteractorCallback? = null
 
     override fun create(callback: ViperContract.InteractorCallback) {
-        if (callback is SelectContract.InteractorCallback) {
-            this.callback = callback
-            createLoad()
-        } else {
-            throw IllegalArgumentException("SelectContract.InteractorCallback should be set.")
-        }
+        this.callback = callback.downCast()
+            ?: throw IllegalArgumentException("SelectContract.InteractorCallback should be set.")
+        createLoad()
     }
 
     override fun destroy() {
