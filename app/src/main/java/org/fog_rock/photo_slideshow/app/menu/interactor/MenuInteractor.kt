@@ -64,9 +64,9 @@ class MenuInteractor(
         googleWebApis.requestSignOut(false)
 
     private suspend fun signOut(): ApiResult {
+        val emailAddress = googleWebApis.getSignedInEmailAddress()
         val result = googleWebApis.requestSignOut(true)
         if (result == ApiResult.SUCCEEDED) {
-            val emailAddress = googleWebApis.getSignedInEmailAddress()
             appDatabase.deleteUserInfo(emailAddress)
         }
         return result
