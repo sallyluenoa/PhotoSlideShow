@@ -9,7 +9,7 @@ import androidx.preference.PreferenceFragmentCompat
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.ui.extension.FragmentCallback
 import org.fog_rock.photo_slideshow.app.module.ui.extension.getActivityCallback
-import org.fog_rock.photo_slideshow.core.extension.tag
+import org.fog_rock.photo_slideshow.core.extension.TAG
 
 class SettingsFragment : PreferenceFragmentCompat() {
 
@@ -42,7 +42,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        callback?.onCreateViewFragment(tag())
+        callback?.onCreateViewFragment(TAG)
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 

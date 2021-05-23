@@ -12,7 +12,7 @@ import org.fog_rock.photo_slideshow.BuildConfig
 import org.fog_rock.photo_slideshow.R
 import org.fog_rock.photo_slideshow.app.module.ui.extension.FragmentCallback
 import org.fog_rock.photo_slideshow.app.module.ui.extension.getActivityCallback
-import org.fog_rock.photo_slideshow.core.extension.tag
+import org.fog_rock.photo_slideshow.core.extension.TAG
 
 class MenuFragment : PreferenceFragmentCompat() {
 
@@ -63,7 +63,7 @@ class MenuFragment : PreferenceFragmentCompat() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        callback?.onCreateViewFragment(tag())
+        callback?.onCreateViewFragment(TAG)
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
