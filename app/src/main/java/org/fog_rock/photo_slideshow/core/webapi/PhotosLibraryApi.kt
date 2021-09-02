@@ -1,64 +1,61 @@
 package org.fog_rock.photo_slideshow.core.webapi
 
-import android.content.Context
-import android.util.Log
-import com.google.android.gms.common.api.ApiException
-import com.google.photos.library.v1.proto.SearchMediaItemsRequest
 import com.google.photos.types.proto.Album
 import com.google.photos.types.proto.MediaItem
-import kotlin.math.max
+import org.fog_rock.photo_slideshow.core.webapi.entity.TokenInfo
 
 /**
  * Google Photos に関連するAPI
+ * https://developers.google.com/photos/
+ * https://google.github.io/java-photoslibrary/1.4.0/
  */
-class PhotosLibraryApi(
-    private val context: Context,
-    accessToken: String) {
+interface PhotosLibraryApi {
 
-    private val TAG = PhotosLibraryApi::class.java.simpleName
+    /**
+     * アルバム取得要求.
+     * コルーチン内で呼び出すこと.
+     * @param albumId アルバムID
+     */
+    suspend fun requestAlbum(albumId: String): Album
 
-    private val clientHolder = PhotosLibraryClientHolder(accessToken)
+    /**
+     * メディアアイテム取得要求.
+     * コルーチン内で呼び出すこと.
+     * @param mediaItemId メディアアイテムID
+     */
+    suspend fun requestMediaItem(mediaItemId: String): MediaItem
 
-    fun getSharedAlbums(): List<Album> =
-        try {
-            val pagedResponse = clientHolder.client.listSharedAlbums()
-            val sharedAlbumsResponse = pagedResponse.page.response
-            sharedAlbumsResponse.sharedAlbumsList
-        } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get album response.")
-            e.printStackTrace()
-            listOf<Album>()
-        }
+    /**
+     * アルバムリストの更新要求.
+     * コルーチン内で呼び出すこと.
+     */
+    suspend fun requestUpdateAlbums(albums: List<Album>): List<Album>
 
-    fun getMediaItems(album: Album, maxSize: Int): List<MediaItem> =
-        try {
-            val request = SearchMediaItemsRequest.newBuilder().apply {
-                albumId = album.id
-                pageSize = 100
-            }.build()
-            val pagedResponse = clientHolder.client.searchMediaItems(request)
-            val mediaItemsResponse = pagedResponse.page.response
+    /**
+     * メディアアイテムリスト更新要求.
+     * コルーチン内で呼び出すこと.
+     */
+    suspend fun requestUpdateMediaItems(mediaItems: List<MediaItem>): List<MediaItem>
 
-            val count = mediaItemsResponse.mediaItemsCount
-            Log.d(TAG, "mediaItem count: $count")
-            val randNumbers = generateRandomNumbers(max(count - maxSize, 0), count)
-            val mediaItems = mutableListOf<MediaItem>()
-            randNumbers.forEach {
-                val item = mediaItemsResponse.getMediaItems(it)
-                Log.d(TAG, "$it: ${item.id}")
-                mediaItems.add(item)
-            }
-            mediaItems.toList()
-        } catch (e: ApiException) {
-            Log.e(TAG, "Failed to get mediaItem response.")
-            e.printStackTrace()
-            listOf<MediaItem>()
-        }
+    /**
+     * 共有アルバムリスト取得要求.
+     * コルーチン内で呼び出すこと.
+     */
+    suspend fun requestSharedAlbums(): List<Album>
 
-    private fun generateRandomNumbers(start: Int, end: Int): List<Int> {
-        val numbers = mutableListOf<Int>()
-        for (i in start until end) numbers.add(i)
-        numbers.shuffle()
-        return numbers.toList()
-    }
+    /**
+     * アルバム内のアイテムリスト取得要求.
+     * コルーチン内で呼び出すこと.
+     */
+    suspend fun requestMediaItems(album: Album): List<MediaItem>
+
+    /**
+     * 指定されたトークン情報でクライアントを更新する.
+     */
+    fun updatePhotosLibraryClient(tokenInfo: TokenInfo?)
+
+    /**
+     * 現在のトークン情報を取得する.
+     */
+    fun currentTokenInfo(): TokenInfo
 }

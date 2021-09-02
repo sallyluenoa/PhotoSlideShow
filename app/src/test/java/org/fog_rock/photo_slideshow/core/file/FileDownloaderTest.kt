@@ -1,30 +1,47 @@
 package org.fog_rock.photo_slideshow.core.file
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
+import org.fog_rock.photo_slideshow.core.file.impl.FileDownloaderImpl
 import org.junit.Assert.assertEquals
+import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.net.URL
 
-@RunWith(AndroidJUnit4::class)
 class FileDownloaderTest {
 
-    private val context: Context = ApplicationProvider.getApplicationContext()
-    private val fileDownloader = FileDownloader(10000L)
+    @Rule
+    @JvmField
+    val tempFolder: TemporaryFolder = TemporaryFolder()
+
+    private val fileDownloader: FileDownloader = FileDownloaderImpl()
 
     @Test
-    fun doDownload() {
+    fun requestDownload() {
 
         val downloadURL = URL("https://publicobject.com/helloworld.txt")
-        val outputFile1 = File(context.filesDir, "sample1.txt")
+        val outputFile1 = File(tempFolder.root, "sample1.txt")
 
-        val ret1 = runBlocking {
-            fileDownloader.doDownload(downloadURL, outputFile1)
+        // 正常系
+        val normalResult = runBlocking {
+            fileDownloader.requestDownload(downloadURL, outputFile1)
         }
-        assertEquals(true, ret1)
+        assertEquals(true, normalResult)
+
+        // すでにファイルが存在
+        val duplicateResult = runBlocking {
+            fileDownloader.requestDownload(downloadURL, outputFile1)
+        }
+        assertEquals(true, duplicateResult)
+
+        val notFoundURL = URL("https://publicobject.com/helloworld")
+        val outputFile2 = File(tempFolder.root, "sample2.txt")
+
+        // 異常系 (404: Not Found)
+        val errorNotFoundResult = runBlocking {
+            fileDownloader.requestDownload(notFoundURL, outputFile2)
+        }
+        assertEquals(false, errorNotFoundResult)
     }
 }

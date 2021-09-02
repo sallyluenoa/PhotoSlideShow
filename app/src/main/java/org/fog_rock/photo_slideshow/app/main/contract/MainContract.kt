@@ -1,28 +1,33 @@
 package org.fog_rock.photo_slideshow.app.main.contract
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import com.google.photos.types.proto.Album
-import com.google.photos.types.proto.MediaItem
+import org.fog_rock.photo_slideshow.app.main.entity.UpdatePhotosRequest
+import org.fog_rock.photo_slideshow.app.module.lib.AppDatabase
+import org.fog_rock.photo_slideshow.core.database.entity.DisplayedPhoto
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
 
-class MainContract {
+interface MainContract {
 
     interface Presenter : ViperContract.Presenter {
         /**
-         * アルバム取得を要求.
+         * 写真表示のためのデータ取得を要求.
+         * @see PresenterCallback.requestLoadDisplayedPhotosResult
          */
-        fun requestAlbums()
+        fun requestLoadDisplayedPhotos()
 
         /**
-         * ライセンス表示を要求.
+         * 写真更新に必要な一連処理を要求.
+         * @see PresenterCallback.requestUpdateDisplayedPhotosResult
          */
-        fun requestLicense()
+        fun requestUpdateDisplayedPhotos()
 
         /**
-         * サインアウトを要求.
+         * メニュー画面表示を要求.
          */
-        fun requestSignOut()
+        fun requestShowMenu()
 
         /**
          * Activity#onActivityResult()の結果を評価する.
@@ -33,84 +38,77 @@ class MainContract {
 
     interface PresenterCallback : ViperContract.PresenterCallback {
         /**
-         * スライドショー開始を要求する.
-         * @param files 画像ファイルリスト
+         * 写真表示のためのデータ取得結果.
+         * @see Presenter.requestLoadDisplayedPhotos
          */
-        fun requestSlideShow(files: List<String>)
+        fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>, timeIntervalSecs: Int)
 
         /**
-         * ビューの終了処理を要求する.
+         * 写真更新に必要な一連処理の結果.
+         * @see Presenter.requestUpdateDisplayedPhotos
          */
-        fun requestFinish()
+        fun requestUpdateDisplayedPhotosResult(request: UpdatePhotosRequest)
     }
 
     interface Interactor : ViperContract.Interactor {
         /**
-         * 共有アルバム取得を要求.
-         * @see InteractorCallback.requestSharedAlbumsResult
+         * 写真表示のためのデータ取得を要求.
+         * @see InteractorCallback.requestLoadDisplayedPhotosResult
          */
-        fun requestSharedAlbums()
+        fun requestLoadDisplayedPhotos()
 
         /**
-         * メディアアイテム取得を要求.
-         * @param album メディアアイテムを取得するターゲットアルバム
+         * 写真リストのダウンロード要求.
+         * @see InteractorCallback.requestDownloadPhotosResult
          */
-        fun requestMediaItems(album: Album)
+        fun requestDownloadPhotos(context: Context, albums: List<Album>?)
 
         /**
-         * ファイルダウンロードを要求.
-         * @param mediaItems ダウンロードターゲットのメディアアイテムリスト
+         * データベース更新要求.
+         * @see InteractorCallback.requestUpdateDatabaseResult
          */
-        fun requestDownloadFiles(mediaItems: List<MediaItem>)
+        fun requestUpdateDatabase(photosInfo: List<AppDatabase.PhotoInfo>)
 
         /**
-         * サインアウトを要求.
+         * 写真更新する必要があるか.
          */
-        fun requestSignOut()
+        fun isNeededUpdatePhotos(): Boolean
+
+        /**
+         * 選択されたアルバムが存在するか.
+         */
+        fun hasSelectedAlbums(): Boolean
     }
 
     interface InteractorCallback : ViperContract.InteractorCallback {
         /**
-         * 共有アルバム取得結果.
-         * @param albums アルバムリスト
-         * @see Interactor.requestSharedAlbums
+         * 写真表示のためのデータ取得結果.
+         * @see Interactor.requestLoadDisplayedPhotos
          */
-        fun requestSharedAlbumsResult(albums: List<Album>?)
+        fun requestLoadDisplayedPhotosResult(displayedPhotos: List<DisplayedPhoto>, timeIntervalSecs: Int)
 
         /**
-         * メディアアイテム取得結果.
-         * @param mediaItems メディアアイテムリスト
-         * @see Interactor.requestMediaItems
+         * 写真リストのダウンロード要求の結果.
+         * @see Interactor.requestDownloadPhotos
          */
-        fun requestMediaItemsResult(mediaItems: List<MediaItem>?)
+        fun requestDownloadPhotosResult(photosInfo: List<AppDatabase.PhotoInfo>)
 
         /**
-         * ファイルダウンロード完了.
-         * @param files ダウンロードに成功した画像ファイルリスト
-         * @see Interactor.requestDownloadFiles
+         * データベース更新要求の結果.
+         * @see Interactor.requestUpdateDatabase
          */
-        fun completedDownloadFiles(files: List<String>)
-
-        /**
-         * サインアウト完了.
-         */
-        fun requestSignOutResult(isSucceeded: Boolean)
+        fun requestUpdateDatabaseResult(isSucceeded: Boolean)
     }
 
     interface Router : ViperContract.Router {
         /**
-         * SplashActivityの表示.
-         */
-        fun startSplashActivity(activity: Activity)
-
-        /**
          * SelectActivityの表示.
          */
-        fun startSelectActivity(activity: Activity, albums: List<Album>, requestCode: Int)
+        fun startSelectActivity(activity: Activity, requestCode: Int)
 
         /**
-         * OssLicensesMenuActivityの表示.
+         * MenuActivityの表示.
          */
-        fun startOssLicensesMenuActivity(activity: Activity, titleResId: Int)
+        fun startMenuActivity(activity: Activity, requestCode: Int)
     }
 }

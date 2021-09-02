@@ -2,23 +2,73 @@
 <resources>
     <string name="app_name">PhotoSlideShow</string>
 
+    <string name="empty"/>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
     <string name="start">Start</string>
     <string name="end">End</string>
+    <string name="retry">Retry</string>
     <string name="menu">Menu</string>
-    <string name="license">License</string>
+    <string name="settings">Settings</string>
+    <string name="license_info">License Info</string>
+    <string name="others">Others</string>
+    <string name="account_info">Account Info</string>
+    <string name="account_name">Account Name</string>
+    <string name="email_address">Email Address</string>
+    <string name="app_version">App Version</string>
     <string name="sign_in">Sign In</string>
     <string name="sign_out">Sign Out</string>
+    <string name="change_user">Change User</string>
+
+    <string name="number_of_10_photos">10 photos</string>
+    <string name="number_of_20_photos">20 photos</string>
+    <string name="number_of_30_photos">30 photos</string>
+    <string name="number_of_40_photos">40 photos</string>
+    <string name="number_of_50_photos">50 photos</string>
+    <string name="time_interval_5_seconds">5 seconds</string>
+    <string name="time_interval_10_seconds">10 seconds</string>
+    <string name="time_interval_30_seconds">30 seconds</string>
+    <string name="time_interval_60_seconds">60 seconds</string>
+    <string name="update_time_1_hour">1 hour</string>
+    <string name="update_time_3_hours">3 hours</string>
+    <string name="update_time_6_hours">6 hours</string>
+    <string name="update_time_12_hours">12 hours</string>
+    <string name="update_time_24_hours">24 hours</string>
+
+    <string name="number_of_photos_title">The Number of Photos</string>
+    <string name="number_of_photos_summary">Displays up to %1$s.</string>
+    <string name="time_interval_of_photos_title">Time Interval of Photos</string>
+    <string name="time_interval_of_photos_summary">Photos are displayed every %1$s.</string>
+    <string name="server_update_time_title">Server Update Time</string>
+    <string name="server_update_time_summary">We update photos from the server every %1$s.</string>
 
     <string name="failed_runtime_permissions_title">Permissions are denied.</string>
-    <string name="failed_runtime_permissions_message">App will be finished.</string>
+    <string name="failed_runtime_permissions_message">Are you sure to request permissions again?</string>
     <string name="failed_google_sign_in_title">Failed to sign in with Google account.</string>
-    <string name="failed_google_sign_in_message">App will be finished.</string>
+    <string name="failed_google_sign_in_message">@string/retry_sign_in_message</string>
+    <string name="failed_update_user_info_in_title">Failed to update user info.</string>
+    <string name="failed_update_user_info_in_message">@string/retry_sign_in_message</string>
+    <string name="failed_unknown_request_title">Unexpected error occurs.</string>
+    <string name="failed_unknown_request_message">@string/retry_sign_in_message</string>
+    <string name="retry_sign_in_message">Are you sure to sign in again?</string>
 
     <string name="confirm_select_album_title">The album is selected.</string>
     <string name="confirm_select_album_message">Are you sure to start slide show?\nAlbum Name: %1$s</string>
+
+    <string name="alert_changed_settings_title">App settings are changed.</string>
+    <string name="alert_changed_settings_message">The partial settings will be applied next update.</string>
+
+    <string name="confirm_change_user_title">You will be changed user.</string>
+    <string name="confirm_change_user_message">Access your Google account and app internal data will be kept.</string>
+    <string name="confirm_sign_out_title">You will be signed out.</string>
+    <string name="confirm_sign_out_message">Access your Google account and app internal data will be deleted.</string>
+
+    <string name="failed_change_user_title">Failed to change user.</string>
+    <string name="failed_change_user_message">@string/try_again_message</string>
+    <string name="failed_sign_out_title">Failed to sign out.</string>
+    <string name="failed_sign_out_message">@string/try_again_message</string>
+    <string name="try_again_message">Try again after a while.</string>
 
 </resources>

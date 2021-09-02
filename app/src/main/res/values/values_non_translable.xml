@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pref_key_root" translatable="false">preference_root</string>
+
+    <string name="pref_key_account_name" translatable="false">account_name</string>
+    <string name="pref_key_email_address" translatable="false">email_address</string>
+    <string name="pref_key_settings" translatable="false">settings</string>
+    <string name="pref_key_app_version" translatable="false">app_version</string>
+    <string name="pref_key_license_info" translatable="false">license_info</string>
+    <string name="pref_key_change_user" translatable="false">change_user</string>
+    <string name="pref_key_sign_out" translatable="false">sign_out</string>
+
+    <string name="pref_key_number_of_photos" translatable="false">number_of_photos</string>
+    <string name="pref_key_time_interval_of_photos" translatable="false">time_interval_of_photos</string>
+    <string name="pref_key_server_update_time" translatable="false">server_update_time</string>
+
+    <string name="default_value_number_of_photos" translatable="false">30</string>
+    <string name="default_value_time_interval_of_photos" translatable="false">30</string>
+    <string name="default_value_server_update_time" translatable="false">24</string>
+
+</resources>

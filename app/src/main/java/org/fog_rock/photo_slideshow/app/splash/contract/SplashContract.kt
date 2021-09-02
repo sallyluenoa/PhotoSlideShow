@@ -1,18 +1,18 @@
 package org.fog_rock.photo_slideshow.app.splash.contract
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
-import org.fog_rock.photo_slideshow.core.entity.SignInRequest
+import org.fog_rock.photo_slideshow.app.splash.entity.SignInRequest
 import org.fog_rock.photo_slideshow.core.viper.ViperContract
-import org.fog_rock.photo_slideshow.core.webapi.GoogleSignInClientHolder
+import org.fog_rock.photo_slideshow.core.webapi.entity.ApiResult
 
-class SplashContract {
+interface SplashContract {
 
     interface Presenter : ViperContract.Presenter {
         /**
          * サインインに必要な一連処理をリクエストする.
-         * @see PresenterCallback.succeededSignIn
-         * @see PresenterCallback.failedSignIn
+         * @see PresenterCallback.requestSignInResult
          */
         fun requestSignIn()
 
@@ -31,35 +31,29 @@ class SplashContract {
 
     interface PresenterCallback : ViperContract.PresenterCallback {
         /**
-         * サインインの一連処理に成功.
+         * サインインに必要な一連処理の結果.
          * @see Presenter.requestSignIn
          */
-        fun succeededSignIn()
-
-        /**
-         * サインインの一連処理に失敗.
-         * @param request 失敗したリクエスト
-         * @see Presenter.requestSignIn
-         */
-        fun failedSignIn(request: SignInRequest)
+        fun requestSignInResult(request: SignInRequest)
     }
 
     interface Interactor : ViperContract.Interactor {
-        /**
-         * ClientHolderを取得.
-         */
-        fun getClientHolder(): GoogleSignInClientHolder
-
-        /**
-         * ランタイムパーミッションが許可されているか.
-         */
-        fun isGrantedRuntimePermissions(permissions: Array<String>): Boolean
-
         /**
          * Googleアカウントでのサイレントサインイン要求.
          * @see InteractorCallback.requestGoogleSilentSignInResult
          */
         fun requestGoogleSilentSignIn()
+
+        /**
+         * ユーザー情報の更新要求.
+         * @see InteractorCallback.requestUpdateUserInfoResult
+         */
+        fun requestUpdateUserInfo()
+
+        /**
+         * ランタイムパーミッションが許可されているか.
+         */
+        fun isGrantedRuntimePermissions(context: Context, permissions: Array<String>): Boolean
 
         /**
          * Googleアカウントでのユーザーサインインに成功したか.
@@ -69,10 +63,16 @@ class SplashContract {
 
     interface InteractorCallback: ViperContract.InteractorCallback {
         /**
-         * Googleアカウントでのサイレントサインインを要求に成功したか.
+         * Googleアカウントでのサイレントサインイン要求の結果.
          * @see Interactor.requestGoogleSilentSignIn
          */
-        fun requestGoogleSilentSignInResult(isSucceeded: Boolean)
+        fun requestGoogleSilentSignInResult(result: ApiResult)
+
+        /**
+         * ユーザー情報の更新要求の結果.
+         * @see Interactor.requestUpdateUserInfo
+         */
+        fun requestUpdateUserInfoResult(isSucceeded: Boolean)
     }
 
     interface Router : ViperContract.Router {
@@ -84,7 +84,7 @@ class SplashContract {
         /**
          * Googleサインインの表示.
          */
-        fun startGoogleSignInActivity(activity: Activity, clientHolder: GoogleSignInClientHolder, requestCode: Int)
+        fun startGoogleSignInActivity(activity: Activity, requestCode: Int)
 
         /**
          * MainActivityの表示.

@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
+        android:name=".app.PhotoSlideShowApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -17,7 +18,10 @@
         <activity
             android:name=".app.splash.view.SplashActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTask"
+            android:exported="true"
+            >
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,10 +32,23 @@
         <activity
             android:name=".app.main.view.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTask"
+            android:exported="false"
+            />
         <activity
             android:name=".app.select.view.SelectActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTop"
+            android:exported="false"
+            />
+        <activity
+            android:name=".app.menu.view.MenuActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:launchMode="singleTop"
+            android:exported="false"
+            />
     </application>
 </manifest>

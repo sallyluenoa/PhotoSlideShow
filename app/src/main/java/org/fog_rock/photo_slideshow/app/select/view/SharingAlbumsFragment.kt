@@ -2,46 +2,46 @@ package org.fog_rock.photo_slideshow.app.select.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.photos.types.proto.Album
-import kotlinx.android.synthetic.main.fragment_sharing_albums.*
 import org.fog_rock.photo_slideshow.R
-import org.fog_rock.photo_slideshow.app.module.AppDialogFragment
+import org.fog_rock.photo_slideshow.app.module.ui.AppDialogFragment
+import org.fog_rock.photo_slideshow.core.extension.getListExtra
+import org.fog_rock.photo_slideshow.core.extension.logE
+import org.fog_rock.photo_slideshow.core.extension.logI
+import org.fog_rock.photo_slideshow.core.extension.putListExtra
+import org.fog_rock.photo_slideshow.databinding.FragmentSharingAlbumsBinding
 
 class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdapter.OnItemClickListener {
 
-    private val TAG = SharingAlbumsFragment::class.java.simpleName
-
-    private val CODE_CONFIRM_SELECT = 1000
-
     companion object {
 
+        private const val CODE_CONFIRM_SELECT = 1000
         private const val ARGS_ALBUMS = "albums"
 
-        fun newInstance(albums: Array<Album>): Fragment {
-            val args = Bundle().apply {
-                putSerializable(ARGS_ALBUMS, albums)
-            }
-            return SharingAlbumsFragment().apply {
-                arguments = args
+        fun newInstance(albums: List<Album>): Fragment = SharingAlbumsFragment().apply {
+            arguments = Bundle().apply {
+                putListExtra(ARGS_ALBUMS, albums)
             }
         }
     }
 
     private val args: Bundle by lazy {
         arguments ?: run {
-            Log.e(TAG, "Not found arguments.")
+            logE("Not found arguments.")
             Bundle()
         }
     }
-    private val albums: Array<Album> by lazy {
-        args.getSerializable(ARGS_ALBUMS) as Array<Album>
+    private val albums: List<Album> by lazy {
+        args.getListExtra(ARGS_ALBUMS) ?: emptyList()
     }
+
+    private var _binding: FragmentSharingAlbumsBinding? = null
+    private val binding get() = _binding!!
 
     private var selectedView: View? = null
     private var selectedAlbum: Album? = null
@@ -50,21 +50,30 @@ class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdap
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_sharing_albums, container, false)
+    ): View {
+        _binding = FragmentSharingAlbumsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val albumsAdapter = AlbumsAdapter(albums, this)
-        recyclerView.apply {
+        binding.recyclerView.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
             adapter = albumsAdapter
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _binding = null
+    }
+
     override fun onDialogResult(requestCode: Int, resultCode: Int, data: Intent) {
-        Log.i(TAG, "onDialogResult() requestCode: $requestCode, resultCode: $resultCode")
+        logI("onDialogResult() requestCode: $requestCode, resultCode: $resultCode")
 
         when (requestCode) {
             CODE_CONFIRM_SELECT -> {
@@ -73,26 +82,26 @@ class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdap
 
                 if (resultCode == AppDialogFragment.BUTTON_POSITIVE) {
                     val album = selectedAlbum ?: run {
-                        Log.e(TAG, "There are no selected albums.")
+                        logE("There are no selected albums.")
                         return
                     }
                     val activity = requireActivity()
                     if (activity is SelectActivity) {
                         activity.decidedAndFinishAlbum(album)
                     } else {
-                        Log.e(TAG, "Activity is not SelectActivity.")
+                        logE("Activity is not SelectActivity.")
                     }
                 }
                 selectedAlbum = null
             }
             else -> {
-                Log.e(TAG, "Unknown requestCode: $requestCode")
+                logE("Unknown requestCode: $requestCode")
             }
         }
     }
 
     override fun onItemClick(view: View, position: Int, album: Album) {
-        Log.i(TAG, "Item clicked. position: $position")
+        logI("Item clicked. position: $position")
         selectedView = view
         selectedAlbum = album
 
@@ -102,6 +111,6 @@ class SharingAlbumsFragment : Fragment(), AppDialogFragment.Callback, AlbumsAdap
             setPositiveLabel(R.string.start)
             setNegativeLabel(R.string.cancel)
             setCancelable(false)
-        }.show(childFragmentManager, CODE_CONFIRM_SELECT)
+        }.show(this, CODE_CONFIRM_SELECT)
     }
 }

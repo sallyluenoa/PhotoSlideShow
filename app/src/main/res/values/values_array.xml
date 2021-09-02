@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="titles_number_of_photos">
+        <item>@string/number_of_10_photos</item>
+        <item>@string/number_of_20_photos</item>
+        <item>@string/number_of_30_photos</item>
+        <item>@string/number_of_40_photos</item>
+        <item>@string/number_of_50_photos</item>
+    </string-array>
+
+    <string-array name="values_number_of_photos">
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+    </string-array>
+
+    <string-array name="titles_time_interval_of_photos">
+        <item>@string/time_interval_5_seconds</item>
+        <item>@string/time_interval_10_seconds</item>
+        <item>@string/time_interval_30_seconds</item>
+        <item>@string/time_interval_60_seconds</item>
+    </string-array>
+
+    <string-array name="values_time_interval_of_photos">
+        <item>5</item>
+        <item>10</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
+
+    <string-array name="titles_server_update_time">
+        <item>@string/update_time_1_hour</item>
+        <item>@string/update_time_3_hours</item>
+        <item>@string/update_time_6_hours</item>
+        <item>@string/update_time_12_hours</item>
+        <item>@string/update_time_24_hours</item>
+    </string-array>
+
+    <string-array name="values_server_update_time">
+        <item>1</item>
+        <item>3</item>
+        <item>6</item>
+        <item>12</item>
+        <item>24</item>
+    </string-array>
+
+</resources>
